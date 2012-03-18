@@ -73,7 +73,12 @@ public class ClientWriter implements Runnable, Watcher{
 			
 				count++;
 			}
-			
+			try {
+				client.close();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

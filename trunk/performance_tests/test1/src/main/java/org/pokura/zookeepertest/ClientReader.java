@@ -8,7 +8,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 
-public class ClientReader implements Runnable, Watcher {
+public class ClientReader implements Runnable, Watcher{
 
 	ZooKeeper client;
 	TestDataCallBack tDataCallBack;
@@ -62,7 +62,7 @@ public class ClientReader implements Runnable, Watcher {
 				count++;
 			
 			}
-			
+			System.out.println("done");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
