@@ -2,18 +2,22 @@ package org.pokura.zookeepertest;
 
 import java.io.IOException;
 
+import org.apache.zookeeper.AsyncCallback.DataCallback;
+import org.apache.zookeeper.AsyncCallback.StatCallback;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.Stat;
 
-public class ClientReader implements Runnable, Watcher{
+public class ClientReader implements Runnable, Watcher, DataCallback,StatCallback{
 
 	ZooKeeper client;
 	TestDataCallBack tDataCallBack;
 	TestStatCallBack tStatCallBack;
 	String path;
+	int resettercount = 0;
 	
 
 	public void run() {
@@ -22,12 +26,11 @@ public class ClientReader implements Runnable, Watcher{
 	}
 	
 	public void shortRunTest(){
-		int count = 0;
-		String path = "";
+		
+		
 		tDataCallBack = new TestDataCallBack();
 		tStatCallBack = new  TestStatCallBack();
 		try {
-			
 			String threadName = Thread.currentThread().getName();
 			int threadId = Integer.valueOf(threadName);
 			
@@ -54,20 +57,36 @@ public class ClientReader implements Runnable, Watcher{
 			default:
 				break;
 			}
-		   long s = 40000;
-			while(count <= 40000){
-				int c = count%1000;
-				client.exists(path+c, false, tStatCallBack, null);
-				client.getData(path+c, false, tDataCallBack, null);
-				count++;
+		
+			readData(client,true);
 			
-			}
-			System.out.println("done");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		
+	}
+	
+	public void readData(ZooKeeper client,boolean isFirst){
+		int count = 0;
+		if(isFirst){
+			while(count <= 40000){
+				int c = count%1000;
+				client.exists(path+c, false, this, null);
+				client.getData(path+c, false, this, null);
+				count++;
+			
+			}
+		}else{
+			while(count <= 30000){
+				int c = count%1000;
+				client.exists(path+c, false, this, null);
+				client.getData(path+c, false, this, null);
+				count++;
+			
+			}
+			
+		}
 	}
 
 	private void longRunTest(){
@@ -75,6 +94,22 @@ public class ClientReader implements Runnable, Watcher{
 	}
 	public void process(WatchedEvent event) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	public void processResult(int rc, String path, Object ctx, Stat stat) {
+		TestWatcher.readCount++;
+		this.resettercount++;
+		if(resettercount==30000){
+			readData(client,false);
+			resettercount = 0;
+		}
+		
+	}
+
+	public void processResult(int rc, String path, Object ctx, byte[] data,
+			Stat stat) {
+		TestWatcher.readCount++;
 		
 	}
 }
