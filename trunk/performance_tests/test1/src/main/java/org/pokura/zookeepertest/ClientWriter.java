@@ -10,11 +10,12 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.AsyncCallback.StringCallback;
 import org.apache.zookeeper.ZooDefs.Ids;
 
-public class ClientWriter implements Runnable, Watcher{
+public class ClientWriter implements Runnable, Watcher, StringCallback{
 	
 	ZooKeeper client;
-	TestStringCallBack tStringCallBack;
+	TestVoidCallBack tVoidCallBack;
 	String path;
+	int resetterCount = 0;
 	String oneKbString = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
@@ -26,6 +27,7 @@ public class ClientWriter implements Runnable, Watcher{
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+	byte [] databytes;
 
 	public void run() {
 	
@@ -37,7 +39,7 @@ public class ClientWriter implements Runnable, Watcher{
 	private void shortRunTest(){
 		
 		int count = 0;
-		tStringCallBack = new TestStringCallBack();
+		tVoidCallBack = new TestVoidCallBack();
 		
 		try {
 			
@@ -66,19 +68,10 @@ public class ClientWriter implements Runnable, Watcher{
 			default:
 				break;
 			}
-		
-			while(count <= 40000){
-				
-				client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,tStringCallBack,null);
 			
-				count++;
-			}
-			try {
-				client.close();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			writeData(client, true, cm);
+			
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,9 +79,45 @@ public class ClientWriter implements Runnable, Watcher{
 	}
 	
 	private void longRunTest(){
+		int count = 0;
+		CreateMode cm =CreateMode.EPHEMERAL_SEQUENTIAL;
+		while(count <= 40000){
+			
+			client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,this,null);
+		
+			count++;
+		}
+	}
+	
+	public void writeData(ZooKeeper client,boolean isFirst, CreateMode cm){
+		int count = 0;
+		if(isFirst){
+			while(count <= 25000){
+				client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,this,null);
+				
+				count++;
+			
+			}
+		}else{
+			while(count <= 15000){
+				client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,this,null);
+				
+				count++;
+			
+			}
+			
+		}
 		
 	}
-
+	public void deleteData(ZooKeeper client,String path, int version){
+		
+		client.delete(path, version, tVoidCallBack, null);
+		
+	}
+	public void dataWriter(){
+		
+		
+	}
 	public void process(WatchedEvent event) {
 		
 		
@@ -96,6 +125,14 @@ public class ClientWriter implements Runnable, Watcher{
 
 	public void processResult(int rc, String path, Object ctx, String name) {
 		
+		CreateMode cm =CreateMode.EPHEMERAL_SEQUENTIAL;
+		this.resetterCount++;
+		TestWatcher.writeCount++;
+		deleteData(client,name,0);
+		if(this.resetterCount == 15000){
+			writeData(client, false, cm);
+			this.resetterCount = 0;
+		}
 		
 	}
 
