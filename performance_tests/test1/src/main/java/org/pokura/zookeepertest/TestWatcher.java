@@ -36,7 +36,7 @@ public class TestWatcher implements Runnable {
 		
 		
 		
-		tick1.scheduleAtFixedRate(checkStats, 0, 1000);
+	//	tick1.scheduleAtFixedRate(checkStats, 0, 1000);
 		
 	}
 
@@ -44,5 +44,6 @@ public class TestWatcher implements Runnable {
 		// TODO Auto-generated method stub
 		
 	}
+
 
 }
