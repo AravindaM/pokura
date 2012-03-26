@@ -15,11 +15,12 @@ public class ZookeeperPerfoemanceTest {
 		Thread clientThreadr2 = new Thread(clientr,"2");
 		Thread watcherThread = new Thread(watcher, "watcher1");
 		clientThreadw1.start();
-		clientThreadw2.start();
-		clientThreadr1.start();
-		clientThreadr2.start();
-		watcherThread.start();
-	
+		//clientThreadw2.start();
+		//clientThreadr1.start();
+		//clientThreadr2.start();
+		//watcherThread.start();
+		
+
 	}
 
 	

@@ -28,23 +28,25 @@ public class ClientWriter implements Runnable, Watcher, StringCallback{
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	byte [] databytes;
+	long timePeriod = 1000*60*1;
+	long startTime ;
+	long currentTime;
 
 	public void run() {
 	
-				
+		startTime = System.currentTimeMillis();		
 		shortRunTest();
 				
 	}
 
 	private void shortRunTest(){
 		
-		int count = 0;
 		tVoidCallBack = new TestVoidCallBack();
 		
 		try {
 			
 			CreateMode cm =CreateMode.EPHEMERAL_SEQUENTIAL;
-			byte [] databytes = oneKbString.getBytes("UTF-16LE");
+		    databytes = oneKbString.getBytes("UTF-16LE");
 			
 			String threadName = Thread.currentThread().getName();
 			int threadId = Integer.valueOf(threadName);
@@ -79,35 +81,50 @@ public class ClientWriter implements Runnable, Watcher, StringCallback{
 	}
 	
 	private void longRunTest(){
-		int count = 0;
-		CreateMode cm =CreateMode.EPHEMERAL_SEQUENTIAL;
-		while(count <= 40000){
-			
-			client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,this,null);
 		
-			count++;
-		}
 	}
 	
 	public void writeData(ZooKeeper client,boolean isFirst, CreateMode cm){
 		int count = 0;
-		if(isFirst){
-			while(count <= 25000){
-				client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,this,null);
+		boolean isShown = false;
+		int c = 0;
+		startTime = System.currentTimeMillis();
+		currentTime = System.currentTimeMillis();
+		boolean create = true;
+			while((currentTime-startTime) < timePeriod){
+				
+				if(((currentTime - startTime)%5000 ) < 1000 && !isShown){
+                    System.out.println((currentTime-startTime)+"TestReads :"+count);
+                    count = 0;
+                    isShown = true;
+
+	            }
+	            
+	            if(((currentTime - startTime)%5000 ) > 1000){
+	                    isShown = false;
+	            }
+				if (create){
+					client.create("/testwrite/data"+c,databytes, Ids.OPEN_ACL_UNSAFE, cm,null,null);
+					if(c == 30000){
+						create = false;
+						c--;
+					}
+					c++;
+				}else{
+					client.delete("/testwrite/data"+c, 0, null, null);
+					if ( c == 100){
+						create = true;
+						c++;
+					}
+					c--;
+				}
 				
 				count++;
-			
-			}
-		}else{
-			while(count <= 15000){
-				client.create("/supun2/data",databytes, Ids.OPEN_ACL_UNSAFE, cm,this,null);
+				c++; 
+				currentTime = System.currentTimeMillis();
 				
-				count++;
 			
 			}
-			
-		}
-		
 	}
 	public void deleteData(ZooKeeper client,String path, int version){
 		
