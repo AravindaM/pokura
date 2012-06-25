@@ -106,10 +106,10 @@ public class ContextReplicationTest extends TestCase {
     }
 
     private void canRunTests() {
-        if(System.getProperty("run.clustering.tests", "false").equals("false")){
-            canRunTests = false;
-            return;
-        }
+//        if(System.getProperty("run.clustering.tests", "false").equals("false")){
+//            canRunTests = false;
+//            return;
+//        }
 
         // Which port should we listen to
         final int port;
