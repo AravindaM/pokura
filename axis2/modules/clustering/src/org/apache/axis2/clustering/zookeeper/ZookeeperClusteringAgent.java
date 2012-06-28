@@ -19,40 +19,67 @@
 package org.apache.axis2.clustering.zookeeper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringCommand;
+import org.apache.axis2.clustering.ClusteringConstants;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.clustering.Member;
+import org.apache.axis2.clustering.RequestBlockingHandler;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
-import org.apache.catalina.tribes.Channel;
-import org.apache.catalina.tribes.ChannelException;
+import org.apache.axis2.description.PhaseRule;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.engine.DispatchPhase;
+import org.apache.axis2.engine.Phase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ZookeeperClusteringAgent implements ClusteringAgent{
 
+	private static final Log log = LogFactory.getLog(ZookeeperClusteringAgent.class);
+	
+	private NodeManager configurationManager;
+    private StateManager contextManager;
+    private final Map<String, GroupManagementAgent> groupManagementAgents =
+        new HashMap<String, GroupManagementAgent>();
+
+    private final HashMap<String, Parameter> parameters;
+    
+    private ConfigurationContext configurationContext;
+    
+    /**
+     * Static members
+     */
+    private List<org.apache.axis2.clustering.Member> members;
+    
+	
+	public ZookeeperClusteringAgent() {
+		parameters = new HashMap<String, Parameter>();
+	}
+
 	public void addParameter(Parameter param) throws AxisFault {
-		// TODO Auto-generated method stub
-		
+		parameters.put(param.getName(), param);
 	}
 
 	public void removeParameter(Parameter param) throws AxisFault {
-		// TODO Auto-generated method stub
-		
+		parameters.remove(param.getName());
 	}
 
 	public void deserializeParameters(OMElement parameterElement)
 			throws AxisFault {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public Parameter getParameter(String name) {
@@ -61,38 +88,39 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 	}
 
 	public ArrayList<Parameter> getParameters() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Parameter> list = new ArrayList<Parameter>();
+		for (String msg : parameters.keySet()) {
+            list.add(parameters.get(msg));
+        }
+		return list;
 	}
 
 	public boolean isParameterLocked(String parameterName) {
-		// TODO Auto-generated method stub
-		return false;
+		Parameter parameter = parameters.get(parameterName);
+        return parameter != null && parameter.isLocked();
 	}
 
 	public void init() throws ClusteringFault {
-		// TODO Auto-generated method stub
+        log.info("Initializing cluster...");
+        addRequestBlockingHandlerToInFlows();
+        
 		
 	}
 
 	public StateManager getStateManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return contextManager;
 	}
 
 	public NodeManager getNodeManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return configurationManager;
 	}
 
 	public void setStateManager(StateManager stateManager) {
-		// TODO Auto-generated method stub
-		
+		this.contextManager = stateManager;
 	}
 
 	public void setNodeManager(NodeManager nodeManager) {
-		// TODO Auto-generated method stub
-		
+		this.configurationManager = nodeManager;
 	}
 
 	public void shutdown() throws ClusteringFault {
@@ -102,35 +130,83 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 
 	public void setConfigurationContext(
 			ConfigurationContext configurationContext) {
-		// TODO Auto-generated method stub
-		
+		this.configurationContext = configurationContext;
 	}
 
 	public void setMembers(List<Member> members) {
-		// TODO Auto-generated method stub
-		
+		this.members = members;
 	}
 
 	public List<Member> getMembers() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.members;
 	}
 
 	public void addGroupManagementAgent(GroupManagementAgent agent,
 			String applicationDomain) {
-		// TODO Auto-generated method stub
+		log.info("Managing group application domain " + applicationDomain +
+                " using agent " + agent.getClass());
+		groupManagementAgents.put(applicationDomain, agent);
 		
 	}
 
 	public GroupManagementAgent getGroupManagementAgent(String applicationDomain) {
-		// TODO Auto-generated method stub
-		return null;
+		return groupManagementAgents.get(applicationDomain);
 	}
 
 	public Set<String> getDomains() {
-		// TODO Auto-generated method stub
-		return null;
+		return groupManagementAgents.keySet();
 	}
+
+	/**
+     * A RequestBlockingHandler, which is an implementation of
+     * {@link org.apache.axis2.engine.Handler} is added to the InFlow & InFaultFlow. This handler
+     * is used for rejecting Web service requests until this node has been initialized. This handler
+     * can also be used for rejecting requests when this node is reinitializing or is in an
+     * inconsistent state (which can happen when a configuration change is taking place).
+     */
+    private void addRequestBlockingHandlerToInFlows() {
+        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+        for (Object o : axisConfig.getInFlowPhases()) {
+            Phase phase = (Phase) o;
+            if (phase instanceof DispatchPhase) {
+                RequestBlockingHandler requestBlockingHandler = new RequestBlockingHandler();
+                if (!phase.getHandlers().contains(requestBlockingHandler)) {
+                    PhaseRule rule = new PhaseRule("Dispatch");
+                    rule.setAfter("SOAPMessageBodyBasedDispatcher");
+                    rule.setBefore("InstanceDispatcher");
+                    HandlerDescription handlerDesc = requestBlockingHandler.getHandlerDesc();
+                    handlerDesc.setHandler(requestBlockingHandler);
+                    handlerDesc.setName(ClusteringConstants.REQUEST_BLOCKING_HANDLER);
+                    handlerDesc.setRules(rule);
+                    phase.addHandler(requestBlockingHandler);
+
+                    log.debug("Added " + ClusteringConstants.REQUEST_BLOCKING_HANDLER +
+                              " between SOAPMessageBodyBasedDispatcher & InstanceDispatcher to InFlow");
+                    break;
+                }
+            }
+        }
+        for (Object o : axisConfig.getInFaultFlowPhases()) {
+            Phase phase = (Phase) o;
+            if (phase instanceof DispatchPhase) {
+                RequestBlockingHandler requestBlockingHandler = new RequestBlockingHandler();
+                if (!phase.getHandlers().contains(requestBlockingHandler)) {
+                    PhaseRule rule = new PhaseRule("Dispatch");
+                    rule.setAfter("SOAPMessageBodyBasedDispatcher");
+                    rule.setBefore("InstanceDispatcher");
+                    HandlerDescription handlerDesc = requestBlockingHandler.getHandlerDesc();
+                    handlerDesc.setHandler(requestBlockingHandler);
+                    handlerDesc.setName(ClusteringConstants.REQUEST_BLOCKING_HANDLER);
+                    handlerDesc.setRules(rule);
+                    phase.addHandler(requestBlockingHandler);
+
+                    log.debug("Added " + ClusteringConstants.REQUEST_BLOCKING_HANDLER +
+                              " between SOAPMessageBodyBasedDispatcher & InstanceDispatcher to InFaultFlow");
+                    break;
+                }
+            }
+        }
+    }
 
 	public boolean isCoordinator() {
 		// TODO Auto-generated method stub
