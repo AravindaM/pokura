@@ -17,8 +17,35 @@
  * under the License.
  */
 
-package org.apache.axis2.clustering.zookeeper;
+package org.apache.axis2.clustering.common;
 
-public class ZookeeperConstants {
 
+public interface Member {
+
+    byte[] SHUTDOWN_PAYLOAD = null;
+
+    java.lang.String getName();
+
+    byte[] getHost();
+
+    int getPort();
+
+    int getSecurePort();
+
+    long getMemberAliveTime();
+
+    boolean isReady();
+
+    boolean isSuspect();
+
+    boolean isFailing();
+
+    byte[] getUniqueId();
+
+    byte[] getPayload();
+
+    byte[] getCommand();
+
+    byte[] getDomain();
 }
+

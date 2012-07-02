@@ -16,9 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.axis2.clustering.zookeeper;
 
-public class ZookeeperConstants {
+import org.apache.axis2.clustering.common.Member;
+import org.apache.axis2.clustering.management.GroupManagementAgent;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Responsible for managing the membership. Handles membership changes.
+ */
+
+public class ZookeeperMembershipManager {
+
+    private static final Log log = LogFactory.getLog(ZookeeperMembershipManager.class);
+
+    private byte[] domain;
+
+    private GroupManagementAgent groupManagementAgent;
+    private ConfigurationContext configContext;
+
+    private final List<Member> members = new ArrayList<Member>();
+
+
+
+
 
 }
