@@ -26,8 +26,6 @@ public class Axis2DataWatcher implements Watcher {
 
 	public void process(WatchedEvent event) {
 		// TODO Auto-generated method stub
-
-
 		
 	}
 
