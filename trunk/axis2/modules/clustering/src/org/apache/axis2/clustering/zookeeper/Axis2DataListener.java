@@ -22,7 +22,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 
 
-public class Axis2DataWatcher implements Watcher {
+public class Axis2DataListener implements Watcher {
 
 	public void process(WatchedEvent event) {
 		// TODO Auto-generated method stub
