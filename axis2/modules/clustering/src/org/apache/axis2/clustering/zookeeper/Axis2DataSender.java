@@ -19,6 +19,6 @@
 
 package org.apache.axis2.clustering.zookeeper;
 
-public class ZookeeperConstants {
 
+public class Axis2DataSender {
 }
