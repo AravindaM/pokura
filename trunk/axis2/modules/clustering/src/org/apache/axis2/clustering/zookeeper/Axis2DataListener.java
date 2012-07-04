@@ -20,13 +20,77 @@ package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.EventType;
+
 
 
 public class Axis2DataListener implements Watcher {
-
+	
+	private WatchedEvent event;
+	private String path;
+	private EventType eventType;
+	
 	public void process(WatchedEvent event) {
-		// TODO Auto-generated method stub
+		this.event = event; 
+		path = event.getPath();
+		eventType = event.getType();
+
+		switch (event.getType()) {
+		case None:
+
+			break;
+		case NodeCreated:
+
+			break;
+		case NodeDataChanged:
+
+			break;
+		case NodeDeleted:
+
+			break;
+		case NodeChildrenChanged:
+
+			break;
+		default:
+			break;
+		}
+	}
+
+	public void handleKeeperStateEvent(){
+		switch (event.getState()) {
+		case AuthFailed:
+
+			break;
+		case Disconnected:
+
+			break;
+		case Expired:
+
+			break;
+		case SyncConnected:
+
+			break;
+
+
+		default:
+			break;
+		}
+
+	}
+
+	public void handleNodeCreateEvent(){
 		
 	}
 
+	public void handleNodeDataChangeEvent(){
+
+	}
+
+	public void handleNodeDeletedEvent(){
+
+	}
+
+	public void handleNodeChildrenChangedEvent(){
+		 
+	}
 }
