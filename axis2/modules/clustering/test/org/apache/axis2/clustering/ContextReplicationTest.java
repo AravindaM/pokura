@@ -106,10 +106,10 @@ public class ContextReplicationTest extends TestCase {
     }
 
     private void canRunTests() {
-//        if(System.getProperty("run.clustering.tests", "false").equals("false")){
-//            canRunTests = false;
-//            return;
-//        }
+        if(System.getProperty("run.clustering.tests", "false").equals("false")){
+            canRunTests = false;
+            return;
+        }
 
         // Which port should we listen to
         final int port;
@@ -183,11 +183,11 @@ public class ContextReplicationTest extends TestCase {
     }
 
     protected void setUp() throws Exception {
-        canRunTests();
-        if (!canRunTests) {
-            System.out.println("[WARNING] Aborting clustering tests");
-            return;
-        }
+//        canRunTests();
+//        if (!canRunTests) {
+//            System.out.println("[WARNING] Aborting clustering tests");
+//            return;
+//        }
 
         System.setProperty(ClusteringConstants.LOCAL_IP_ADDRESS, Utils.getIpAddress());
 
