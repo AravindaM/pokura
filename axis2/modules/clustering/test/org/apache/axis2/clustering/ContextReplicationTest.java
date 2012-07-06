@@ -302,7 +302,7 @@ public class ContextReplicationTest extends TestCase {
         assertNull(value);
     }
 
-    public void testSetPropertyInServiceGroupContext() throws Exception {
+    /*public void testSetPropertyInServiceGroupContext() throws Exception {
         if (!canRunTests) {
             return;
         }
@@ -324,9 +324,9 @@ public class ContextReplicationTest extends TestCase {
         serviceGroupContext1.setProperty(key1, val1);
         ctxMan1.updateContext(serviceGroupContext1);
         assertEquals(val1, serviceGroupContext2.getProperty(key1));
-    }
+    }*/
 
-    public void testRemovePropertyFromServiceGroupContext() throws Exception {
+    /*public void testRemovePropertyFromServiceGroupContext() throws Exception {
         if (!canRunTests) {
             return;
         }
@@ -634,7 +634,7 @@ public class ContextReplicationTest extends TestCase {
         String value3 = (String) configurationContext2.getProperty(key3);
         assertEquals(val3, value3); // The property should have gotten replicated
 
-    }
+    }*/
 
     protected void tearDown() throws Exception {
         super.tearDown();
