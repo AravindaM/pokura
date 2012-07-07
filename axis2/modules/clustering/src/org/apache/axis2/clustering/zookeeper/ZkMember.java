@@ -21,19 +21,18 @@ package org.apache.axis2.clustering.zookeeper;
 
 import java.util.UUID;
 
-public interface ZookeeperMember {
+public interface ZkMember {
 
-    public String getZkHostName();
+    public byte[] getZkHostName();
 
     public UUID getZkNodeID();
 
     public int getPort();
 
-    public String getDomain();
+    public byte[] getDomain();
 
     public boolean isAlive();
 
     public byte[] getPayLoad();
-
 
 }

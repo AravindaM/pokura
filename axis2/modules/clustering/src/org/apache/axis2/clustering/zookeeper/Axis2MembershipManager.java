@@ -19,5 +19,54 @@
 
 package org.apache.axis2.clustering.zookeeper;
 
+import org.apache.axis2.clustering.management.GroupManagementAgent;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Axis2MembershipManager {
+
+    private static Log log = LogFactory.getLog(Axis2MembershipManager.class);
+
+    private byte[] domain;
+    private ConfigurationContext configContext;
+    private GroupManagementAgent groupManagementAgent;
+
+    private final List<ZkMember> members = new ArrayList<ZkMember>();
+
+    public Axis2MembershipManager(ConfigurationContext configCtxt) {
+        this.setConfigContext(configCtxt);
+    }
+
+    public byte[] getDomain() {
+        return domain;
+    }
+
+    public void setDomain(byte[] domain) {
+        this.domain = domain;
+    }
+
+    public ConfigurationContext getConfigContext() {
+        return configContext;
+    }
+
+    public void setConfigContext(ConfigurationContext configContext) {
+        this.configContext = configContext;
+    }
+
+    public GroupManagementAgent getGroupManagementAgent() {
+        return groupManagementAgent;
+    }
+
+    public void setGroupManagementAgent(GroupManagementAgent groupManagementAgent) {
+        this.groupManagementAgent = groupManagementAgent;
+    }
+
+    public List<ZkMember> getMembers() {
+        //to be implemented
+        return members;
+    }
 }
