@@ -50,8 +50,8 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 
 	private static final Log log = LogFactory.getLog(ZookeeperClusteringAgent.class);
 	
-	private NodeManager configurationManager;
-    private StateManager contextManager;
+	private ZookeeperNodeManager configurationManager;
+    private ZookeeperStateManager contextManager;
     private final Map<String, GroupManagementAgent> groupManagementAgents =
         new HashMap<String, GroupManagementAgent>();
 
