@@ -66,6 +66,10 @@ public class ZookeeperUtils {
 	}
 	
 	public static List<ClusteringCommand> getNewCommands(String path,String currentid){
+	
+		// TODO Later members should not execute previous commands 
+		// When a new member is initialized it should be assigned a currentId 
+		
 		String id =currentid;
 		List<ClusteringCommand> commands = new ArrayList<ClusteringCommand>();
 		String commandpath = path+"/"+ZookeeperConstants.COMMAND_BASE_NAME;
@@ -78,6 +82,8 @@ public class ZookeeperUtils {
 		
 		return commands;
 	}
+	
+	 
 	
 	private static String getNextId(String id){
 		Integer count = Integer.valueOf(id);
