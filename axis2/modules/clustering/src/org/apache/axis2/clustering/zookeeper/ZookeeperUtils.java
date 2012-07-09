@@ -1,11 +1,16 @@
 package org.apache.axis2.clustering.zookeeper;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.axis2.clustering.ClusteringCommand;
+import org.apache.axis2.clustering.ClusteringConstants;
+import org.apache.axis2.clustering.Member;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 
@@ -100,5 +105,60 @@ public class ZookeeperUtils {
         return false;
     }
 
+    public static boolean areInSameDomain(ZkMember member, byte[] domain) {
+        if (member != null) {
+            return java.util.Arrays.equals(member.getDomain(), domain);
+        } else return false;
+    }
+
+    //
+    public static String getName(ZkMember member) {
+        return getHost(member) + ":" + member.getPort() + "(" + new String(member.getDomain()) + ")";
+    }
+
+    //TODO Implementation of this method
+    //Using String Buffer ?
+    public static String getHost(ZkMember member) {
+        return null;
+    }
+
+    public static Member toAxis2Member(ZkMember member) {
+        Member axis2Member = new Member(ZookeeperUtils.getHost(member), member.getPort());
+
+        Properties props = ZookeeperUtils.getPayload(member.getPayLoad());
+
+        String httpPort = props.getProperty("httpPort");
+        if (httpPort != null && httpPort.trim().length() != 0) {
+            axis2Member.setHttpPort(Integer.parseInt(httpPort));
+        }
+
+        String httpsPort = props.getProperty("httpsPort");
+        if (httpsPort != null && httpsPort.trim().length() != 0) {
+            axis2Member.setHttpsPort(Integer.parseInt(httpsPort));
+        }
+
+        String isActive = props.getProperty(ClusteringConstants.Parameters.IS_ACTIVE);
+        if (isActive != null && isActive.trim().length() != 0) {
+            axis2Member.setActive(Boolean.valueOf(isActive));
+        }
+
+        axis2Member.setDomain(new String(member.getDomain()));
+        axis2Member.setProperties(props);
+
+        return axis2Member;
+    }
+
+    private static Properties getPayload(byte[] payLoad) {
+        Properties properties = null;
+
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(payLoad);
+            properties = new Properties();
+            properties.load(inputStream);
+        } catch (IOException e) {
+           //???
+        }
+        return properties;
+    }
 
 }
