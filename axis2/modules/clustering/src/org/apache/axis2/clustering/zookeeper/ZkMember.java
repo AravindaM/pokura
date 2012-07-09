@@ -34,5 +34,7 @@ public interface ZkMember {
     public boolean isAlive();
 
     public byte[] getPayLoad();
+     // override equals and hashcode methods when implementing
+    
 
 }
