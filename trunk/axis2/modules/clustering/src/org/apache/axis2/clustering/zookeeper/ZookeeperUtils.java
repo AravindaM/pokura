@@ -1,6 +1,5 @@
 package org.apache.axis2.clustering.zookeeper;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +27,7 @@ public class ZookeeperUtils {
 
 	public static void createCommandZNode(ClusteringCommand command,
 			String domain) {
-		zookeeper.create("/" + domain + "/command/command", command,
+		zookeeper.create("/" + domain + ZookeeperConstants.COMMAND_BASE_NAME, command,
 				CreateMode.PERSISTENT_SEQUENTIAL);
 	}
 	
