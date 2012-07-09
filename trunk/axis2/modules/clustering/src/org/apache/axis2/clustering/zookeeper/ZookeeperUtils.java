@@ -8,20 +8,30 @@ import java.util.List;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 
 public class ZookeeperUtils {
 
     public static ZkClient zookeeper;
 
-    public static void setZookeeperConnection(ZkClient zkclient) {
-        zookeeper = zkclient;
-    }
+    public ZookeeperUtils(ZkClient zk) {
+		this.zookeeper = zk;
+	}
 
-    public static void createCommandZNode(ClusteringCommand command, ZkClient zkClient, String domain) {
-        zkClient.create("/" + domain + "/command/command", command, CreateMode.PERSISTENT_SEQUENTIAL);
+	public static ZkClient getZookeeper() {
+		return zookeeper;
+	}
 
-    }
+	public static void setZookeeperConnection(ZkClient zkclient) {
+		zookeeper = zkclient;
+	}
 
+	public static void createCommandZNode(ClusteringCommand command,
+			String domain) {
+		zookeeper.create("/" + domain + "/command/command", command,
+				CreateMode.PERSISTENT_SEQUENTIAL);
+	}
+	
     public static Object getAddedNodes() {
         //This method should able to find the nodes that were added and return them
         return null;
