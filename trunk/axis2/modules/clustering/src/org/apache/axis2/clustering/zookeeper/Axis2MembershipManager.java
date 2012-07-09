@@ -37,8 +37,11 @@ public class Axis2MembershipManager {
 
     private final List<ZkMember> members = new ArrayList<ZkMember>();
 
+    public Axis2MembershipManager(){
+    }
+
     public Axis2MembershipManager(ConfigurationContext configCtxt) {
-        this.setConfigContext(configCtxt);
+        this.configContext=configCtxt;
     }
 
     public byte[] getDomain() {
@@ -65,8 +68,11 @@ public class Axis2MembershipManager {
         this.groupManagementAgent = groupManagementAgent;
     }
 
-    public List<ZkMember> getMembers() {
-        //to be implemented
-        return members;
+    public ZkMember[] getMembers() {
+        return members.toArray(new ZkMember[members.size()]);
+    }
+
+    public boolean addMember(ZkMember member){
+        return false;
     }
 }
