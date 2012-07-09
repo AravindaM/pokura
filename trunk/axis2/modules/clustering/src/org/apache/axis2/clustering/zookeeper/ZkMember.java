@@ -35,6 +35,16 @@ public interface ZkMember {
 
     public byte[] getPayLoad();
 
+    public void setZkHostName(byte[] zkHostName);
+
+    public void setZkNodeId(UUID zkNodeId);
+
+    public void setPort(int port);
+
+    public void setDomain(byte[] domain);
+
+    public void setPayLoad(byte[] payLoad);
+
     public boolean equals(Object obj);
 
     public int hashCode();

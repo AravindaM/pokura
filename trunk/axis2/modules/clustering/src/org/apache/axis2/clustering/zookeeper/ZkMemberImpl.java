@@ -43,8 +43,8 @@ public class ZkMemberImpl implements ZkMember {
         return domain;
     }
 
-    public void setPayLoad(byte[] payLoad) {
-        this.payLoad = payLoad;
+    public byte[] getPayLoad() {
+        return payLoad;
     }
 
     public boolean isAlive() {
@@ -84,8 +84,8 @@ public class ZkMemberImpl implements ZkMember {
         this.domain = domain;
     }
 
-    public byte[] getPayLoad() {
-        return payLoad;
+    public void setPayLoad(byte[] payLoad) {
+        this.payLoad = payLoad;
     }
 }
 

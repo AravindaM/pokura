@@ -68,11 +68,23 @@ public class Axis2MembershipManager {
         this.groupManagementAgent = groupManagementAgent;
     }
 
+/*
     public ZkMember[] getMembers() {
         return members.toArray(new ZkMember[members.size()]);
+
+    }
+*/
+
+    public List<ZkMember> getMembers() {
+        return members;
     }
 
     public boolean addMember(ZkMember member){
+        if(log.isDebugEnabled()){
+            log.debug("Members List contains "+ members.contains(member));
+            log.debug("Memeber belongs to my domain "+ZookeeperUtils.isInDomain(member,domain));
+        }
+
         return false;
     }
 }
