@@ -24,6 +24,7 @@ public class Axis2CommandChildListener implements IZkChildListener {
 
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
 		Collections.sort(currentChilds);
+		
 		for (int i = currentId; i < currentChilds.size(); i++) {
 			System.out.println(currentChilds.get(i) + " processing...");
 			processMessage((ClusteringCommand) ZookeeperUtils.getZookeeper().readData(currentChilds.get(i)));

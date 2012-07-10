@@ -10,8 +10,9 @@ public class Axis2CommandReceiver {
 		this.membershipManager = membershipManager;
 	}
 
-	public void startRecieve() {
-		String commandPath = "/" + membershipManager.getDomain() + ZookeeperConstants.COMMAND_BASE_NAME ;
+	public void startRecieve() {		
+		String domainName = new String(membershipManager.getDomain());
+		String commandPath = "/" + domainName + ZookeeperConstants.COMMANDS_BASE_NAME ;
 		Integer initialId = generateCurrentId(commandPath);
 		generateCurrentId(commandPath);
 		ZookeeperUtils.getZookeeper().subscribeChildChanges(

@@ -34,12 +34,15 @@ public class CommandTest extends TestCase implements Serializable{
 	}
 
 	public void testSendCommand() throws ClusteringFault{
-			ZkClient zkcli = new ZkClient("localhost:4599");
+			ZkClient zkcli = new ZkClient("localhost:4599");			
+//			zkcli.createPersistent("/TestDomain/command");
 			ZookeeperUtils.setZookeeperConnection(zkcli);
 			
 			MembershipManager membershipManager = new MembershipManager();
 			membershipManager.setDomain(new String("TestDomain").getBytes());
 			
+			Axis2CommandReceiver axis2CommandReceiver = new Axis2CommandReceiver(membershipManager);
+			axis2CommandReceiver.startRecieve();
 			ZookeeperSender sender = new ZookeeperSender(membershipManager);
 			
 			
@@ -56,6 +59,7 @@ public class CommandTest extends TestCase implements Serializable{
 			DeleteServiceStateCommand command = new DeleteServiceStateCommand();
 			
 			sender.sendToGroup(command);
+			
 		 }
 
 	/**
