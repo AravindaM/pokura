@@ -8,13 +8,10 @@ import org.apache.zookeeper.ZooKeeper;
 
 public class ZookeeperSender implements MessageSender{
 	
-	private ZookeeperUtils zookeeperUtils;
-	
 	private MembershipManager membershipManager;
 	private byte[] domain;
 	
-	public ZookeeperSender(ZookeeperUtils zkUtils, MembershipManager membershipManager) {
-		this.zookeeperUtils = zkUtils;
+	public ZookeeperSender(MembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 	
@@ -22,7 +19,7 @@ public class ZookeeperSender implements MessageSender{
 		domain = membershipManager.getDomain();		
 		String domainName = new String(domain);
 		
-		zookeeperUtils.createCommandZNode(msg, domainName);
+		ZookeeperUtils.createCommandZNode(msg, domainName);
 		
 	}
 
