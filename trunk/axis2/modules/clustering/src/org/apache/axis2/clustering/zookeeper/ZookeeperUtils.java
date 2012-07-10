@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.Properties;
 
 import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkMarshallingError;
+import org.I0Itec.zkclient.serialize.SerializableSerializer;
+import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringConstants;
 import org.apache.axis2.clustering.Member;
@@ -35,6 +39,14 @@ public class ZookeeperUtils {
 		zookeeper.create("/" + domain + ZookeeperConstants.COMMAND_BASE_NAME, command,
 				CreateMode.PERSISTENT_SEQUENTIAL);
 	}
+	public static void setZkMemeber(String domain,ZkMember member){
+		String id = "asdasasdasda1";
+		ZkSerializer as = new SerializableSerializer();
+		zookeeper.setZkSerializer(as);
+		
+		System.out.print(false);
+		zookeeper.createPersistent("/domain1/members/"+id, member);
+	}
 	
     public static Object getAddedNodes() {
         //This method should able to find the nodes that were added and return them
@@ -56,49 +68,54 @@ public class ZookeeperUtils {
 
     }
 
+	
+	public static List<ZkMember> getNewMembers(List<ZkMember> existingMembers,List<ZkMember> currentMembers){
+		Collection<ZkMember> oldList = existingMembers;
+		Collection<ZkMember> newList = currentMembers;
+		
+		newList.removeAll(oldList);
+		
+		
+		return (List<ZkMember>)newList;
+		
+	}
+	public static List<ZkMember> getNewMembers(Axis2MembershipManager membershipManager, List<ZkMember> currentMembers){
+		return getNewMembers(membershipManager.getMembers(), currentMembers);
+	}
+	
+	public static List<ZkMember> getNewMembers(Axis2MembershipManager membershipManager, String parentPath){
+		return getNewMembers(membershipManager.getMembers(), getZkMembers(parentPath));
+	}
+	
+	public static List<ClusteringCommand> getNewCommands(String path,String currentid){
+	
+		// TODO Later members should not execute previous commands 
+		// When a new member is initialized it should be assigned a currentId 
+		
+		String id =id = getNextId(currentid);
+		List<ClusteringCommand> commands = new ArrayList<ClusteringCommand>();
+		String commandpath = path+"/"+ZookeeperConstants.COMMAND_BASE_NAME;
+		ClusteringCommand command;
+		
+		while ((command = (ClusteringCommand)zookeeper.readData(commandpath+id,true))!=null) {
+			commands.add(command);
+			id = getNextId(id);
+		}
+		
+		return commands;
+	}
+	
+	 
+	
+	private static String getNextId(String id){
+		Integer count = Integer.valueOf(id);
+		count++;
+		return String.format("%010d", count);
+	}
     public static List<ZkMember> getZkMembers(String parentPath) {
         List<String> childlist = zookeeper.getChildren(parentPath);
         return getZkMembers(childlist);
 
-    }
-
-    public static List<ZkMember> getNewMembers(List<ZkMember> existingMembers, List<ZkMember> currentMembers) {
-        Collection<ZkMember> oldList = existingMembers;
-        Collection<ZkMember> newList = currentMembers;
-
-        newList.removeAll(oldList);
-
-
-        return (List<ZkMember>) newList;
-
-    }
-
-    public static List<ZkMember> getNewMembers(Axis2MembershipManager membershipManager, List<ZkMember> currentMembers) {
-        return getNewMembers(membershipManager.getMembers(), currentMembers);
-    }
-
-    public static List<ZkMember> getNewMembers(Axis2MembershipManager membershipManager, String parentPath) {
-        return getNewMembers(membershipManager.getMembers(), getZkMembers(parentPath));
-    }
-
-    public static List<ClusteringCommand> getNewCommands(String path, String currentid) {
-        String id = currentid;
-        List<ClusteringCommand> commands = new ArrayList<ClusteringCommand>();
-        String commandpath = path + "/" + ZookeeperConstants.COMMAND_BASE_NAME;
-        ClusteringCommand command;
-
-        while ((command = (ClusteringCommand) zookeeper.readData(commandpath + id, true)) != null) {
-            commands.add(command);
-            id = getNextId(id);
-        }
-
-        return commands;
-    }
-
-    private static String getNextId(String id) {
-        Integer count = Integer.valueOf(id);
-        count++;
-        return String.format("%010d", count);
     }
 
     public static boolean isInDomain(ZkMember member, byte[] domain) {
