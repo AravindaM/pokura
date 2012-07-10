@@ -19,7 +19,9 @@ public class Axis2CommandReceiver {
 				commandPath,
 				new Axis2CommandChildListener(initialId));
 	}
-	
+	public void stopRecive(){
+		// TODO this method should be able to remove the chlidlistners from the given path
+	}
 	private Integer generateCurrentId(String commandPath){
 		// TODO size cannot do because later old commands have to delete
 		return ZookeeperUtils.getZookeeper().getChildren(commandPath).size();
