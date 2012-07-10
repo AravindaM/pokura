@@ -22,4 +22,5 @@ package org.apache.axis2.clustering.zookeeper;
 public class ZookeeperConstants {
 
 	public static final String COMMAND_BASE_NAME = "/command/command";
+	public static final String COMMANDS_BASE_NAME = "/command";
 }
