@@ -36,6 +36,7 @@ import org.apache.axis2.clustering.RequestBlockingHandler;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
+import org.apache.axis2.clustering.tribes.MembershipManager;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
@@ -54,11 +55,53 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
     private ZookeeperStateManager contextManager;
     private final Map<String, GroupManagementAgent> groupManagementAgents =
         new HashMap<String, GroupManagementAgent>();
+    private MembershipManager primaryMembershipManager;
 
+    private Axis2CommandChildListener axis2CommandChildListener;
+    private	Axis2CommandReceiver axis2CommandReceiver;
+    private Axis2MemberListener axis2MemberListener;
+    private Axis2MemberReceiver axis2MemberReceiver;
     private final HashMap<String, Parameter> parameters;
     
     private ConfigurationContext configurationContext;
     
+    
+    
+    
+    public Axis2CommandChildListener getAxis2CommandChildListener() {
+		return axis2CommandChildListener;
+	}
+
+	public void setAxis2CommandChildListener(
+			Axis2CommandChildListener axis2CommandChildListener) {
+		this.axis2CommandChildListener = axis2CommandChildListener;
+	}
+
+	public Axis2CommandReceiver getAxis2CommandReceiver() {
+		return axis2CommandReceiver;
+	}
+
+	public void setAxis2CommandReceiver(Axis2CommandReceiver axis2CommandReceiver) {
+		this.axis2CommandReceiver = axis2CommandReceiver;
+	}
+
+	public Axis2MemberListener getAxis2MemberListener() {
+		return axis2MemberListener;
+	}
+
+	public void setAxis2MemberListener(Axis2MemberListener axis2MemberListener) {
+		this.axis2MemberListener = axis2MemberListener;
+	}
+
+	public Axis2MemberReceiver getAxis2MemberReceiver() {
+		return axis2MemberReceiver;
+	}
+
+	public void setAxis2MemberReceiver(Axis2MemberReceiver axis2MemberReceiver) {
+		this.axis2MemberReceiver = axis2MemberReceiver;
+	}
+
+	
     /**
      * Static members
      */
@@ -103,6 +146,16 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 	public void init() throws ClusteringFault {
         log.info("Initializing cluster...");
         addRequestBlockingHandlerToInFlows();
+        primaryMembershipManager = new MembershipManager(configurationContext);
+        byte[] domain = getClusterDomain();
+        log.info("Cluster domain: " + new String(domain));
+        primaryMembershipManager.setDomain(domain);
+        
+        axis2CommandReceiver = new Axis2CommandReceiver(primaryMembershipManager);
+        axis2MemberReceiver =  new Axis2MemberReceiver();
+        
+        
+        
         
 		
 	}
@@ -116,11 +169,11 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 	}
 
 	public void setStateManager(StateManager stateManager) {
-		this.contextManager = stateManager;
+		this.contextManager = (ZookeeperStateManager)stateManager;
 	}
 
 	public void setNodeManager(NodeManager nodeManager) {
-		this.configurationManager = nodeManager;
+		this.configurationManager = (ZookeeperNodeManager)nodeManager;
 	}
 
 	public void shutdown() throws ClusteringFault {
@@ -153,6 +206,22 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 		return groupManagementAgents.get(applicationDomain);
 	}
 
+	 /**
+     * Get the clustering domain to which this node belongs to
+     *
+     * @return The clustering domain to which this node belongs to
+     */
+    private byte[] getClusterDomain() {
+        Parameter domainParam = getParameter(ClusteringConstants.Parameters.DOMAIN);
+        byte[] domain;
+        if (domainParam != null) {
+            domain = ((String) domainParam.getValue()).getBytes();
+        } else {
+            domain = ClusteringConstants.DEFAULT_DOMAIN.getBytes();
+        }
+        return domain;
+    }
+    
 	public Set<String> getDomains() {
 		return groupManagementAgents.keySet();
 	}
