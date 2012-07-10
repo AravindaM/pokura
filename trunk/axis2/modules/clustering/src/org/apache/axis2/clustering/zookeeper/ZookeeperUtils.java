@@ -20,9 +20,9 @@ import org.apache.zookeeper.data.Stat;
 
 public class ZookeeperUtils {
 
-    public static ZkClient zookeeper;
+	public static ZkClient zookeeper;
 
-    public ZookeeperUtils(ZkClient zk) {
+	public ZookeeperUtils(ZkClient zk) {
 		this.zookeeper = zk;
 	}
 
@@ -36,147 +36,162 @@ public class ZookeeperUtils {
 
 	public static void createCommandZNode(ClusteringCommand command,
 			String domain) {
-		zookeeper.create("/" + domain + ZookeeperConstants.COMMAND_BASE_NAME, command,
-				CreateMode.PERSISTENT_SEQUENTIAL);
+
+		zookeeper.setZkSerializer(new SerializableSerializer());
+//		zookeeper.setZkSerializer(new CommandSerializer());
+		zookeeper.create("/" + domain + ZookeeperConstants.COMMAND_BASE_NAME,
+				command, CreateMode.PERSISTENT_SEQUENTIAL);
+
 	}
-	public static void setZkMemeber(ZkMember member){
+
+	public static void setZkMemeber(ZkMember member) {
 		String domain = member.getDomain().toString();
 		String id = UUID.randomUUID().toString();
 		ZkSerializer as = new SerializableSerializer();
 		zookeeper.setZkSerializer(as);
-		
+
 		System.out.print(false);
-		zookeeper.createPersistent("/"+domain+"/members/"+id, member);
+		zookeeper.createPersistent("/" + domain + "/members/" + id, member);
 	}
-	
-    public static Object getAddedNodes() {
-        //This method should able to find the nodes that were added and return them
-        return null;
-    }
 
-    public static Object getChildNodes(String path) {
-        return null;
-    }
+	public static Object getAddedNodes() {
+		// This method should able to find the nodes that were added and return
+		// them
+		return null;
+	}
 
-    public static List<ZkMember> getZkMembers(List<String> childlist) {
-        List<ZkMember> members = new ArrayList<ZkMember>();
-        for (String childpath : childlist) {
-            zookeeper.setZkSerializer(new ZkMemberSerializer());
-            members.add((ZkMember) zookeeper.readData(childpath));
-        }
+	public static Object getChildNodes(String path) {
+		return null;
+	}
 
-        return members;
+	public static List<ZkMember> getZkMembers(List<String> childlist) {
+		List<ZkMember> members = new ArrayList<ZkMember>();
+		for (String childpath : childlist) {
+			zookeeper.setZkSerializer(new ZkMemberSerializer());
+			members.add((ZkMember) zookeeper.readData(childpath));
+		}
 
-    }
+		return members;
 
-	
-	public static List<ZkMember> getNewMembers(List<ZkMember> existingMembers,List<ZkMember> currentMembers){
+	}
+
+	public static List<ZkMember> getNewMembers(List<ZkMember> existingMembers,
+			List<ZkMember> currentMembers) {
 		Collection<ZkMember> oldList = existingMembers;
 		Collection<ZkMember> newList = currentMembers;
-		
+
 		newList.removeAll(oldList);
-		
-		
-		return (List<ZkMember>)newList;
-		
+
+		return (List<ZkMember>) newList;
+
 	}
-	public static List<ZkMember> getNewMembers(Axis2MembershipManager membershipManager, List<ZkMember> currentMembers){
+
+	public static List<ZkMember> getNewMembers(
+			Axis2MembershipManager membershipManager,
+			List<ZkMember> currentMembers) {
 		return getNewMembers(membershipManager.getMembers(), currentMembers);
 	}
-	
-	public static List<ZkMember> getNewMembers(Axis2MembershipManager membershipManager, String parentPath){
-		return getNewMembers(membershipManager.getMembers(), getZkMembers(parentPath));
+
+	public static List<ZkMember> getNewMembers(
+			Axis2MembershipManager membershipManager, String parentPath) {
+		return getNewMembers(membershipManager.getMembers(),
+				getZkMembers(parentPath));
 	}
-	
-	public static List<ClusteringCommand> getNewCommands(String path,String currentid){
-	
-		// TODO Later members should not execute previous commands 
-		// When a new member is initialized it should be assigned a currentId 
-		
-		String id =id = getNextId(currentid);
+
+	public static List<ClusteringCommand> getNewCommands(String path,
+			String currentid) {
+
+		// TODO Later members should not execute previous commands
+		// When a new member is initialized it should be assigned a currentId
+
+		String id = id = getNextId(currentid);
 		List<ClusteringCommand> commands = new ArrayList<ClusteringCommand>();
-		String commandpath = path+"/"+ZookeeperConstants.COMMAND_BASE_NAME;
+		String commandpath = path + "/" + ZookeeperConstants.COMMAND_BASE_NAME;
 		ClusteringCommand command;
-		
-		while ((command = (ClusteringCommand)zookeeper.readData(commandpath+id,true))!=null) {
+
+		while ((command = (ClusteringCommand) zookeeper.readData(commandpath
+				+ id, true)) != null) {
 			commands.add(command);
 			id = getNextId(id);
 		}
-		
+
 		return commands;
 	}
-	
-	 
-	
-	private static String getNextId(String id){
+
+	private static String getNextId(String id) {
 		Integer count = Integer.valueOf(id);
 		count++;
 		return String.format("%010d", count);
 	}
-    public static List<ZkMember> getZkMembers(String parentPath) {
-        List<String> childlist = zookeeper.getChildren(parentPath);
-        return getZkMembers(childlist);
 
-    }
+	public static List<ZkMember> getZkMembers(String parentPath) {
+		List<String> childlist = zookeeper.getChildren(parentPath);
+		return getZkMembers(childlist);
 
-    public static boolean isInDomain(ZkMember member, byte[] domain) {
-        return false;
-    }
+	}
 
-    public static boolean areInSameDomain(ZkMember member, byte[] domain) {
-        if (member != null) {
-            return java.util.Arrays.equals(member.getDomain(), domain);
-        } else return false;
-    }
+	public static boolean isInDomain(ZkMember member, byte[] domain) {
+		return false;
+	}
 
-    //
-    public static String getName(ZkMember member) {
-        return getHost(member) + ":" + member.getPort() + "(" + new String(member.getDomain()) + ")";
-    }
+	public static boolean areInSameDomain(ZkMember member, byte[] domain) {
+		if (member != null) {
+			return java.util.Arrays.equals(member.getDomain(), domain);
+		} else
+			return false;
+	}
 
-    //TODO Implementation of this method
-    //Using String Buffer ?
-    public static String getHost(ZkMember member) {
-        return null;
-    }
+	//
+	public static String getName(ZkMember member) {
+		return getHost(member) + ":" + member.getPort() + "("
+				+ new String(member.getDomain()) + ")";
+	}
 
-    public static Member toAxis2Member(ZkMember member) {
-        Member axis2Member = new Member(ZookeeperUtils.getHost(member), member.getPort());
+	// TODO Implementation of this method
+	// Using String Buffer ?
+	public static String getHost(ZkMember member) {
+		return null;
+	}
 
-        Properties props = ZookeeperUtils.getPayload(member.getPayLoad());
+	public static Member toAxis2Member(ZkMember member) {
+		Member axis2Member = new Member(ZookeeperUtils.getHost(member),
+				member.getPort());
 
-        String httpPort = props.getProperty("httpPort");
-        if (httpPort != null && httpPort.trim().length() != 0) {
-            axis2Member.setHttpPort(Integer.parseInt(httpPort));
-        }
+		Properties props = ZookeeperUtils.getPayload(member.getPayLoad());
 
-        String httpsPort = props.getProperty("httpsPort");
-        if (httpsPort != null && httpsPort.trim().length() != 0) {
-            axis2Member.setHttpsPort(Integer.parseInt(httpsPort));
-        }
+		String httpPort = props.getProperty("httpPort");
+		if (httpPort != null && httpPort.trim().length() != 0) {
+			axis2Member.setHttpPort(Integer.parseInt(httpPort));
+		}
 
-        String isActive = props.getProperty(ClusteringConstants.Parameters.IS_ACTIVE);
-        if (isActive != null && isActive.trim().length() != 0) {
-            axis2Member.setActive(Boolean.valueOf(isActive));
-        }
+		String httpsPort = props.getProperty("httpsPort");
+		if (httpsPort != null && httpsPort.trim().length() != 0) {
+			axis2Member.setHttpsPort(Integer.parseInt(httpsPort));
+		}
 
-        axis2Member.setDomain(new String(member.getDomain()));
-        axis2Member.setProperties(props);
+		String isActive = props
+				.getProperty(ClusteringConstants.Parameters.IS_ACTIVE);
+		if (isActive != null && isActive.trim().length() != 0) {
+			axis2Member.setActive(Boolean.valueOf(isActive));
+		}
 
-        return axis2Member;
-    }
+		axis2Member.setDomain(new String(member.getDomain()));
+		axis2Member.setProperties(props);
 
-    private static Properties getPayload(byte[] payLoad) {
-        Properties properties = null;
+		return axis2Member;
+	}
 
-        try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(payLoad);
-            properties = new Properties();
-            properties.load(inputStream);
-        } catch (IOException e) {
-           //???
-        }
-        return properties;
-    }
+	private static Properties getPayload(byte[] payLoad) {
+		Properties properties = null;
+
+		try {
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(payLoad);
+			properties = new Properties();
+			properties.load(inputStream);
+		} catch (IOException e) {
+			// ???
+		}
+		return properties;
+	}
 
 }

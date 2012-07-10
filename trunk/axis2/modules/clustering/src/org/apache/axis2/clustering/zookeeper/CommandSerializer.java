@@ -21,7 +21,8 @@ public class CommandSerializer implements ZkSerializer {
         oos.writeObject(data);
         return baos.toByteArray();
         }catch (Exception e) {
-            return null;
+        	throw new ZkMarshallingError(e);
+            //return null;
         }
 	}
 
@@ -35,7 +36,7 @@ public class CommandSerializer implements ZkSerializer {
         }catch (Exception e) {
             // TODO: handle exception
         }
-        return null;
+        return command;
 	}
 
 }
