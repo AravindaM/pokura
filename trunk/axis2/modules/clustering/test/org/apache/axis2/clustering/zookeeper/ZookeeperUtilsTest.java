@@ -9,10 +9,11 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
-public class ZookeeperUtilsTest{
+public class ZookeeperUtilsTest extends TestCase{
 	ZkServer zks;
- @Before
- public void setup(){
+	
+ @Override
+	protected void setUp() throws Exception {
 	 zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",new IDefaultNameSpace() {
 			
 			public void createDefaultNameSpace(ZkClient zkClient) {
@@ -21,16 +22,21 @@ public class ZookeeperUtilsTest{
 			}
 		},4599);
 		 zks.start();
-			 
-		
- }
- 
- @Test
+		super.setUp();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		zks.shutdown();
+		super.tearDown();
+	}
+
+
  public void testGetNewMembers(){
 	ZkClient zkcli = new ZkClient("localhost:4599");
 	ZookeeperUtils.setZookeeperConnection(zkcli);
 	ZkMemberImpl member =  new  ZkMemberImpl();
-	ZookeeperUtils.setZkMemeber("domain1", member);
+	ZookeeperUtils.setZkMemeber(member);
 	zks.shutdown();
  }
 }

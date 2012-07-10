@@ -39,13 +39,14 @@ public class ZookeeperUtils {
 		zookeeper.create("/" + domain + ZookeeperConstants.COMMAND_BASE_NAME, command,
 				CreateMode.PERSISTENT_SEQUENTIAL);
 	}
-	public static void setZkMemeber(String domain,ZkMember member){
-		String id = "asdasasdasda1";
+	public static void setZkMemeber(ZkMember member){
+		String domain = member.getDomain().toString();
+		String id = UUID.randomUUID().toString();
 		ZkSerializer as = new SerializableSerializer();
 		zookeeper.setZkSerializer(as);
 		
 		System.out.print(false);
-		zookeeper.createPersistent("/domain1/members/"+id, member);
+		zookeeper.createPersistent("/"+domain+"/members/"+id, member);
 	}
 	
     public static Object getAddedNodes() {
