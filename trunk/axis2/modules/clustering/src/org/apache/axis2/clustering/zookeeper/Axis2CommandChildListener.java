@@ -16,19 +16,17 @@ public class Axis2CommandChildListener implements IZkChildListener {
 	private ZookeeperStateManager stateManager;
 	private ConfigurationContext configurationContext;
 	private ZookeeperNodeManager nodeManager;
-	private ZookeeperUtils zookeeperUtils;
-
 	private Integer currentId;
 
-	public Axis2CommandChildListener(Integer initialId, ZookeeperUtils zookeeperUtils) {
+	public Axis2CommandChildListener(Integer initialId) {
 		currentId = initialId;
-		this.zookeeperUtils = zookeeperUtils;
 	}
 
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
 		Collections.sort(currentChilds);
 		for (int i = currentId; i < currentChilds.size(); i++) {
-			processMessage((ClusteringCommand) zookeeperUtils.getZookeeper().readData(currentChilds.get(i)));
+			System.out.println(currentChilds.get(i) + " processing...");
+			processMessage((ClusteringCommand) ZookeeperUtils.getZookeeper().readData(currentChilds.get(i)));
 			currentId++;
 		}
 		
