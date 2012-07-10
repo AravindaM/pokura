@@ -4,11 +4,9 @@ import org.apache.axis2.clustering.tribes.MembershipManager;
 
 public class Axis2CommandReceiver {
 
-	private ZookeeperUtils zookeeperUtils;
 	private MembershipManager membershipManager;
 
-	public Axis2CommandReceiver(ZookeeperUtils zookeeperUtils, MembershipManager membershipManager) {
-		this.zookeeperUtils = zookeeperUtils;
+	public Axis2CommandReceiver(MembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 
@@ -16,13 +14,14 @@ public class Axis2CommandReceiver {
 		String commandPath = "/" + membershipManager.getDomain() + ZookeeperConstants.COMMAND_BASE_NAME ;
 		Integer initialId = generateCurrentId(commandPath);
 		generateCurrentId(commandPath);
-		zookeeperUtils.getZookeeper().subscribeChildChanges(
+		ZookeeperUtils.getZookeeper().subscribeChildChanges(
 				commandPath,
-				new Axis2CommandChildListener(initialId,zookeeperUtils));
+				new Axis2CommandChildListener(initialId));
 	}
 	
 	private Integer generateCurrentId(String commandPath){
-		return zookeeperUtils.getZookeeper().getChildren(commandPath).size();
+		// TODO size cannot do because later old commands have to delete
+		return ZookeeperUtils.getZookeeper().getChildren(commandPath).size();
 	}
 	
 
