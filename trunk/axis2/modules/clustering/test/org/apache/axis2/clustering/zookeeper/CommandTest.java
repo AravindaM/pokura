@@ -48,12 +48,21 @@ public class CommandTest extends TestCase implements Serializable{
 
 					}
 				}, 4599);
-		zks.start();		
+		zks.start();	
+		
+		
 	}
 
+
 	public void testSendCommand() throws ClusteringFault{
-			ZkClient zkcli = new ZkClient("localhost:4599");			
-//			zkcli.createPersistent("/TestDomain/command");
+			ZkClient zkcli = new ZkClient("localhost:4599");
+			
+			if(!zkcli.exists("/TestDomain/command"))
+			{
+				zkcli.createPersistent("/TestDomain");
+				zkcli.createPersistent("/TestDomain/command");
+			}
+	
 			ZookeeperUtils.setZookeeperConnection(zkcli);
 			
 			MembershipManager membershipManager = new MembershipManager();
@@ -63,21 +72,10 @@ public class CommandTest extends TestCase implements Serializable{
 			axis2CommandReceiver.startRecieve();
 			ZookeeperSender sender = new ZookeeperSender(membershipManager);
 			
-			
-//			UpdateStateCommand command = new UpdateStateCommand() {
-//				
-//				@Override
-//				public void execute(ConfigurationContext configContext)
-//						throws ClusteringFault {
-//					// TODO Auto-generated method stub
-//					System.out.println("State Updated");
-//				}
-//			};
-			
 			DeleteServiceStateCommand command = new DeleteServiceStateCommand();
-			
+						
 			sender.sendToGroup(command);
-			
+						
 		 }
 
 	/**
