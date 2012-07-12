@@ -28,6 +28,9 @@ public class Axis2CommandReceiver {
 		this.membershipManager = membershipManager;
 	}
 
+	/**
+	 * Set Zookeeper command listener
+	 */
 	public void startRecieve() {		
 		String domainName = new String(membershipManager.getDomain());
 		String commandPath = "/" + domainName + ZookeeperConstants.COMMANDS_BASE_NAME ;
@@ -40,6 +43,11 @@ public class Axis2CommandReceiver {
 	public void stopRecive(){
 		// TODO this method should be able to remove the chlidlistners from the given path
 	}
+	/**
+	 * Generated the sequence number of the command
+	 * @param commandPath - pass the path of the command objects to process
+	 * @return return the number of command objects in the given path
+	 */
 	private Integer generateCurrentId(String commandPath){
 		// TODO size cannot do because later old commands have to delete
 		return ZookeeperUtils.getZookeeper().getChildren(commandPath).size();

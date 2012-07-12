@@ -39,10 +39,10 @@ public class Axis2CommandChildListener implements IZkChildListener {
 	public Axis2CommandChildListener(Integer initialId) {
 		currentId = initialId;
 	}
-
+	
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
+		//call command processing method for each new command
 		Collections.sort(currentChilds);
-		
 		for (int i = currentId; i < currentChilds.size(); i++) {
 			System.out.println(currentChilds.get(i) + " processing...");
 			processMessage((ClusteringCommand) ZookeeperUtils.getZookeeper().readData(currentChilds.get(i)));
@@ -52,6 +52,7 @@ public class Axis2CommandChildListener implements IZkChildListener {
 	}
 
 	private void processMessage(ClusteringCommand command) throws ClusteringFault {
+		// process the command object
 		if (command instanceof StateClusteringCommand && stateManager != null) {
 			StateClusteringCommand ctxCmd = (StateClusteringCommand) command;
 			ctxCmd.execute(configurationContext);
