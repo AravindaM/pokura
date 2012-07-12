@@ -36,15 +36,14 @@ public class Axis2MembershipManager {
     private GroupManagementAgent groupManagementAgent;
 
     private final List<ZkMember> members = new ArrayList<ZkMember>();
-
     //Member represents this node
     private ZkMember localMember;
 
-    public Axis2MembershipManager(){
+    public Axis2MembershipManager() {
     }
 
     public Axis2MembershipManager(ConfigurationContext configCtxt) {
-        this.configContext=configCtxt;
+        this.configContext = configCtxt;
     }
 
     public byte[] getDomain() {
@@ -83,39 +82,55 @@ public class Axis2MembershipManager {
     }
 
     /**
-     *
      * @param member The New member added to the cluster
      * @return true If the member was added to the <code>members</code> list
      */
 
-    public boolean addMember(ZkMember member){
+    public boolean addMember(ZkMember member) {
 
         boolean memberExists = members.contains(member);
         boolean belongsToSameDomain = ZookeeperUtils.areInSameDomain(member, domain);
 
-        if(log.isDebugEnabled()){
-            log.debug("Members List contains "+ memberExists);
-            log.debug("Memeber belongs to my domain "+belongsToSameDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Members List contains " + memberExists);
+            log.debug("Memeber belongs to my domain " + belongsToSameDomain);
         }
 
         //If member already exists or the member is belongs to another domain, no need to add it
         //to the cluster
 
-        if(memberExists||!(belongsToSameDomain)){
+        if (memberExists || !(belongsToSameDomain)) {
             return false;
         }
         // TODO What are the other checks to be carried out before adding a member
 
-        boolean shouldAddMember = (localMember==null)||ZookeeperUtils.areInSameDomain(member,localMember.getDomain());
+        boolean shouldAddMember = (localMember == null) || ZookeeperUtils.areInSameDomain(member,
+                localMember.getDomain());
 
         //If Member handles the service requests, i.e. Memeber is an application member
-        if(groupManagementAgent!=null){
-            log.info("Application member "+ ZookeeperUtils.getName(member)+ " joined the group" + new String(member.getDomain()));
+        if (groupManagementAgent != null) {
+            log.info("Application member " + ZookeeperUtils.getName(member) + " joined the group"
+                    + new String(member.getDomain()));
             groupManagementAgent.applicationMemberAdded(ZookeeperUtils.toAxis2Member(member));
         }
 
         // TODO rest of the method impl.
         return false;
+    }
+
+      /**
+     * A member disappeared
+     *
+     * @param member The member that left the cluster
+     */
+    public void memberRemoved(ZkMember member) {
+        members.remove(member);
+
+
+        // Is this an application domain member?
+        if (groupManagementAgent != null) {
+            groupManagementAgent.applicationMemberRemoved(ZookeeperUtils.toAxis2Member(member));
+        }
     }
 
     public ZkMember getLocalMember() {
