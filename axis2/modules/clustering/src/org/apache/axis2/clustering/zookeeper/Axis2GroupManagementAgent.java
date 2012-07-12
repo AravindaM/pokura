@@ -16,38 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.Member;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.GroupManagementCommand;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Axis2GroupManagementAgent implements GroupManagementAgent{
+
+    private static final Log log = LogFactory.getLog(Axis2GroupManagementAgent.class);
+    private final List<Member> members = new ArrayList<Member>();
+    private Axis2MembershipManager membershipManager;
+    private String description;
+
     public void setDescription(String description) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        this.description=description;
     }
 
     public String getDescription() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return description;
     }
 
     public void applicationMemberAdded(Member member) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     public void applicationMemberRemoved(Member member) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     public List<Member> getMembers() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return members;
     }
 
     public void send(GroupManagementCommand command) throws ClusteringFault {
-        //To change body of implemented methods use File | Settings | File Templates.
+
+    }
+
+    public void setMembershipManager(Axis2MembershipManager membershipManager) {
+        this.membershipManager = membershipManager;
     }
 }
