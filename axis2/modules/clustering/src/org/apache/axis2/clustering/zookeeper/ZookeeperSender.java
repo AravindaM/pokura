@@ -24,12 +24,6 @@ import org.apache.axis2.clustering.MessageSender;
 import org.apache.axis2.clustering.tribes.MembershipManager;
 import org.apache.zookeeper.ZooKeeper;
 
-/**
- * This class is used to send messages to Zookeeper cluster
- * 
- *
- */
-
 public class ZookeeperSender implements MessageSender{
 	
 	private MembershipManager membershipManager;
@@ -39,10 +33,7 @@ public class ZookeeperSender implements MessageSender{
 		this.membershipManager = membershipManager;
 	}
 	
-	/**
-	 * send command objects to the group
-	 * @param msg - command object
-	 */
+	
 	public void sendToGroup(ClusteringCommand msg) throws ClusteringFault {
 		domain = membershipManager.getDomain();		
 		String domainName = new String(domain);
