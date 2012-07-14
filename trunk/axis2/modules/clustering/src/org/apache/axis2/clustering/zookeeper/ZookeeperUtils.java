@@ -43,15 +43,25 @@ public class ZookeeperUtils {
 	public ZookeeperUtils(ZkClient zk) {
 		this.zookeeper = zk;
 	}
-
+	/**
+	 * This method allows the user to get the zookeeper client instance
+	 * @return the ZooKeeper Object 
+	 */
 	public static ZkClient getZookeeper() {
 		return zookeeper;
 	}
-
+	/**
+	 * This method is used to set the ZooKeeper client
+	 * @param zkclient the ZooKeeper client
+	 */
 	public static void setZookeeperConnection(ZkClient zkclient) {
 		zookeeper = zkclient;
 	}
-
+	/**
+	 * This method is used to serialize and save a command object into the group command node
+	 * @param command the command object to be saved
+	 * @param domain the domain that the command should be sent to
+	 */
 	public static void createCommandZNode(ClusteringCommand command,
 			String domain) {
 
@@ -62,6 +72,10 @@ public class ZookeeperUtils {
 
 	}
 
+	/**
+	 * Saves the given ZooKeeper member in the member node under the domain that the member belongs to
+	 * @param member the member object to be saved
+	 */
 	public static void setZkMemeber(ZkMember member) {
 		String domain = member.getDomain().toString();
 		String id = UUID.randomUUID().toString();
@@ -81,7 +95,12 @@ public class ZookeeperUtils {
 	public static Object getChildNodes(String path) {
 		return null;
 	}
-
+	
+	/** 
+	 * Retrieves the member objects according to the given path list
+	 * @param childlist the list of paths to the members
+	 * @return a list ZooKeeper members 
+	 */
 	public static List<ZkMember> getZkMembers(List<String> childlist) {
 		List<ZkMember> members = new ArrayList<ZkMember>();
 		for (String childpath : childlist) {
@@ -92,7 +111,12 @@ public class ZookeeperUtils {
 		return members;
 
 	}
-
+	/**
+	 * calculates the new members in the list when old and new list of members are given
+	 * @param existingMembers - the old set of members
+	 * @param currentMembers - new set of members
+	 * @return a list of members
+	 */
 	public static List<ZkMember> getNewMembers(List<ZkMember> existingMembers,
 			List<ZkMember> currentMembers) {
 		Collection<ZkMember> oldList = existingMembers;
@@ -103,19 +127,36 @@ public class ZookeeperUtils {
 		return (List<ZkMember>) newList;
 
 	}
-
+	/**
+	 * calculates the new members using the membership manager
+	 * @param membershipManager - the membership manger of the system
+	 * @param currentMembers - new set of members
+	 * @return a list of members
+	 */
 	public static List<ZkMember> getNewMembers(
 			Axis2MembershipManager membershipManager,
 			List<ZkMember> currentMembers) {
 		return getNewMembers(membershipManager.getMembers(), currentMembers);
 	}
 
+	/**
+	 * calculates the new members using the membership manager and parent node path
+	 * @param membershipManager - the membership manger of the system
+	 * @param parentPath -new set of members
+	 * @return a list of members
+	 */
 	public static List<ZkMember> getNewMembers(
 			Axis2MembershipManager membershipManager, String parentPath) {
 		return getNewMembers(membershipManager.getMembers(),
 				getZkMembers(parentPath));
 	}
 
+	/**
+	 * This method returns the 
+	 * @param path
+	 * @param currentid
+	 * @return a list of commands
+	 */
 	public static List<ClusteringCommand> getNewCommands(String path,
 			String currentid) {
 
@@ -135,23 +176,42 @@ public class ZookeeperUtils {
 
 		return commands;
 	}
-
+	/**
+	 * Generates the next id of the command node sequence. 
+	 * @param id the current id
+	 * @return returns the next id
+	 */
 	private static String getNextId(String id) {
 		Integer count = Integer.valueOf(id);
 		count++;
 		return String.format("%010d", count);
 	}
-
+	
+	/**
+	 * This method gets the zookeeper members under the given parent path	
+	 * @param parentPath the path of the parent node
+	 * @return a list od zookeeper members
+	 */
 	public static List<ZkMember> getZkMembers(String parentPath) {
 		List<String> childlist = zookeeper.getChildren(parentPath);
 		return getZkMembers(childlist);
 
 	}
-
-	public static boolean isInDomain(ZkMember member, byte[] domain) {
-		return false;
-	}
-
+//	/**
+//	 * Checks whether the given member is in the specified domain
+// 	 * @param member the member to be checked
+//	 * @param domain the domain 
+// 	 * @return true if the member is i this domain
+//	 */
+//	public static boolean isInDomain(ZkMember member, byte[] domain) {
+//		return false;
+//	}
+	/**
+	 * Checks whether the given member is in the specified domain
+ 	 * @param member the member to be checked
+	 * @param domain the domain 
+ 	 * @return true if the member is i this domain
+	 */
 	public static boolean areInSameDomain(ZkMember member, byte[] domain) {
 		if (member != null) {
 			return java.util.Arrays.equals(member.getDomain(), domain);
@@ -159,7 +219,11 @@ public class ZookeeperUtils {
 			return false;
 	}
 
-	//
+	/**
+	 * Gets the name of the given member
+	 * @param member 
+	 * @return the name of the member
+	 */
 	public static String getName(ZkMember member) {
 		return getHost(member) + ":" + member.getPort() + "("
 				+ new String(member.getDomain()) + ")";
@@ -171,6 +235,11 @@ public class ZookeeperUtils {
 		return null;
 	}
 
+	/**
+	 * Converts a given zookeeper member into a Axis2 member
+	 * @param member The zookeeper member to be converted
+	 * @return returns the axis2 member
+	 */
 	public static Member toAxis2Member(ZkMember member) {
 		Member axis2Member = new Member(ZookeeperUtils.getHost(member),
 				member.getPort());
