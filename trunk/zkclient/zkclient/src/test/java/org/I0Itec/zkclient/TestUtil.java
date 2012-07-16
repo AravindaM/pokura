@@ -19,10 +19,13 @@ import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.zookeeper.server.quorum.QuorumPeer;
+import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
 import org.mockito.exceptions.base.MockitoAssertionError;
 
 public class TestUtil {
@@ -98,6 +101,10 @@ public class TestUtil {
         FileUtils.deleteDirectory(new File(dataPath));
         FileUtils.deleteDirectory(new File(logPath));
         ZkServer zkServer = new ZkServer(dataPath, logPath, mock(IDefaultNameSpace.class), port, ZkServer.DEFAULT_TICK_TIME, 100);
+        QuorumServer quorumServer = new QuorumServer(1212121, new InetSocketAddress(3313), new InetSocketAddress(3314));
+        QuorumPeer qp = new QuorumPeer();
+        qp.
+        quorumServer.
         zkServer.start();
         return zkServer;
     }

@@ -134,6 +134,7 @@ public class ZkServer {
            _zk.setMinSessionTimeout(_minSessionTimeout);
             _nioFactory = new NIOServerCnxn.Factory(new InetSocketAddress(port));
             _nioFactory.startup(_zk);
+            
         } catch (IOException e) {
             throw new ZkException("Unable to start single ZooKeeper server.", e);
         } catch (InterruptedException e) {
