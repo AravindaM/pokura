@@ -40,6 +40,11 @@
             <version>1.7</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        	<groupId>com.github.sgroschupf</groupId>
+        	<artifactId>zkclient</artifactId>
+        	<version>0.1</version>
+        </dependency>
     </dependencies>
 
     <build>

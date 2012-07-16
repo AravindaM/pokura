@@ -42,8 +42,16 @@ public class ServerZkClientTest extends AbstractBaseZkClientTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        _zkServer = TestUtil.startZkServer("ZkClientTest_" + _counter.addAndGet(1), 4711);
+        _zkServer = TestUtil.startZkServer("ZkClientTest_" + _counter.addAndGet(1), 4219);
+        _zkServer2 = TestUtil.startZkServer("ZkClientTest_" + _counter.addAndGet(1), 4215);
+        
+        Gateway gateway = new Gateway(4219, 4215);
+        gateway.start();
+        _zkServer.shutdown();
+        _zkServer2.shutdown();
         _client = new ZkClient("localhost:4711", 5000);
+        _client2 = new ZkClient("localhost:4713", 5000);
+
     }
 
     @Override

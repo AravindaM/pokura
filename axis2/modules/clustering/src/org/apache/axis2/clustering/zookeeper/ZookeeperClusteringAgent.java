@@ -155,7 +155,10 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
         axis2MemberReceiver =  new Axis2MemberReceiver();
         
         
-        
+        setMaximumRetries();
+        //configureMode(domain);
+       // configureMembershipScheme(domain, mode.getMembershipManagers());
+        setMemberInfo();
         
 		
 	}
@@ -225,6 +228,26 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 	public Set<String> getDomains() {
 		return groupManagementAgents.keySet();
 	}
+	 /**
+     * Set the maximum number of retries, if message sending to a particular node fails
+     */
+    private void setMaximumRetries() {
+       //TODO create set max Retries if applicable for ZooKeeper 
+    }
+    private void configureMode(byte[] domain) {
+        if (clusterManagementMode) {
+            mode = new ClusterManagementMode(domain, groupManagementAgents, primaryMembershipManager);
+            for (GroupManagementAgent agent : groupManagementAgents.values()) {
+
+                if (agent instanceof DefaultGroupManagementAgent) {
+                    ((DefaultGroupManagementAgent) agent).setSender(channelSender);
+                }
+            }
+        } else {
+            mode = new ApplicationMode(domain, primaryMembershipManager);
+        }
+        mode.init(channel);
+    }
 
 	/**
      * A RequestBlockingHandler, which is an implementation of
