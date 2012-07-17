@@ -27,39 +27,147 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 
-public class Axis2GroupManagementAgent implements GroupManagementAgent{
+public class Axis2GroupManagementAgent implements GroupManagementAgent {
 
-    private static final Log log = LogFactory.getLog(Axis2GroupManagementAgent.class);
-    private final List<Member> members = new ArrayList<Member>();
-    private Axis2MembershipManager membershipManager;
-    private String description;
+	private static final Log log = LogFactory.getLog(Axis2GroupManagementAgent.class);
+	private final List<Member> members = new ArrayList<Member>();
+	private Axis2MembershipManager membershipManager;
+	private ZookeeperSender zookeeperSender;
+	private String description;
 
-    public void setDescription(String description) {
-        this.description=description;
-    }
+	public Axis2GroupManagementAgent(Axis2MembershipManager membershipManager, String description) {
+		this.membershipManager = membershipManager;
+		this.description = description;
+		initZookeeperSender();
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public Axis2MembershipManager getMembershipManager() {
+		return membershipManager;
+	}
 
-    public void applicationMemberAdded(Member member) {
+	public void setMembershipManager(Axis2MembershipManager membershipManager) {
+		this.membershipManager = membershipManager;
+	}
 
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void applicationMemberRemoved(Member member) {
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    }
+	public List<Member> getMembers() {
+		return members;
+	}
+	
+	public void setZookeeperSender(ZookeeperSender zookeeperSender) {
+		this.zookeeperSender = zookeeperSender;
+	}
 
-    public List<Member> getMembers() {
-        return members;
-    }
+	public void applicationMemberAdded(Member member) {
+		Thread th = new Thread(new MemberAdder(member));
+		th.setPriority(Thread.MAX_PRIORITY);
+		th.start();
+	}
 
-    public void send(GroupManagementCommand command) throws ClusteringFault {
+	public void applicationMemberRemoved(Member member) {
+		log.info("Application member " + member + " left cluster.");
+		members.remove(member);
+	}
 
-    }
+	public void send(GroupManagementCommand command) throws ClusteringFault {
+		zookeeperSender.sendToGroup(command);
+	}
 
-    public void setMembershipManager(Axis2MembershipManager membershipManager) {
-        this.membershipManager = membershipManager;
-    }
+	private void initZookeeperSender() {
+		if (membershipManager != null) {
+			zookeeperSender = new ZookeeperSender(membershipManager);
+		}
+	}
+
+	private class MemberAdder implements Runnable {
+
+		private final Member member;
+
+		private MemberAdder(Member member) {
+			this.member = member;
+		}
+
+		public void run() {
+			if (members.contains(member)) {
+				return;
+			}
+			if (canConnect(member)) {
+				try {
+					Thread.sleep(10000); // Sleep for sometime to allow complete
+											// initialization of the node
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				if (!members.contains(member)) {
+					members.add(member);
+				}
+				log.info("Application member " + member + " joined application cluster");
+			} else {
+				log.error("Could not add application member " + member);
+			}
+		}
+
+		/**
+		 * Before adding a member, we will try to verify whether we can connect
+		 * to it
+		 * 
+		 * @param member
+		 *            The member whose connectvity needs to be verified
+		 * @return true, if the member can be contacted; false, otherwise.
+		 */
+		private boolean canConnect(Member member) {
+			if (log.isDebugEnabled()) {
+				log.debug("Trying to connect to member " + member + "...");
+			}
+			for (int retries = 30; retries > 0; retries--) {
+				try {
+					InetAddress addr = InetAddress.getByName(member.getHostName());
+					int httpPort = member.getHttpPort();
+					if (log.isDebugEnabled()) {
+						log.debug("HTTP Port=" + httpPort);
+					}
+					if (httpPort != -1) {
+						SocketAddress httpSockaddr = new InetSocketAddress(addr, httpPort);
+						new Socket().connect(httpSockaddr, 10000);
+					}
+					int httpsPort = member.getHttpsPort();
+					if (log.isDebugEnabled()) {
+						log.debug("HTTPS Port=" + httpsPort);
+					}
+					if (httpsPort != -1) {
+						SocketAddress httpsSockaddr = new InetSocketAddress(addr, httpsPort);
+						new Socket().connect(httpsSockaddr, 10000);
+					}
+					return true;
+				} catch (IOException e) {
+					if (log.isDebugEnabled()) {
+						log.debug("", e);
+					}
+					String msg = e.getMessage();
+					if (msg.indexOf("Connection refused") == -1 && msg.indexOf("connect timed out") == -1) {
+						log.error("Cannot connect to member " + member, e);
+					}
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException ignored) {
+					}
+				}
+			}
+			return false;
+		}
+	}
+
 }
