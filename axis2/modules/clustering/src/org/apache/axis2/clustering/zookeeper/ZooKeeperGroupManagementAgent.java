@@ -33,25 +33,25 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-public class Axis2GroupManagementAgent implements GroupManagementAgent {
+public class ZooKeeperGroupManagementAgent implements GroupManagementAgent {
 
-	private static final Log log = LogFactory.getLog(Axis2GroupManagementAgent.class);
+	private static final Log log = LogFactory.getLog(ZooKeeperGroupManagementAgent.class);
 	private final List<Member> members = new ArrayList<Member>();
-	private Axis2MembershipManager membershipManager;
-	private ZookeeperSender zookeeperSender;
+	private ZooKeeperMembershipManager membershipManager;
+	private ZooKeeperSender zookeeperSender;
 	private String description;
 
-	public Axis2GroupManagementAgent(Axis2MembershipManager membershipManager, String description) {
+	public ZooKeeperGroupManagementAgent(ZooKeeperMembershipManager membershipManager, String description) {
 		this.membershipManager = membershipManager;
 		this.description = description;
 		initZookeeperSender();
 	}
 
-	public Axis2MembershipManager getMembershipManager() {
+	public ZooKeeperMembershipManager getMembershipManager() {
 		return membershipManager;
 	}
 
-	public void setMembershipManager(Axis2MembershipManager membershipManager) {
+	public void setMembershipManager(ZooKeeperMembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 
@@ -67,7 +67,7 @@ public class Axis2GroupManagementAgent implements GroupManagementAgent {
 		return members;
 	}
 	
-	public void setZookeeperSender(ZookeeperSender zookeeperSender) {
+	public void setZookeeperSender(ZooKeeperSender zookeeperSender) {
 		this.zookeeperSender = zookeeperSender;
 	}
 
@@ -88,7 +88,7 @@ public class Axis2GroupManagementAgent implements GroupManagementAgent {
 
 	private void initZookeeperSender() {
 		if (membershipManager != null) {
-			zookeeperSender = new ZookeeperSender(membershipManager);
+			zookeeperSender = new ZooKeeperSender(membershipManager);
 		}
 	}
 

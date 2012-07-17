@@ -21,6 +21,7 @@ package org.apache.axis2.clustering.zookeeper;
 import java.util.UUID;
 
 public class ZkMemberImpl implements ZkMember {
+	//TODO create the toString method
     private byte[] zkHostName;
     private UUID zkNodeId;
     private int port;

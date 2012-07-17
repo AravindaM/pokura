@@ -29,14 +29,14 @@ import org.apache.axis2.clustering.management.NodeManagementCommand;
 import org.apache.axis2.clustering.state.StateClusteringCommand;
 import org.apache.axis2.context.ConfigurationContext;
 
-public class Axis2CommandChildListener implements IZkChildListener {
+public class ZooKeeperCommandListener implements IZkChildListener {
 
-	private ZookeeperStateManager stateManager;
+	private ZooKeeperStateManager stateManager;
 	private ConfigurationContext configurationContext;
-	private ZookeeperNodeManager nodeManager;
+	private ZooKeeperNodeManager nodeManager;
 	private Integer currentId;
 
-	public Axis2CommandChildListener(Integer initialId) {
+	public ZooKeeperCommandListener(Integer initialId) {
 		currentId = initialId;
 	}
 	
@@ -45,7 +45,7 @@ public class Axis2CommandChildListener implements IZkChildListener {
 		Collections.sort(currentChilds);
 		for (int i = currentId; i < currentChilds.size(); i++) {
 			System.out.println(currentChilds.get(i) + " processing...");
-			processMessage((ClusteringCommand) ZookeeperUtils.getZookeeper().readData(currentChilds.get(i)));
+			processMessage((ClusteringCommand) ZooKeeperUtils.getZookeeper().readData(currentChilds.get(i)));
 			currentId++;
 		}
 		

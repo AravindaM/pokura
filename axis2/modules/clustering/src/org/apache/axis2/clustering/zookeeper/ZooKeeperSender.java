@@ -18,28 +18,32 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import org.apache.axis2.clustering.tribes.MembershipManager;
+import org.apache.axis2.clustering.ClusteringCommand;
+import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.MessageSender;
+import org.apache.zookeeper.ZooKeeper;
 
-public class Axis2MemberReceiver {
-	private Axis2MembershipManager membershipManager;
-
-	public Axis2MemberReceiver(Axis2MembershipManager membershipManager) {
+public class ZooKeeperSender implements MessageSender{
+	
+	private ZooKeeperMembershipManager membershipManager;
+	private byte[] domain;
+	
+	public ZooKeeperSender(ZooKeeperMembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
-
-	/**
-	 * Set Zookeeper command listener
-	 */
-	public void startRecieve() {		
-		String domainName = new String(membershipManager.getDomain());
-		String memberPath = "/" + domainName + ZookeeperConstants.MEMEBER_BASE_NAME ;
-		ZookeeperUtils.getZookeeper().subscribeChildChanges(
-				memberPath,
-				new Axis2MemberListener(membershipManager));
-	}
 	
-	public void stopRecieve(){
-		// TODO this method should be able to remove the chlidlistners from the given path
-
+	
+	public void sendToGroup(ClusteringCommand msg) throws ClusteringFault {
+		domain = membershipManager.getDomain();		
+		String domainName = new String(domain);
+		
+		ZooKeeperUtils.createCommandZNode(msg, domainName);
+		
 	}
+
+	public void sendToSelf(ClusteringCommand msg) throws ClusteringFault {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

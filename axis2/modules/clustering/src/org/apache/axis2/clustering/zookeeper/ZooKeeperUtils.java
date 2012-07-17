@@ -36,11 +36,11 @@ import org.apache.axis2.clustering.Member;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 
-public class ZookeeperUtils {
+public class ZooKeeperUtils {
 
 	public static ZkClient zookeeper;
 
-	public ZookeeperUtils(ZkClient zk) {
+	public ZooKeeperUtils(ZkClient zk) {
 		this.zookeeper = zk;
 	}
 	/**
@@ -67,7 +67,7 @@ public class ZookeeperUtils {
 
 		zookeeper.setZkSerializer(new SerializableSerializer());
 //		zookeeper.setZkSerializer(new CommandSerializer());
-		zookeeper.create("/" + domain + ZookeeperConstants.COMMAND_BASE_NAME,
+		zookeeper.create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME,
 				command, CreateMode.PERSISTENT_SEQUENTIAL);
 
 	}
@@ -101,11 +101,13 @@ public class ZookeeperUtils {
 	 * @param childlist the list of paths to the members
 	 * @return a list ZooKeeper members 
 	 */
-	public static List<ZkMember> getZkMembers(List<String> childlist) {
+	public static List<ZkMember> getZkMembers(List<String> childlist,String parentPath) {
 		List<ZkMember> members = new ArrayList<ZkMember>();
 		for (String childpath : childlist) {
-			zookeeper.setZkSerializer(new ZkMemberSerializer());
-			members.add((ZkMember) zookeeper.readData(childpath));
+			zookeeper.setZkSerializer(new SerializableSerializer());
+			
+			Object m =  zookeeper.readData(parentPath+"/"+childpath);
+			members.add((ZkMember)m);
 		}
 
 		return members;
@@ -134,7 +136,7 @@ public class ZookeeperUtils {
 	 * @return a list of members
 	 */
 	public static List<ZkMember> getNewMembers(
-			Axis2MembershipManager membershipManager,
+			ZooKeeperMembershipManager membershipManager,
 			List<ZkMember> currentMembers) {
 		return getNewMembers(membershipManager.getMembers(), currentMembers);
 	}
@@ -146,7 +148,7 @@ public class ZookeeperUtils {
 	 * @return a list of members
 	 */
 	public static List<ZkMember> getNewMembers(
-			Axis2MembershipManager membershipManager, String parentPath) {
+			ZooKeeperMembershipManager membershipManager, String parentPath) {
 		return getNewMembers(membershipManager.getMembers(),
 				getZkMembers(parentPath));
 	}
@@ -165,7 +167,7 @@ public class ZookeeperUtils {
 
 		String id = id = getNextId(currentid);
 		List<ClusteringCommand> commands = new ArrayList<ClusteringCommand>();
-		String commandpath = path + "/" + ZookeeperConstants.COMMAND_BASE_NAME;
+		String commandpath = path + "/" + ZooKeeperConstants.COMMAND_BASE_NAME;
 		ClusteringCommand command;
 
 		while ((command = (ClusteringCommand) zookeeper.readData(commandpath
@@ -194,7 +196,7 @@ public class ZookeeperUtils {
 	 */
 	public static List<ZkMember> getZkMembers(String parentPath) {
 		List<String> childlist = zookeeper.getChildren(parentPath);
-		return getZkMembers(childlist);
+		return getZkMembers(childlist,parentPath);
 
 	}
 //	/**
@@ -241,10 +243,10 @@ public class ZookeeperUtils {
 	 * @return returns the axis2 member
 	 */
 	public static Member toAxis2Member(ZkMember member) {
-		Member axis2Member = new Member(ZookeeperUtils.getHost(member),
+		Member axis2Member = new Member(ZooKeeperUtils.getHost(member),
 				member.getPort());
 
-		Properties props = ZookeeperUtils.getPayload(member.getPayLoad());
+		Properties props = ZooKeeperUtils.getPayload(member.getPayLoad());
 
 		String httpPort = props.getProperty("httpPort");
 		if (httpPort != null && httpPort.trim().length() != 0) {
