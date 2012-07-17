@@ -21,15 +21,14 @@ package org.apache.axis2.clustering.zookeeper;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.MessageSender;
-import org.apache.axis2.clustering.tribes.MembershipManager;
 import org.apache.zookeeper.ZooKeeper;
 
 public class ZookeeperSender implements MessageSender{
 	
-	private MembershipManager membershipManager;
+	private Axis2MembershipManager membershipManager;
 	private byte[] domain;
 	
-	public ZookeeperSender(MembershipManager membershipManager) {
+	public ZookeeperSender(Axis2MembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 	
