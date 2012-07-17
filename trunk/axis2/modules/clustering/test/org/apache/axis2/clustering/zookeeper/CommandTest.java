@@ -63,14 +63,14 @@ public class CommandTest extends TestCase implements Serializable{
 				zkcli.createPersistent("/TestDomain/command");
 			}
 	
-			ZookeeperUtils.setZookeeperConnection(zkcli);
+			ZooKeeperUtils.setZookeeperConnection(zkcli);
 			
-			Axis2MembershipManager membershipManager = new Axis2MembershipManager();
+			ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
 			membershipManager.setDomain(new String("TestDomain").getBytes());
 			
-			Axis2CommandReceiver axis2CommandReceiver = new Axis2CommandReceiver(membershipManager);
+			ZooKeeperCommandSubscriber axis2CommandReceiver = new ZooKeeperCommandSubscriber(membershipManager);
 			axis2CommandReceiver.startRecieve();
-			ZookeeperSender sender = new ZookeeperSender(membershipManager);
+			ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
 			
 			DeleteServiceStateCommand command = new DeleteServiceStateCommand();
 						
