@@ -3,15 +3,16 @@ package org.apache.axis2.clustering.zookeeper;
 import java.util.List;
 
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.MembershipScheme;
 import org.apache.commons.logging.LogFactory;
 
-public class ZooKeeperMembershipScheme {
+public class ZooKeeperMembershipScheme implements MembershipScheme{
 
     private static final org.apache.commons.logging.Log log = LogFactory.getLog(ZooKeeperMembershipScheme.class);
 
-    private final Axis2MembershipManager membershipManager;
+    private final ZooKeeperMembershipManager membershipManager;
 
-    public ZooKeeperMembershipScheme(Axis2MembershipManager membershipManager) {
+    public ZooKeeperMembershipScheme(ZooKeeperMembershipManager membershipManager) {
         this.membershipManager = membershipManager;
     }
 
@@ -22,9 +23,9 @@ public class ZooKeeperMembershipScheme {
 
     public void joinGroup() throws ClusteringFault {
         String domainName = new String(membershipManager.getDomain());
-        String memberPath = "/" + domainName + ZookeeperConstants.MEMEBER_BASE_NAME;
+        String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME;
 
-        List<ZkMember> members = ZookeeperUtils.getZkMembers(memberPath);
+        List<ZkMember> members = ZooKeeperUtils.getZkMembers(memberPath);
 
         if (!members.isEmpty()) {
             membershipManager.setMembers(members);
@@ -32,7 +33,7 @@ public class ZooKeeperMembershipScheme {
             log.info("No members found. Local member is the 1st member ");
         }
         //create a node for this member
-        ZookeeperUtils.setZkMemeber(membershipManager.getLocalMember());
+        ZooKeeperUtils.setZkMemeber(membershipManager.getLocalMember());
     }
 
 }

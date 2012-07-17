@@ -20,11 +20,11 @@ package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.axis2.clustering.tribes.MembershipManager;
 
-public class Axis2CommandReceiver {
+public class ZooKeeperCommandSubscriber {
 
-	private Axis2MembershipManager membershipManager;
+	private ZooKeeperMembershipManager membershipManager;
 
-	public Axis2CommandReceiver(Axis2MembershipManager membershipManager) {
+	public ZooKeeperCommandSubscriber(ZooKeeperMembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 
@@ -33,12 +33,12 @@ public class Axis2CommandReceiver {
 	 */
 	public void startRecieve() {		
 		String domainName = new String(membershipManager.getDomain());
-		String commandPath = "/" + domainName + ZookeeperConstants.COMMANDS_BASE_NAME ;
+		String commandPath = "/" + domainName + ZooKeeperConstants.COMMANDS_BASE_NAME ;
 		Integer initialId = generateCurrentId(commandPath);
 		generateCurrentId(commandPath);
-		ZookeeperUtils.getZookeeper().subscribeChildChanges(
+		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
 				commandPath,
-				new Axis2CommandChildListener(initialId));
+				new ZooKeeperCommandListener(initialId));
 	}
 	public void stopRecive(){
 		// TODO this method should be able to remove the chlidlistners from the given path
@@ -50,7 +50,7 @@ public class Axis2CommandReceiver {
 	 */
 	private Integer generateCurrentId(String commandPath){
 		// TODO size cannot do because later old commands have to delete
-		return ZookeeperUtils.getZookeeper().getChildren(commandPath).size();
+		return ZooKeeperUtils.getZookeeper().getChildren(commandPath).size();
 	}
 	
 

@@ -27,9 +27,9 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Axis2MembershipManager {
+public class ZooKeeperMembershipManager {
 
-    private static Log log = LogFactory.getLog(Axis2MembershipManager.class);
+    private static Log log = LogFactory.getLog(ZooKeeperMembershipManager.class);
 
     private byte[] domain;
     private ConfigurationContext configContext;
@@ -39,10 +39,10 @@ public class Axis2MembershipManager {
     //Member represents this node
     private ZkMember localMember;
 
-    public Axis2MembershipManager() {
+    public ZooKeeperMembershipManager() {
     }
 
-    public Axis2MembershipManager(ConfigurationContext configCtxt) {
+    public ZooKeeperMembershipManager(ConfigurationContext configCtxt) {
         this.configContext = configCtxt;
     }
 
@@ -93,7 +93,7 @@ public class Axis2MembershipManager {
     public boolean addMember(ZkMember member) {
 
         boolean memberExists = members.contains(member);
-        boolean belongsToSameDomain = ZookeeperUtils.areInSameDomain(member, domain);
+        boolean belongsToSameDomain = ZooKeeperUtils.areInSameDomain(member, domain);
 
         if (log.isDebugEnabled()) {
             log.debug("Members List contains " + memberExists);
@@ -108,20 +108,20 @@ public class Axis2MembershipManager {
         }
         // TODO What are the other checks to be carried out before adding a member
 
-        boolean shouldAddMember = (localMember == null) || ZookeeperUtils.areInSameDomain(member,
+        boolean shouldAddMember = (localMember == null) || ZooKeeperUtils.areInSameDomain(member,
                 localMember.getDomain());
 
         //If Member handles the service requests, i.e. Memeber is an application member
         if (groupManagementAgent != null) {
-            log.info("Application member " + ZookeeperUtils.getName(member) + " joined the group"
+            log.info("Application member " + ZooKeeperUtils.getName(member) + " joined the group"
                     + new String(member.getDomain()));
-            groupManagementAgent.applicationMemberAdded(ZookeeperUtils.toAxis2Member(member));
+            groupManagementAgent.applicationMemberAdded(ZooKeeperUtils.toAxis2Member(member));
         }
 
         if (shouldAddMember) {
             members.add(member);
             if (log.isDebugEnabled()) {
-                log.debug("Added member" + ZookeeperUtils.getName(member) + "to domain" + new String(member.getDomain()));
+                log.debug("Added member" + ZooKeeperUtils.getName(member) + "to domain" + new String(member.getDomain()));
             }
             return true;
         }
@@ -136,12 +136,12 @@ public class Axis2MembershipManager {
      */
     public void memberRemoved(ZkMember member) {
         if (log.isDebugEnabled()) {
-            log.debug("Member disappeared" + ZookeeperUtils.getName(member) + "from domain" + new String(member.getDomain()));
+            log.debug("Member disappeared" + ZooKeeperUtils.getName(member) + "from domain" + new String(member.getDomain()));
             members.remove(member);
         }
         // If this an application domain member
         if (groupManagementAgent != null) {
-            groupManagementAgent.applicationMemberRemoved(ZookeeperUtils.toAxis2Member(member));
+            groupManagementAgent.applicationMemberRemoved(ZooKeeperUtils.toAxis2Member(member));
         }
     }
 

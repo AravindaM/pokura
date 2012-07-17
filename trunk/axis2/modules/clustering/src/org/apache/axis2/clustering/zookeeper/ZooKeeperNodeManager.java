@@ -28,7 +28,7 @@ import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 
-public class ZookeeperNodeManager implements NodeManager {
+public class ZooKeeperNodeManager implements NodeManager {
 
 	public void addParameter(Parameter param) throws AxisFault {
 		// TODO Auto-generated method stub

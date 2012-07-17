@@ -36,13 +36,13 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.context.ServiceGroupContext;
 import org.apache.axis2.description.Parameter;
 
-public class ZookeeperStateManager implements StateManager {
+public class ZooKeeperStateManager implements StateManager {
 
 	private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
 
 	private final Map<String, List> excludedReplicationPatterns = new HashMap<String, List>();
 
-	public ZookeeperStateManager() {
+	public ZooKeeperStateManager() {
 	}
 
 	public void addParameter(Parameter param) throws AxisFault {

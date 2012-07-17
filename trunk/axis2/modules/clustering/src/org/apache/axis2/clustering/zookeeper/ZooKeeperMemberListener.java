@@ -24,12 +24,12 @@ import org.I0Itec.zkclient.IZkChildListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Axis2MemberListener implements IZkChildListener {
+public class ZooKeeperMemberListener implements IZkChildListener {
 	
-	 private static Log log = LogFactory.getLog(Axis2MemberListener.class);
-	 private final Axis2MembershipManager membershipManager;
+	 private static Log log = LogFactory.getLog(ZooKeeperMemberListener.class);
+	 private final ZooKeeperMembershipManager membershipManager;
 	    
-	public Axis2MemberListener(Axis2MembershipManager membershipManager) {
+	public ZooKeeperMemberListener(ZooKeeperMembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 
@@ -37,13 +37,13 @@ public class Axis2MemberListener implements IZkChildListener {
 			throws Exception {
 		//TODO improve performance by making sure unwanted member objects are not retrieved 
 		List<ZkMember> oldmembers = membershipManager.getMembers();
-		List<ZkMember> newmembers = ZookeeperUtils.getZkMembers(currentChilds);
+		List<ZkMember> newmembers = ZooKeeperUtils.getZkMembers(currentChilds,parentPath);
 		
-		List<ZkMember> addedmembers = ZookeeperUtils.getNewMembers(oldmembers,newmembers);
+		List<ZkMember> addedmembers = ZooKeeperUtils.getNewMembers(oldmembers,newmembers);
 		 for (ZkMember zkMember : addedmembers) {
 			 if (membershipManager.addMember(zkMember)) {
-		            log.info("New member " + ZookeeperUtils.getName(zkMember) + " joined cluster.");
-		            System.out.println("New member " + ZookeeperUtils.getName(zkMember) + " joined cluster.");
+		            log.info("New member " + ZooKeeperUtils.getName(zkMember) + " joined cluster.");
+		            System.out.println("New member " + ZooKeeperUtils.getName(zkMember) + " joined cluster.");
 			  }
 		}
 		 

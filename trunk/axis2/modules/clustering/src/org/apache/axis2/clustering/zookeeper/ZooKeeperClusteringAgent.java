@@ -32,6 +32,7 @@ import org.apache.axis2.clustering.ClusteringConstants;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.clustering.Member;
+import org.apache.axis2.clustering.MembershipScheme;
 import org.apache.axis2.clustering.RequestBlockingHandler;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
@@ -47,20 +48,20 @@ import org.apache.axis2.engine.Phase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class ZookeeperClusteringAgent implements ClusteringAgent{
+public class ZooKeeperClusteringAgent implements ClusteringAgent{
 
-	private static final Log log = LogFactory.getLog(ZookeeperClusteringAgent.class);
+	private static final Log log = LogFactory.getLog(ZooKeeperClusteringAgent.class);
 	
-	private ZookeeperNodeManager configurationManager;
-    private ZookeeperStateManager contextManager;
+	private ZooKeeperNodeManager configurationManager;
+    private ZooKeeperStateManager contextManager;
     private final Map<String, GroupManagementAgent> groupManagementAgents =
         new HashMap<String, GroupManagementAgent>();
-    private Axis2MembershipManager primaryMembershipManager;
+    private ZooKeeperMembershipManager primaryMembershipManager;
 
-    private Axis2CommandChildListener axis2CommandChildListener;
-    private	Axis2CommandReceiver axis2CommandReceiver;
-    private Axis2MemberListener axis2MemberListener;
-    private Axis2MemberReceiver axis2MemberReceiver;
+    private ZooKeeperCommandListener axis2CommandChildListener;
+    private	ZooKeeperCommandSubscriber axis2CommandReceiver;
+    private ZooKeeperMemberListener axis2MemberListener;
+    private ZooKeeperMemberSubscriber axis2MemberReceiver;
     private final HashMap<String, Parameter> parameters;
     
     private ConfigurationContext configurationContext;
@@ -68,36 +69,36 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
     
     
     
-    public Axis2CommandChildListener getAxis2CommandChildListener() {
+    public ZooKeeperCommandListener getAxis2CommandChildListener() {
 		return axis2CommandChildListener;
 	}
 
 	public void setAxis2CommandChildListener(
-			Axis2CommandChildListener axis2CommandChildListener) {
+			ZooKeeperCommandListener axis2CommandChildListener) {
 		this.axis2CommandChildListener = axis2CommandChildListener;
 	}
 
-	public Axis2CommandReceiver getAxis2CommandReceiver() {
+	public ZooKeeperCommandSubscriber getAxis2CommandReceiver() {
 		return axis2CommandReceiver;
 	}
 
-	public void setAxis2CommandReceiver(Axis2CommandReceiver axis2CommandReceiver) {
+	public void setAxis2CommandReceiver(ZooKeeperCommandSubscriber axis2CommandReceiver) {
 		this.axis2CommandReceiver = axis2CommandReceiver;
 	}
 
-	public Axis2MemberListener getAxis2MemberListener() {
+	public ZooKeeperMemberListener getAxis2MemberListener() {
 		return axis2MemberListener;
 	}
 
-	public void setAxis2MemberListener(Axis2MemberListener axis2MemberListener) {
+	public void setAxis2MemberListener(ZooKeeperMemberListener axis2MemberListener) {
 		this.axis2MemberListener = axis2MemberListener;
 	}
 
-	public Axis2MemberReceiver getAxis2MemberReceiver() {
+	public ZooKeeperMemberSubscriber getAxis2MemberReceiver() {
 		return axis2MemberReceiver;
 	}
 
-	public void setAxis2MemberReceiver(Axis2MemberReceiver axis2MemberReceiver) {
+	public void setAxis2MemberReceiver(ZooKeeperMemberSubscriber axis2MemberReceiver) {
 		this.axis2MemberReceiver = axis2MemberReceiver;
 	}
 
@@ -108,7 +109,7 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
     private List<org.apache.axis2.clustering.Member> members;
     
 	
-	public ZookeeperClusteringAgent() {
+	public ZooKeeperClusteringAgent() {
 		parameters = new HashMap<String, Parameter>();
 	}
 
@@ -142,22 +143,26 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 		Parameter parameter = parameters.get(parameterName);
         return parameter != null && parameter.isLocked();
 	}
-
+	
 	public void init() throws ClusteringFault {
         log.info("Initializing cluster...");
         addRequestBlockingHandlerToInFlows();
-        primaryMembershipManager = new Axis2MembershipManager(configurationContext);
+        primaryMembershipManager = new ZooKeeperMembershipManager(configurationContext);
         byte[] domain = getClusterDomain();
         log.info("Cluster domain: " + new String(domain));
         primaryMembershipManager.setDomain(domain);
+        ZkMember zkm = new ZkMemberImpl();
+        zkm.setDomain(domain);
+        primaryMembershipManager.setLocalMember(zkm);
         
-        axis2CommandReceiver = new Axis2CommandReceiver(primaryMembershipManager);
-        axis2MemberReceiver =  new Axis2MemberReceiver(primaryMembershipManager);
+      //  axis2CommandReceiver = new Axis2CommandReceiver(primaryMembershipManager);
+        axis2MemberReceiver =  new ZooKeeperMemberSubscriber(primaryMembershipManager);
         
-        axis2CommandReceiver.startRecieve();
+       // axis2CommandReceiver.startRecieve();
         axis2MemberReceiver.startRecieve();
         
-        
+        MembershipScheme mm = new ZooKeeperMembershipScheme(primaryMembershipManager);
+        mm.joinGroup();
         
         //setMaximumRetries();
         //configureMode(domain);
@@ -176,11 +181,11 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 	}
 
 	public void setStateManager(StateManager stateManager) {
-		this.contextManager = (ZookeeperStateManager)stateManager;
+		this.contextManager = (ZooKeeperStateManager)stateManager;
 	}
 
 	public void setNodeManager(NodeManager nodeManager) {
-		this.configurationManager = (ZookeeperNodeManager)nodeManager;
+		this.configurationManager = (ZooKeeperNodeManager)nodeManager;
 	}
 
 	public void shutdown() throws ClusteringFault {
