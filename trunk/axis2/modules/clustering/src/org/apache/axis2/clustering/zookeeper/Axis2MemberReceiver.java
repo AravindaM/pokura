@@ -18,6 +18,28 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
+import org.apache.axis2.clustering.tribes.MembershipManager;
+
 public class Axis2MemberReceiver {
-// TODO this class should handle member event similar to Axis2CommandReceiver is used for commands
+	private Axis2MembershipManager membershipManager;
+
+	public Axis2MemberReceiver(Axis2MembershipManager membershipManager) {
+		this.membershipManager = membershipManager;
+	}
+
+	/**
+	 * Set Zookeeper command listener
+	 */
+	public void startRecieve() {		
+		String domainName = new String(membershipManager.getDomain());
+		String memberPath = "/" + domainName + ZookeeperConstants.MEMEBER_BASE_NAME ;
+		ZookeeperUtils.getZookeeper().subscribeChildChanges(
+				memberPath,
+				new Axis2MemberListener(membershipManager));
+	}
+	
+	public void stopRecieve(){
+		// TODO this method should be able to remove the chlidlistners from the given path
+
+	}
 }

@@ -55,7 +55,7 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
     private ZookeeperStateManager contextManager;
     private final Map<String, GroupManagementAgent> groupManagementAgents =
         new HashMap<String, GroupManagementAgent>();
-    private MembershipManager primaryMembershipManager;
+    private Axis2MembershipManager primaryMembershipManager;
 
     private Axis2CommandChildListener axis2CommandChildListener;
     private	Axis2CommandReceiver axis2CommandReceiver;
@@ -146,19 +146,23 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 	public void init() throws ClusteringFault {
         log.info("Initializing cluster...");
         addRequestBlockingHandlerToInFlows();
-        primaryMembershipManager = new MembershipManager(configurationContext);
+        primaryMembershipManager = new Axis2MembershipManager(configurationContext);
         byte[] domain = getClusterDomain();
         log.info("Cluster domain: " + new String(domain));
         primaryMembershipManager.setDomain(domain);
         
         axis2CommandReceiver = new Axis2CommandReceiver(primaryMembershipManager);
-        axis2MemberReceiver =  new Axis2MemberReceiver();
+        axis2MemberReceiver =  new Axis2MemberReceiver(primaryMembershipManager);
+        
+        axis2CommandReceiver.startRecieve();
+        axis2MemberReceiver.startRecieve();
         
         
-        setMaximumRetries();
+        
+        //setMaximumRetries();
         //configureMode(domain);
        // configureMembershipScheme(domain, mode.getMembershipManagers());
-        setMemberInfo();
+       // setMemberInfo();
         
 		
 	}
@@ -235,18 +239,18 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
        //TODO create set max Retries if applicable for ZooKeeper 
     }
     private void configureMode(byte[] domain) {
-        if (clusterManagementMode) {
-            mode = new ClusterManagementMode(domain, groupManagementAgents, primaryMembershipManager);
-            for (GroupManagementAgent agent : groupManagementAgents.values()) {
-
-                if (agent instanceof DefaultGroupManagementAgent) {
-                    ((DefaultGroupManagementAgent) agent).setSender(channelSender);
-                }
-            }
-        } else {
-            mode = new ApplicationMode(domain, primaryMembershipManager);
-        }
-        mode.init(channel);
+//        if (clusterManagementMode) {
+//            mode = new ClusterManagementMode(domain, groupManagementAgents, primaryMembershipManager);
+//            for (GroupManagementAgent agent : groupManagementAgents.values()) {
+//
+//                if (agent instanceof DefaultGroupManagementAgent) {
+//                    ((DefaultGroupManagementAgent) agent).setSender(channelSender);
+//                }
+//            }
+//        } else {
+//            mode = new ApplicationMode(domain, primaryMembershipManager);
+//        }
+//        mode.init(channel);
     }
 
 	/**

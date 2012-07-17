@@ -77,12 +77,12 @@ public class ZookeeperUtils {
 	 * @param member the member object to be saved
 	 */
 	public static void setZkMemeber(ZkMember member) {
-		String domain = member.getDomain().toString();
+		String domain = new String(member.getDomain());
 		String id = UUID.randomUUID().toString();
 		ZkSerializer as = new SerializableSerializer();
 		zookeeper.setZkSerializer(as);
 
-		System.out.print(false);
+	//	System.out.print(false);
 		zookeeper.createPersistent("/" + domain + "/members/" + id, member);
 	}
 
