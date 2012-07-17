@@ -81,6 +81,9 @@ public class Axis2MembershipManager {
         return members;
     }
 
+    public void setMembers(List<ZkMember> members){
+    	members.addAll(members);
+    }
     /**
      * @param member The New member added to the cluster
      * @return true If the member was added to the <code>members</code> list

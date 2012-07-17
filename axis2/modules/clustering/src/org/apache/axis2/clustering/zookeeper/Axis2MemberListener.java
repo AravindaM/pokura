@@ -18,15 +18,40 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.I0Itec.zkclient.IZkChildListener;
+import org.apache.axis2.clustering.tribes.MembershipManager;
+import org.apache.axis2.clustering.tribes.TribesMembershipListener;
+import org.apache.axis2.clustering.tribes.TribesUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Axis2MemberListener implements IZkChildListener {
+	
+	 private static Log log = LogFactory.getLog(Axis2MemberListener.class);
+	 private final Axis2MembershipManager membershipManager;
+	    
+	public Axis2MemberListener(Axis2MembershipManager membershipManager) {
+		this.membershipManager = membershipManager;
+	}
 
 	public void handleChildChange(String parentPath, List<String> currentChilds)
 			throws Exception {
-		// TODO This class should be able to handle member events that are generated for this listner
+		//TODO improve performance by making sure unwanted member objects are not retrieved 
+		List<ZkMember> oldmembers = membershipManager.getMembers();
+		List<ZkMember> newmembers = ZookeeperUtils.getZkMembers(currentChilds);
+		
+		List<ZkMember> addedmembers = ZookeeperUtils.getNewMembers(oldmembers,newmembers);
+		 for (ZkMember zkMember : addedmembers) {
+			 if (membershipManager.addMember(zkMember)) {
+		            log.info("New member " + ZookeeperUtils.getName(zkMember) + " joined cluster.");
+		            System.out.println("New member " + ZookeeperUtils.getName(zkMember) + " joined cluster.");
+			  }
+		}
+		 
 		
 	}
 

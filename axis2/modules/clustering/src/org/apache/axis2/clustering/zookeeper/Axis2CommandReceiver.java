@@ -22,9 +22,9 @@ import org.apache.axis2.clustering.tribes.MembershipManager;
 
 public class Axis2CommandReceiver {
 
-	private MembershipManager membershipManager;
+	private Axis2MembershipManager membershipManager;
 
-	public Axis2CommandReceiver(MembershipManager membershipManager) {
+	public Axis2CommandReceiver(Axis2MembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 

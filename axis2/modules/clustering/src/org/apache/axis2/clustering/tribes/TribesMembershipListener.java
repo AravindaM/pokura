@@ -39,6 +39,7 @@ public class TribesMembershipListener implements MembershipListener {
     public void memberAdded(Member member) {
         if (membershipManager.memberAdded(member)) {
             log.info("New member " + TribesUtil.getName(member) + " joined cluster.");
+            System.out.println("New member " + TribesUtil.getName(member) + " joined cluster.");
             /*if (TribesUtil.toAxis2Member(member).isActive()) {
             } else {
             }*/
