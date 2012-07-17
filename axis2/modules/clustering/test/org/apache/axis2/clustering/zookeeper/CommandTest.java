@@ -32,7 +32,7 @@ import org.apache.axis2.context.ConfigurationContext;
 
 import junit.framework.TestCase;
 
-public class CommandTest extends TestCase implements Serializable{
+public class CommandTest extends TestCase implements Serializable {
 
 	ZkServer zks;
 
@@ -48,35 +48,46 @@ public class CommandTest extends TestCase implements Serializable{
 
 					}
 				}, 4599);
-		zks.start();	
-		
-		
+		zks.start();
+
 	}
 
+	public void testSendCommand() throws ClusteringFault {
+		ZkClient zkcli = new ZkClient("localhost:4599");
 
-	public void testSendCommand() throws ClusteringFault{
-			ZkClient zkcli = new ZkClient("localhost:4599");
-			
-			if(!zkcli.exists("/TestDomain/command"))
-			{
-				zkcli.createPersistent("/TestDomain");
-				zkcli.createPersistent("/TestDomain/command");
-			}
-	
-			ZooKeeperUtils.setZookeeperConnection(zkcli);
-			
-			ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
-			membershipManager.setDomain(new String("TestDomain").getBytes());
-			
-			ZooKeeperCommandSubscriber axis2CommandReceiver = new ZooKeeperCommandSubscriber(membershipManager);
-			axis2CommandReceiver.startRecieve();
-			ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
-			
-			DeleteServiceStateCommand command = new DeleteServiceStateCommand();
-						
+		if (!zkcli.exists("/TestDomain/command")) {
+			zkcli.createPersistent("/TestDomain");
+			zkcli.createPersistent("/TestDomain/command");
+		}
+
+		ZookeeperUtils.setZookeeperConnection(zkcli);
+
+		MembershipManager membershipManager = new MembershipManager();
+		membershipManager.setDomain(new String("TestDomain").getBytes());
+
+		Axis2CommandReceiver axis2CommandReceiver = new Axis2CommandReceiver(
+				membershipManager);
+		axis2CommandReceiver.startRecieve();
+		final ZookeeperSender sender = new ZookeeperSender(membershipManager);
+
+		final DeleteServiceStateCommand command = new DeleteServiceStateCommand();
+
+
 			sender.sendToGroup(command);
-						
-		 }
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			sender.sendToGroup(command);
+			System.out.println("finish1");
+
+	
+		System.out.println("finish");
+	}
 
 	/**
 	 * Ends initialized data
