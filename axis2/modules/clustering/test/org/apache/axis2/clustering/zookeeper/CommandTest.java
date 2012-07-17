@@ -65,7 +65,7 @@ public class CommandTest extends TestCase implements Serializable{
 	
 			ZookeeperUtils.setZookeeperConnection(zkcli);
 			
-			MembershipManager membershipManager = new MembershipManager();
+			Axis2MembershipManager membershipManager = new Axis2MembershipManager();
 			membershipManager.setDomain(new String("TestDomain").getBytes());
 			
 			Axis2CommandReceiver axis2CommandReceiver = new Axis2CommandReceiver(membershipManager);
