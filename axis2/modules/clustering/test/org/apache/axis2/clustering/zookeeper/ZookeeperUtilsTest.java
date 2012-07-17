@@ -52,9 +52,9 @@ public class ZookeeperUtilsTest extends TestCase{
 
  public void testGetNewMembers(){
 	ZkClient zkcli = new ZkClient("localhost:4599");
-	ZookeeperUtils.setZookeeperConnection(zkcli);
+	ZooKeeperUtils.setZookeeperConnection(zkcli);
 	ZkMemberImpl member =  new  ZkMemberImpl();
-	ZookeeperUtils.setZkMemeber(member);
+	ZooKeeperUtils.setZkMemeber(member);
 	zks.shutdown();
  }
 }

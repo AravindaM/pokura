@@ -1,5 +1,8 @@
 package org.apache.axis2.clustering.zookeeper;
 
+import org.I0Itec.zkclient.IDefaultNameSpace;
+import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.ZkServer;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
@@ -21,7 +24,7 @@ import junit.framework.TestCase;
 
 public class ZooKeeperStateReplicationTest extends TestCase {
 	private static final String TEST_SERVICE_NAME = "testService";
-
+	ZkServer zks;
 	private static final Parameter domainParam =
 		new Parameter(ClusteringConstants.Parameters.DOMAIN,
 				"axis2.domain." + UIDGenerator.generateUID());
@@ -51,8 +54,18 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		//          return;
 		//      }
 
-		System.setProperty(ClusteringConstants.LOCAL_IP_ADDRESS, Utils.getIpAddress());
+		zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
+				new IDefaultNameSpace() {
 
+					public void createDefaultNameSpace(ZkClient zkClient) {
+						// TODO Auto-generated method stub
+
+					}
+				}, 4599);
+		zks.start();	
+		
+		System.setProperty(ClusteringConstants.LOCAL_IP_ADDRESS, Utils.getIpAddress());
+		ZooKeeperUtils.setZookeeperConnection(new ZkClient("localhost:4599"));
 		// First cluster
 		configurationContext1 =
 			ConfigurationContextFactory.createDefaultConfigurationContext();
@@ -76,13 +89,18 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		clusterManager2.addParameter(domainParam);
 		clusterManager2.init();
 		System.out.println("---------- ClusteringAgent-2 successfully initialized -----------");
+		
+		
 	}
 
+	public void testblas(){
+		System.out.println("asdasd");
+	}
 	protected ClusteringAgent getClusterManager(ConfigurationContext configCtx,
 			StateManager stateManager,
 			NodeManager configManager)
 	throws AxisFault {
-		ClusteringAgent clusteringAgent = new ZookeeperClusteringAgent();
+		ClusteringAgent clusteringAgent = new ZooKeeperClusteringAgent();
 		configCtx.getAxisConfiguration().setClusteringAgent(clusteringAgent);
 		clusteringAgent.setNodeManager(configManager);
 		clusteringAgent.setStateManager(stateManager);
@@ -105,12 +123,12 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 	}
 
 	protected StateManager getContextManager() throws AxisFault {
-		StateManager stateManager = new ZookeeperStateManager();
+		StateManager stateManager = new ZooKeeperStateManager();
 		return stateManager;
 	}
 
 	protected NodeManager getConfigurationManager() throws AxisFault {
-		NodeManager contextManager = new ZookeeperNodeManager();
+		NodeManager contextManager = new ZooKeeperNodeManager();
 		return contextManager;
 	}
 }
