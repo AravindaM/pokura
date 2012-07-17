@@ -238,7 +238,7 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
     private void setMaximumRetries() {
        //TODO create set max Retries if applicable for ZooKeeper 
     }
-    private void configureMode(byte[] domain) {
+    /*private void configureMode(byte[] domain) {
 //        if (clusterManagementMode) {
 //            mode = new ClusterManagementMode(domain, groupManagementAgents, primaryMembershipManager);
 //            for (GroupManagementAgent agent : groupManagementAgents.values()) {
@@ -251,7 +251,7 @@ public class ZookeeperClusteringAgent implements ClusteringAgent{
 //            mode = new ApplicationMode(domain, primaryMembershipManager);
 //        }
 //        mode.init(channel);
-    }
+    }*/
 
 	/**
      * A RequestBlockingHandler, which is an implementation of

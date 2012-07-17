@@ -87,5 +87,9 @@ public class ZkMemberImpl implements ZkMember {
     public void setPayLoad(byte[] payLoad) {
         this.payLoad = payLoad;
     }
+
+    public String toString(Object obj) {
+        return obj.getClass().getName();
+    }
 }
 

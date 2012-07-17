@@ -81,9 +81,10 @@ public class Axis2MembershipManager {
         return members;
     }
 
-    public void setMembers(List<ZkMember> members){
-    	members.addAll(members);
+    public void setMembers(List<ZkMember> members) {
+        members.addAll(members);
     }
+
     /**
      * @param member The New member added to the cluster
      * @return true If the member was added to the <code>members</code> list
@@ -117,20 +118,28 @@ public class Axis2MembershipManager {
             groupManagementAgent.applicationMemberAdded(ZookeeperUtils.toAxis2Member(member));
         }
 
+        if (shouldAddMember) {
+            members.add(member);
+            if (log.isDebugEnabled()) {
+                log.debug("Added member" + ZookeeperUtils.getName(member) + "to domain" + new String(member.getDomain()));
+            }
+            return true;
+        }
         // TODO rest of the method impl.
         return false;
     }
 
-      /**
-     * A member disappeared
+    /**
+     * When member left the cluster
      *
      * @param member The member that left the cluster
      */
     public void memberRemoved(ZkMember member) {
-        members.remove(member);
-
-
-        // Is this an application domain member?
+        if (log.isDebugEnabled()) {
+            log.debug("Member disappeared" + ZookeeperUtils.getName(member) + "from domain" + new String(member.getDomain()));
+            members.remove(member);
+        }
+        // If this an application domain member
         if (groupManagementAgent != null) {
             groupManagementAgent.applicationMemberRemoved(ZookeeperUtils.toAxis2Member(member));
         }

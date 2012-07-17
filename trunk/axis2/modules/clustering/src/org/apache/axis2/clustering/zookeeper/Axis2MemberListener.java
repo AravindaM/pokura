@@ -18,14 +18,9 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.I0Itec.zkclient.IZkChildListener;
-import org.apache.axis2.clustering.tribes.MembershipManager;
-import org.apache.axis2.clustering.tribes.TribesMembershipListener;
-import org.apache.axis2.clustering.tribes.TribesUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
