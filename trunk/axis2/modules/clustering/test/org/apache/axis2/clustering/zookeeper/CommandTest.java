@@ -82,12 +82,24 @@ public class CommandTest extends TestCase implements Serializable {
 			sender.sendToGroup(command);
 			sender.sendToGroup(command);
 			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			System.out.println("finish1");
-
-	
-		System.out.println("finish");
+			sender.sendToGroup(command);	
+			
+//			while(true){}
+				
+			long startTime = System.nanoTime();
+			
+			while (System.nanoTime() - startTime < 500000000) {
+//				System.out.println(Axis2CommandReceiver.startTime);
+				
+				if(System.nanoTime() - Axis2CommandReceiver.startTime > 50000000) {
+					System.out.println("timeout reached");
+					axis2CommandReceiver.timoutCommandProcess();
+					break;
+				}
+			}
 	}
+	
+
 
 	/**
 	 * Ends initialized data
