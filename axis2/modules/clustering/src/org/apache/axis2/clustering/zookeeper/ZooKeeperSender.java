@@ -49,9 +49,6 @@ public class ZooKeeperSender implements MessageSender {
 		domain = membershipManager.getDomain();
 		String domainName = new String(domain);
 
-//		long startTime = System.nanoTime();
-//		while (System.nanoTime() - startTime < 10000000) {}
-
 		ZooKeeperUtils.createCommandZNode(msg, domainName);
 	
 	}
