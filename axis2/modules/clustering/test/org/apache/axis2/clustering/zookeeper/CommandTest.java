@@ -23,12 +23,8 @@ import java.io.Serializable;
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
-import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.commands.DeleteServiceStateCommand;
-import org.apache.axis2.clustering.state.commands.UpdateStateCommand;
-import org.apache.axis2.clustering.tribes.MembershipManager;
-import org.apache.axis2.context.ConfigurationContext;
 
 import junit.framework.TestCase;
 
@@ -62,10 +58,10 @@ public class CommandTest extends TestCase implements Serializable {
 
 		ZooKeeperUtils.setZookeeperConnection(zkcli);
 
-		MembershipManager membershipManager = new MembershipManager();
+		ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
 		membershipManager.setDomain(new String("TestDomain").getBytes());
 
-		Axis2CommandReceiver axis2CommandReceiver = new Axis2CommandReceiver(
+		ZooKeeperCommandSubscriber axis2CommandReceiver = new ZooKeeperCommandSubscriber(
 				membershipManager);
 		axis2CommandReceiver.startRecieve();
 		final ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
@@ -98,12 +94,12 @@ public class CommandTest extends TestCase implements Serializable {
 				}
 			}
 	}
-	
-
 
 	/**
 	 * Ends initialized data
 	 */
+
+
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();

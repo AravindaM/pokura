@@ -21,8 +21,6 @@ package org.apache.axis2.clustering.zookeeper;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.MessageSender;
-import org.apache.axis2.clustering.tribes.MembershipManager;
-import org.apache.zookeeper.ZooKeeper;
 
 /**
  * This class is used to send messages to Zookeeper cluster
@@ -32,10 +30,10 @@ import org.apache.zookeeper.ZooKeeper;
 
 public class ZooKeeperSender implements MessageSender {
 
-	private MembershipManager membershipManager;
+	private ZooKeeperMembershipManager membershipManager;
 	private byte[] domain;
 
-	public ZooKeeperSender(MembershipManager membershipManager) {
+	public ZooKeeperSender(ZooKeeperMembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
 
