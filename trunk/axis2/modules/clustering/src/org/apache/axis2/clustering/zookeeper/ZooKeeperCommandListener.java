@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.management.GroupManagementCommand;
@@ -36,16 +37,43 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 	private ZooKeeperNodeManager nodeManager;
 	static Integer currentId;
 
-	public ZooKeeperCommandListener(Integer initialId) {
-		currentId = initialId;
+	/**
+	 * @param stateManager
+	 * @param configurationContext
+	 * @param nodeManager
+	 */
+	public ZooKeeperCommandListener(Integer initialId, ZooKeeperStateManager stateManager,
+			ConfigurationContext configurationContext,
+			ZooKeeperNodeManager nodeManager) {	
+		this.stateManager = stateManager;
+		this.configurationContext = configurationContext;
+		this.nodeManager = nodeManager;
 	}
-	
+
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
 		//call command processing method for each new command
+        long startTime = System.nanoTime();
+		
+		while (System.nanoTime() - startTime < 500000000) {}
+		
 		Collections.sort(currentChilds);
+		
+		
+		System.out.println(parentPath);
+		
 		for (int i = currentId; i < currentChilds.size(); i++) {
 			System.out.println(currentChilds.get(i) + " processing...");
-			processMessage((ClusteringCommand) ZooKeeperUtils.getZookeeper().readData(currentChilds.get(i)));
+//			processMessage((ClusteringCommand) ZooKeeperUtils.getZookeeper().readData(currentChilds.get(i)));
+			
+			ZkClient zk = ZooKeeperUtils.getZookeeper();
+			String cmName = currentChilds.get(i);
+			
+			if(zk.exists(parentPath+"/"+cmName))
+			{
+				ClusteringCommand cm = (ClusteringCommand)zk.readData(parentPath+"/"+cmName);
+				processMessage(cm);
+			}
+			
 			currentId++;
 		}
 		
@@ -53,6 +81,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
 	private void processMessage(ClusteringCommand command) throws ClusteringFault {
 		// process the command object
+		System.out.println("process");
 		if (command instanceof StateClusteringCommand && stateManager != null) {
 			StateClusteringCommand ctxCmd = (StateClusteringCommand) command;
 			ctxCmd.execute(configurationContext);
