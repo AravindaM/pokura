@@ -52,6 +52,17 @@ public class ZooKeeperCommandSubscriber {
 
 
 	/**
+	 * @param membershipManager
+	 */
+	public ZooKeeperCommandSubscriber(
+			ZooKeeperMembershipManager membershipManager) {
+		super();
+		this.membershipManager = membershipManager;
+	}
+
+
+
+	/**
 	 * Set Zookeeper command listener
 	 */
 	public void startRecieve() {

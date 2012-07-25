@@ -45,6 +45,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 	public ZooKeeperCommandListener(Integer initialId, ZooKeeperStateManager stateManager,
 			ConfigurationContext configurationContext,
 			ZooKeeperNodeManager nodeManager) {	
+		currentId = initialId;
 		this.stateManager = stateManager;
 		this.configurationContext = configurationContext;
 		this.nodeManager = nodeManager;
@@ -53,7 +54,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
 		//call command processing method for each new command
         long startTime = System.nanoTime();
-		
+		System.out.println("start time " + startTime);
 		while (System.nanoTime() - startTime < 500000000) {}
 		
 		Collections.sort(currentChilds);
@@ -74,14 +75,14 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 				processMessage(cm);
 			}
 			
-			currentId++;
+//			currentId++;
 		}
 		
 	}
 
 	private void processMessage(ClusteringCommand command) throws ClusteringFault {
 		// process the command object
-		System.out.println("process");
+		
 		if (command instanceof StateClusteringCommand && stateManager != null) {
 			StateClusteringCommand ctxCmd = (StateClusteringCommand) command;
 			ctxCmd.execute(configurationContext);
@@ -90,6 +91,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 		} else if (command instanceof GroupManagementCommand) {
 			((GroupManagementCommand) command).execute(configurationContext);
 		}
+		System.out.println("processed");
 	}
 
 }
