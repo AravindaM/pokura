@@ -18,12 +18,16 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
+import java.util.List;
+
 import org.apache.axis2.clustering.tribes.MembershipManager;
 
 public class ZooKeeperCommandSubscriber {
-
 	private ZooKeeperMembershipManager membershipManager;
-
+	private Integer initialId;
+	public static long startTime;
+	public static long eventCount;
+		
 	public ZooKeeperCommandSubscriber(ZooKeeperMembershipManager membershipManager) {
 		this.membershipManager = membershipManager;
 	}
@@ -31,27 +35,46 @@ public class ZooKeeperCommandSubscriber {
 	/**
 	 * Set Zookeeper command listener
 	 */
-	public void startRecieve() {		
+	public void startRecieve() {
 		String domainName = new String(membershipManager.getDomain());
-		String commandPath = "/" + domainName + ZooKeeperConstants.COMMANDS_BASE_NAME ;
-		Integer initialId = generateCurrentId(commandPath);
-		generateCurrentId(commandPath);
-		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
-				commandPath,
-				new ZooKeeperCommandListener(initialId));
+		String commandPath = "/" + domainName
+				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
+		initialId = generateCurrentId(commandPath);
+				
+		ZooKeeperUtils.getZookeeper().subscribeChildChanges(commandPath,
+				new Axis2CommandChildListener(initialId));
+		
+		
 	}
-	public void stopRecive(){
-		// TODO this method should be able to remove the chlidlistners from the given path
+	
+	public void timoutCommandProcess()
+	{
+		String domainName = new String(membershipManager.getDomain());
+		String commandPath = "/" + domainName
+				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
+		
+		 List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+		
+		for (int i = Axis2CommandChildListener.currentId; i < currentChilds.size(); i++) {
+			System.out.println(currentChilds.get(i) + " after timeout processing...");
+		}
 	}
+
+	public void stopRecive() {
+		// TODO this method should be able to remove the chlidlistners from the
+		// given path
+	}
+
 	/**
 	 * Generated the sequence number of the command
-	 * @param commandPath - pass the path of the command objects to process
+	 * 
+	 * @param commandPath
+	 *            - pass the path of the command objects to process
 	 * @return return the number of command objects in the given path
 	 */
-	private Integer generateCurrentId(String commandPath){
+	private Integer generateCurrentId(String commandPath) {
 		// TODO size cannot do because later old commands have to delete
 		return ZooKeeperUtils.getZookeeper().getChildren(commandPath).size();
 	}
-	
 
 }

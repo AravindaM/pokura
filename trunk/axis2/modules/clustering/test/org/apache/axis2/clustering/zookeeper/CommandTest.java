@@ -23,8 +23,12 @@ import java.io.Serializable;
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
+import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.commands.DeleteServiceStateCommand;
+import org.apache.axis2.clustering.state.commands.UpdateStateCommand;
+import org.apache.axis2.clustering.tribes.MembershipManager;
+import org.apache.axis2.context.ConfigurationContext;
 
 import junit.framework.TestCase;
 
@@ -61,9 +65,9 @@ public class CommandTest extends TestCase implements Serializable {
 		ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
 		membershipManager.setDomain(new String("TestDomain").getBytes());
 
-		ZooKeeperCommandSubscriber axis2CommandReceiver = new ZooKeeperCommandSubscriber(
+		ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
 				membershipManager);
-		axis2CommandReceiver.startRecieve();
+		zooKeeperCommandSubscriber.startRecieve();
 		final ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
 
 		final DeleteServiceStateCommand command = new DeleteServiceStateCommand();
@@ -87,19 +91,19 @@ public class CommandTest extends TestCase implements Serializable {
 			while (System.nanoTime() - startTime < 500000000) {
 //				System.out.println(Axis2CommandReceiver.startTime);
 				
-				if(System.nanoTime() - Axis2CommandReceiver.startTime > 50000000) {
+				if(System.nanoTime() - ZooKeeperCommandSubscriber.startTime > 50000000) {
 					System.out.println("timeout reached");
-					axis2CommandReceiver.timoutCommandProcess();
+					zooKeeperCommandSubscriber.timoutCommandProcess();
 					break;
 				}
 			}
 	}
+	
+
 
 	/**
 	 * Ends initialized data
 	 */
-
-
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
