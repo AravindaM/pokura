@@ -154,7 +154,13 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         ZkMember zkm = new ZkMemberImpl();
         zkm.setDomain(domain);
         primaryMembershipManager.setLocalMember(zkm);
-        
+  
+    	ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
+    			primaryMembershipManager);
+		zooKeeperCommandSubscriber.startRecieve();
+		final ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
+		
+		contextManager.setSender(sender);
       //  axis2CommandReceiver = new Axis2CommandReceiver(primaryMembershipManager);
         axis2MemberReceiver =  new ZooKeeperMemberSubscriber(primaryMembershipManager);
         

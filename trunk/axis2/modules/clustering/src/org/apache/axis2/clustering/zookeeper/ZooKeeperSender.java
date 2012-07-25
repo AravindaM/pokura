@@ -21,6 +21,7 @@ package org.apache.axis2.clustering.zookeeper;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.MessageSender;
+import org.apache.zookeeper.CreateMode;
 
 /**
  * This class is used to send messages to Zookeeper cluster
@@ -47,7 +48,18 @@ public class ZooKeeperSender implements MessageSender {
 		domain = membershipManager.getDomain();
 		String domainName = new String(domain);
 
+		if (!ZooKeeperUtils.getZookeeper().exists("/" + domain
+				+ ZooKeeperConstants.COMMANDS_BASE_NAME)) {
+			
+			ZooKeeperUtils.getZookeeper().createPersistent("/" + domain
+					+ ZooKeeperConstants.COMMANDS_BASE_NAME);
+			
+		}
+
 		ZooKeeperUtils.createCommandZNode(msg, domainName);
+		
+		while(true)
+		{}
 	
 	}
 

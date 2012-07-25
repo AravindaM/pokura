@@ -30,6 +30,7 @@ import org.apache.axis2.clustering.state.StateClusteringCommand;
 import org.apache.axis2.clustering.state.StateClusteringCommandFactory;
 import org.apache.axis2.clustering.state.StateManager;
 import org.apache.axis2.clustering.state.commands.StateClusteringCommandCollection;
+import org.apache.axis2.clustering.tribes.ChannelSender;
 import org.apache.axis2.context.AbstractContext;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ServiceContext;
@@ -41,9 +42,16 @@ public class ZooKeeperStateManager implements StateManager {
 	private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
 
 	private final Map<String, List> excludedReplicationPatterns = new HashMap<String, List>();
+	
+	private ZooKeeperSender sender;
 
 	public ZooKeeperStateManager() {
 	}
+	
+    public void setSender(ZooKeeperSender sender) {
+        this.sender = sender;
+    }
+
 
 	public void addParameter(Parameter param) throws AxisFault {
 		parameters.put(param.getName(), param);
@@ -79,7 +87,7 @@ public class ZooKeeperStateManager implements StateManager {
 		StateClusteringCommand cmd = StateClusteringCommandFactory
 				.getUpdateCommand(context, excludedReplicationPatterns, false);
 		if (cmd != null) {
-			//sender.sendToGroup(cmd);
+			sender.sendToGroup(cmd);
 		}
 
 	}
@@ -89,7 +97,7 @@ public class ZooKeeperStateManager implements StateManager {
         StateClusteringCommand cmd =
                 StateClusteringCommandFactory.getUpdateCommand(context, propertyNames);
         if (cmd != null) {
-            //sender.sendToGroup(cmd);
+            sender.sendToGroup(cmd);
         }
 	}
 
@@ -99,19 +107,19 @@ public class ZooKeeperStateManager implements StateManager {
                 StateClusteringCommandFactory.getCommandCollection(contexts,
                                                                    excludedReplicationPatterns);
         if (!cmd.isEmpty()) {
-           //sender.sendToGroup(cmd);
+           sender.sendToGroup(cmd);
         }
 
 	}
 
 	public void replicateState(StateClusteringCommand command)
 			throws ClusteringFault {
-		 //sender.sendToGroup(command);
+		 sender.sendToGroup(command);
 	}
 
 	public void removeContext(AbstractContext context) throws ClusteringFault {
         StateClusteringCommand cmd = StateClusteringCommandFactory.getRemoveCommand(context);
-        //sender.sendToGroup(cmd);
+        sender.sendToGroup(cmd);
 	}
 
 	public boolean isContextClusterable(AbstractContext context) {

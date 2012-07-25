@@ -93,9 +93,10 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		
 	}
 
-	public void testblas(){
-		System.out.println("asdasd");
-	}
+//	public void testblas(){
+//		System.out.println("asdasd");
+//		while(true){}
+//	}
 	protected ClusteringAgent getClusterManager(ConfigurationContext configCtx,
 			StateManager stateManager,
 			NodeManager configManager)
@@ -131,4 +132,31 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		NodeManager contextManager = new ZooKeeperNodeManager();
 		return contextManager;
 	}
+	
+	  public void testSetPropertyInConfigurationContext() throws Exception {
+//	        if (!canRunTests) {
+//	            return;
+//	        }
+
+	        {
+	            String key1 = "configCtxKey";
+	            String val1 = "configCtxVal1";
+	            configurationContext1.setProperty(key1, val1);
+	            ctxMan1.updateContext(configurationContext1);
+	            String value = (String) configurationContext2.getProperty(key1);
+	            assertEquals(val1, value);
+	        }
+
+	        {
+	            String key2 = "configCtxKey2";
+	            String val2 = "configCtxVal1";
+	            configurationContext2.setProperty(key2, val2);
+	            ctxMan2.updateContext(configurationContext2);
+	            Thread.sleep(1000);
+	            String value = (String) configurationContext1.getProperty(key2);
+	            assertEquals(val2, value);
+	        }
+	        
+	      
+	    }
 }
