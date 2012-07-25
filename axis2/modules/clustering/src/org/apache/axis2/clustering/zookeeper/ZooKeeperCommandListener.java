@@ -34,7 +34,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 	private ZooKeeperStateManager stateManager;
 	private ConfigurationContext configurationContext;
 	private ZooKeeperNodeManager nodeManager;
-	private Integer currentId;
+	static Integer currentId;
 
 	public ZooKeeperCommandListener(Integer initialId) {
 		currentId = initialId;

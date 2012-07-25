@@ -36,14 +36,15 @@ public class ZooKeeperCommandSubscriber {
 	 * Set Zookeeper command listener
 	 */
 	public void startRecieve() {
+		System.out.println("start receive called");
 		String domainName = new String(membershipManager.getDomain());
 		String commandPath = "/" + domainName
 				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
 		initialId = generateCurrentId(commandPath);
 				
 		ZooKeeperUtils.getZookeeper().subscribeChildChanges(commandPath,
-				new Axis2CommandChildListener(initialId));
-		
+				new ZooKeeperCommandListener(initialId));
+		System.out.println("start receive finished");
 		
 	}
 	
@@ -55,7 +56,7 @@ public class ZooKeeperCommandSubscriber {
 		
 		 List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(commandPath);
 		
-		for (int i = Axis2CommandChildListener.currentId; i < currentChilds.size(); i++) {
+		for (int i = ZooKeeperCommandListener.currentId; i < currentChilds.size(); i++) {
 			System.out.println(currentChilds.get(i) + " after timeout processing...");
 		}
 	}
@@ -74,7 +75,15 @@ public class ZooKeeperCommandSubscriber {
 	 */
 	private Integer generateCurrentId(String commandPath) {
 		// TODO size cannot do because later old commands have to delete
+		System.out.println(commandPath);
+		if(ZooKeeperUtils.getZookeeper().exists(commandPath))
+		{
 		return ZooKeeperUtils.getZookeeper().getChildren(commandPath).size();
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
 }
