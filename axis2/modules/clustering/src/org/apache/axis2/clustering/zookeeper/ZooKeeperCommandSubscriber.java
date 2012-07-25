@@ -21,30 +21,49 @@ package org.apache.axis2.clustering.zookeeper;
 import java.util.List;
 
 import org.apache.axis2.clustering.tribes.MembershipManager;
+import org.apache.axis2.context.ConfigurationContext;
 
 public class ZooKeeperCommandSubscriber {
+	private ZooKeeperStateManager stateManager;
+	private ConfigurationContext configurationContext;
+	private ZooKeeperNodeManager nodeManager;
 	private ZooKeeperMembershipManager membershipManager;
 	private Integer initialId;
 	public static long startTime;
 	public static long eventCount;
 		
-	public ZooKeeperCommandSubscriber(ZooKeeperMembershipManager membershipManager) {
+
+	/**
+	 * @param stateManager
+	 * @param configurationContext
+	 * @param nodeManager
+	 * @param membershipManager
+	 */
+	public ZooKeeperCommandSubscriber(ZooKeeperStateManager stateManager,
+			ConfigurationContext configurationContext,
+			ZooKeeperNodeManager nodeManager,
+			ZooKeeperMembershipManager membershipManager) {	
+		this.stateManager = stateManager;
+		this.configurationContext = configurationContext;
+		this.nodeManager = nodeManager;
 		this.membershipManager = membershipManager;
 	}
+
+
 
 	/**
 	 * Set Zookeeper command listener
 	 */
 	public void startRecieve() {
-		System.out.println("start receive called");
+		
 		String domainName = new String(membershipManager.getDomain());
 		String commandPath = "/" + domainName
 				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
 		initialId = generateCurrentId(commandPath);
 				
 		ZooKeeperUtils.getZookeeper().subscribeChildChanges(commandPath,
-				new ZooKeeperCommandListener(initialId));
-		System.out.println("start receive finished");
+				new ZooKeeperCommandListener(initialId,stateManager,configurationContext,nodeManager));
+		System.out.println(commandPath);
 		
 	}
 	

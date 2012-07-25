@@ -48,19 +48,17 @@ public class ZooKeeperSender implements MessageSender {
 		domain = membershipManager.getDomain();
 		String domainName = new String(domain);
 
-		if (!ZooKeeperUtils.getZookeeper().exists("/" + domain
+		if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
 				+ ZooKeeperConstants.COMMANDS_BASE_NAME)) {
 			
-			ZooKeeperUtils.getZookeeper().createPersistent("/" + domain
+			ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
 					+ ZooKeeperConstants.COMMANDS_BASE_NAME);
 			
 		}
 
 		ZooKeeperUtils.createCommandZNode(msg, domainName);
 		
-		while(true)
-		{}
-	
+			
 	}
 
 	public void sendToSelf(ClusteringCommand msg) throws ClusteringFault {
