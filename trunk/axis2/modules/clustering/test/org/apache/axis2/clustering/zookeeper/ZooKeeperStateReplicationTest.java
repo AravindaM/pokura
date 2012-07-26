@@ -32,6 +32,7 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 	private NodeManager configMan1;
 	private ConfigurationContext configurationContext1;
 	private AxisServiceGroup serviceGroup1;
+	@SuppressWarnings("unused")
 	private AxisService service1;
 	// ---------------------------------------------------------------------------------
 
@@ -42,6 +43,7 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 	private NodeManager configMan2;
 	private ConfigurationContext configurationContext2;
 	private AxisServiceGroup serviceGroup2;
+	@SuppressWarnings("unused")
 	private AxisService service2;
 
 	// ---------------------------------------------------------------------------------

@@ -22,9 +22,6 @@ package org.apache.axis2.clustering.zookeeper;
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
-import org.junit.Before;
-import org.junit.Test;
-
 import junit.framework.TestCase;
 
 public class ZookeeperUtilsTest extends TestCase{

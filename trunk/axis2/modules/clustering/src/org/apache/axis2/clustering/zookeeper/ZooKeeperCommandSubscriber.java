@@ -18,6 +18,8 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
+import java.util.List;
+
 import org.apache.axis2.context.ConfigurationContext;
 
 public class ZooKeeperCommandSubscriber {
@@ -95,4 +97,16 @@ public class ZooKeeperCommandSubscriber {
 		}
 	}
 
+	public void timoutCommandProcess()
+	{
+		String domainName = new String(membershipManager.getDomain());
+		String commandPath = "/" + domainName
+				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
+		
+		 List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+		
+		for (int i = initialId; i < currentChilds.size(); i++) {
+			System.out.println(currentChilds.get(i) + " after timeout processing...");
+		}
+	}
 }
