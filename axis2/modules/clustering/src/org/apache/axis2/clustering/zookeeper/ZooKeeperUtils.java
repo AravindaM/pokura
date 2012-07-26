@@ -99,7 +99,7 @@ public class ZooKeeperUtils {
 		zookeeper.setZkSerializer(as);
 
 		// System.out.print(false);
-		zookeeper.createPersistent("/" + domain + "/members/" + id, member);
+		zookeeper.createEphemeral("/" + domain + "/members/" + id, member);
 	}
 
 	public static Object getAddedNodes() {
