@@ -49,5 +49,7 @@ public interface ZkMember extends Serializable{
     public boolean equals(Object obj);
 
     public int hashCode();
+    
+    public String tString();
 
 }

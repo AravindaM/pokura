@@ -18,12 +18,19 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
@@ -38,10 +45,13 @@ import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
 import org.apache.axis2.clustering.tribes.MembershipManager;
+import org.apache.axis2.clustering.tribes.TribesConstants;
+import org.apache.axis2.clustering.tribes.TribesUtil;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.PhaseRule;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.DispatchPhase;
 import org.apache.axis2.engine.Phase;
@@ -161,10 +171,10 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
 		final ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
 		
 		contextManager.setSender(sender);
-      //  axis2CommandReceiver = new Axis2CommandReceiver(primaryMembershipManager);
+        axis2CommandReceiver = new ZooKeeperCommandSubscriber(primaryMembershipManager);
         axis2MemberReceiver =  new ZooKeeperMemberSubscriber(primaryMembershipManager);
         
-       // axis2CommandReceiver.startRecieve();
+        axis2CommandReceiver.startRecieve();
         axis2MemberReceiver.startRecieve();
         
         MembershipScheme mm = new ZooKeeperMembershipScheme(primaryMembershipManager);
@@ -173,7 +183,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         //setMaximumRetries();
         //configureMode(domain);
        // configureMembershipScheme(domain, mode.getMembershipManagers());
-       // setMemberInfo();
+        setMemberInfo();
         
 		
 	}
@@ -238,6 +248,92 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
             domain = ClusteringConstants.DEFAULT_DOMAIN.getBytes();
         }
         return domain;
+    }
+    private void setMemberInfo() throws ClusteringFault {
+        Properties memberInfo = new Properties();
+        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+        TransportInDescription httpTransport = axisConfig.getTransportIn("http");
+        int portOffset = 0;
+        if(System.getProperty("portOffset") != null){
+            portOffset = Integer.parseInt(System.getProperty("portOffset"));
+        }
+        if (httpTransport != null) {
+            Parameter port = httpTransport.getParameter("port");
+            if (port != null) {
+                memberInfo.put("httpPort",
+                               String.valueOf(Integer.valueOf((String)port.getValue()) + portOffset));
+            }
+        }
+        TransportInDescription httpsTransport = axisConfig.getTransportIn("https");
+        if (httpsTransport != null) {
+            Parameter port = httpsTransport.getParameter("port");
+            if (port != null) {
+                memberInfo.put("httpsPort",
+                               String.valueOf(Integer.valueOf((String)port.getValue()) + portOffset));
+            }
+        }
+
+        memberInfo.setProperty("hostName",
+                               TribesUtil.getLocalHost(getParameter(TribesConstants.LOCAL_MEMBER_HOST)));
+
+        Parameter propsParam = getParameter("properties");
+        if(propsParam != null){
+            OMElement paramEle = propsParam.getParameterElement();
+            for(Iterator iter = paramEle.getChildrenWithLocalName("property"); iter.hasNext();){
+                OMElement propEle = (OMElement) iter.next();
+                OMAttribute nameAttrib = propEle.getAttribute(new QName("name"));
+                if(nameAttrib != null){
+                    String attribName = nameAttrib.getAttributeValue();
+                    attribName = replaceProperty(attribName, memberInfo);
+
+                    OMAttribute valueAttrib = propEle.getAttribute(new QName("value"));
+                    if  (valueAttrib != null) {
+                        String attribVal = valueAttrib.getAttributeValue();
+                        attribVal = replaceProperty(attribVal, memberInfo);
+                        memberInfo.setProperty(attribName, attribVal);
+                    }
+                }
+            }
+        }
+
+        memberInfo.remove("hostName"); // this was needed only to populate other properties. No need to send it.
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try {
+            memberInfo.store(bout, "");
+        } catch (IOException e) {
+            String msg = "Cannot store member transport properties in the ByteArrayOutputStream";
+            log.error(msg, e);
+            throw new ClusteringFault(msg, e);
+        }
+        ZkMember member = primaryMembershipManager.getLocalMember();
+        member.setPayLoad(bout.toByteArray());
+        primaryMembershipManager.setLocalMember(member);
+       // channel.getMembershipService().setPayload(bout.toByteArray());
+    }
+
+    private static String replaceProperty(String text, Properties props) {
+        int indexOfStartingChars = -1;
+        int indexOfClosingBrace;
+
+        // The following condition deals with properties.
+        // Properties are specified as ${system.property},
+        // and are assumed to be System properties
+        while (indexOfStartingChars < text.indexOf("${") &&
+               (indexOfStartingChars = text.indexOf("${")) != -1 &&
+            (indexOfClosingBrace = text.indexOf("}")) != -1) { // Is a property used?
+            String sysProp = text.substring(indexOfStartingChars + 2,
+                                            indexOfClosingBrace);
+            String propValue = props.getProperty(sysProp);
+            if (propValue == null) {
+                propValue = System.getProperty(sysProp);
+            }
+            if (propValue != null) {
+                text = text.substring(0, indexOfStartingChars) + propValue +
+                       text.substring(indexOfClosingBrace + 1);
+            }
+        }
+        return text;
     }
     
 	public Set<String> getDomains() {

@@ -37,12 +37,13 @@ public class ZooKeeperMemberSubscriber {
 		String domainName = new String(membershipManager.getDomain());
 		String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME ;
 		//TODO handle the state when the parent nodes are not created
-		ZkClient zkcli = new ZkClient("localhost:4599");
-		
-		if(!zkcli.exists("/"+domainName+"/members"))
+		if(!ZooKeeperUtils.zookeeper.exists("/"+domainName))
 		{
-			zkcli.createPersistent("/"+domainName);
-			zkcli.createPersistent("/"+domainName+"/members");
+			ZooKeeperUtils.zookeeper.createPersistent("/"+domainName);
+		}
+		if(!ZooKeeperUtils.zookeeper.exists("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME))
+		{
+			ZooKeeperUtils.zookeeper.createPersistent("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME);
 		}
 		
 		ZooKeeperUtils.getZookeeper().subscribeChildChanges(

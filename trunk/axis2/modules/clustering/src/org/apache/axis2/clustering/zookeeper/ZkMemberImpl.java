@@ -21,6 +21,11 @@ package org.apache.axis2.clustering.zookeeper;
 import java.util.UUID;
 
 public class ZkMemberImpl implements ZkMember {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3453754554654424234L;
 	//TODO create the toString method
     private byte[] zkHostName;
     private UUID zkNodeId;
@@ -91,6 +96,10 @@ public class ZkMemberImpl implements ZkMember {
 
     public String toString(Object obj) {
         return obj.getClass().getName();
+    }
+    
+    public String tString(){
+    	return this.getClass().getName();
     }
 }
 
