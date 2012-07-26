@@ -35,7 +35,8 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 	private ZooKeeperStateManager stateManager;
 	private ConfigurationContext configurationContext;
 	private ZooKeeperNodeManager nodeManager;
-	static Integer currentId;
+	private Integer currentId;
+	private ZooKeeperMembershipManager membershipManager;
 
 	/**
 	 * @param stateManager
@@ -44,11 +45,12 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 	 */
 	public ZooKeeperCommandListener(Integer initialId, ZooKeeperStateManager stateManager,
 			ConfigurationContext configurationContext,
-			ZooKeeperNodeManager nodeManager) {	
+			ZooKeeperNodeManager nodeManager,ZooKeeperMembershipManager membershipManager) {	
 		currentId = initialId;
 		this.stateManager = stateManager;
 		this.configurationContext = configurationContext;
 		this.nodeManager = nodeManager;
+		this.membershipManager = membershipManager;
 	}
 
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
@@ -75,7 +77,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 				processMessage(cm);
 			}
 			
-//			currentId++;
+			currentId++;
 		}
 		
 	}
@@ -92,6 +94,19 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 			((GroupManagementCommand) command).execute(configurationContext);
 		}
 		System.out.println("processed");
+	}
+	
+	public void timoutCommandProcess()
+	{
+		String domainName = new String(membershipManager.getDomain());
+		String commandPath = "/" + domainName
+				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
+		
+		 List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+		
+		for (int i = currentId; i < currentChilds.size(); i++) {
+			System.out.println(currentChilds.get(i) + " after timeout processing...");
+		}
 	}
 
 }
