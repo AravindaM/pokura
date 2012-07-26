@@ -7,11 +7,8 @@ import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringConstants;
-import org.apache.axis2.clustering.management.DefaultNodeManager;
 import org.apache.axis2.clustering.management.NodeManager;
-import org.apache.axis2.clustering.state.DefaultStateManager;
 import org.apache.axis2.clustering.state.StateManager;
-import org.apache.axis2.clustering.tribes.TribesClusteringAgent;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.AxisService;
@@ -99,10 +96,6 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 
 	}
 
-	// public void testblas(){
-	// System.out.println("asdasd");
-	// while(true){}
-	// }
 	protected ClusteringAgent getClusterManager(ConfigurationContext configCtx,
 			StateManager stateManager, NodeManager configManager)
 			throws AxisFault {
