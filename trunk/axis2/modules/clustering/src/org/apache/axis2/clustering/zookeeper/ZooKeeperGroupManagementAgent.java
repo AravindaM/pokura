@@ -19,18 +19,12 @@
 package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.axis2.clustering.ClusteringFault;
-import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.GroupManagementCommand;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 
 /**
  * This class used to initialize Group of different members and send commands

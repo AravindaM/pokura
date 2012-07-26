@@ -30,7 +30,6 @@ import org.apache.axis2.clustering.state.StateClusteringCommand;
 import org.apache.axis2.clustering.state.StateClusteringCommandFactory;
 import org.apache.axis2.clustering.state.StateManager;
 import org.apache.axis2.clustering.state.commands.StateClusteringCommandCollection;
-import org.apache.axis2.clustering.tribes.ChannelSender;
 import org.apache.axis2.context.AbstractContext;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ServiceContext;
@@ -41,6 +40,7 @@ public class ZooKeeperStateManager implements StateManager {
 
 	private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
 
+	@SuppressWarnings("rawtypes")
 	private final Map<String, List> excludedReplicationPatterns = new HashMap<String, List>();
 	
 	private ZooKeeperSender sender;
@@ -134,12 +134,21 @@ public class ZooKeeperStateManager implements StateManager {
 
 	}
 
-	public void setReplicationExcludePatterns(String contextType, List patterns) {
+	public void setReplicationExcludePatterns(String contextType, ArrayList<?> patterns) {
 		 excludedReplicationPatterns.put(contextType, patterns);
 	}
 
-	public Map getReplicationExcludePatterns() {
+	@SuppressWarnings("rawtypes")
+	public Map<String, List> getReplicationExcludePatterns() {
 		return excludedReplicationPatterns;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.apache.axis2.clustering.state.StateManager#setReplicationExcludePatterns(java.lang.String, java.util.List)
+	 */
+	@SuppressWarnings("rawtypes")
+	public void setReplicationExcludePatterns(String contextType, List patterns) {
+		// TODO Auto-generated method stub		
 	}
 
 }
