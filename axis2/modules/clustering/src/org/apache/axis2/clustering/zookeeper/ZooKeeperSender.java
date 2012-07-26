@@ -21,7 +21,6 @@ package org.apache.axis2.clustering.zookeeper;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.MessageSender;
-import org.apache.zookeeper.CreateMode;
 
 /**
  * This class is used to send messages to Zookeeper cluster

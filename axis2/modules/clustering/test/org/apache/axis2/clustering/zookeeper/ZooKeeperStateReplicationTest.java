@@ -186,7 +186,7 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
-        ZooKeeperUtils.zookeeper.close();
+        ZooKeeperUtils.getZookeeper().close();
         if (clusterManager1 != null) {
             clusterManager1.shutdown();
             System.out.println("------ CLuster-1 shutdown complete ------");

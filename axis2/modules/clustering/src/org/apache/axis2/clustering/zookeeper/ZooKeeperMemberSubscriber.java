@@ -18,9 +18,6 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import org.I0Itec.zkclient.ZkClient;
-import org.apache.axis2.clustering.tribes.MembershipManager;
-
 public class ZooKeeperMemberSubscriber {
 	private ZooKeeperMembershipManager membershipManager;
 
@@ -37,13 +34,13 @@ public class ZooKeeperMemberSubscriber {
 		String domainName = new String(membershipManager.getDomain());
 		String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME ;
 		//TODO handle the state when the parent nodes are not created
-		if(!ZooKeeperUtils.zookeeper.exists("/"+domainName))
+		if(!ZooKeeperUtils.getZookeeper().exists("/"+domainName))
 		{
-			ZooKeeperUtils.zookeeper.createPersistent("/"+domainName);
+			ZooKeeperUtils.getZookeeper().createPersistent("/"+domainName);
 		}
-		if(!ZooKeeperUtils.zookeeper.exists("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME))
+		if(!ZooKeeperUtils.getZookeeper().exists("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME))
 		{
-			ZooKeeperUtils.zookeeper.createPersistent("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME);
+			ZooKeeperUtils.getZookeeper().createPersistent("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME);
 		}
 		
 		ZooKeeperUtils.getZookeeper().subscribeChildChanges(

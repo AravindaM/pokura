@@ -44,7 +44,6 @@ import org.apache.axis2.clustering.RequestBlockingHandler;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
-import org.apache.axis2.clustering.tribes.MembershipManager;
 import org.apache.axis2.clustering.tribes.TribesConstants;
 import org.apache.axis2.clustering.tribes.TribesUtil;
 import org.apache.axis2.context.ConfigurationContext;
@@ -279,7 +278,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         Parameter propsParam = getParameter("properties");
         if(propsParam != null){
             OMElement paramEle = propsParam.getParameterElement();
-            for(Iterator iter = paramEle.getChildrenWithLocalName("property"); iter.hasNext();){
+            for(Iterator<?> iter = paramEle.getChildrenWithLocalName("property"); iter.hasNext();){
                 OMElement propEle = (OMElement) iter.next();
                 OMAttribute nameAttrib = propEle.getAttribute(new QName("name"));
                 if(nameAttrib != null){
@@ -340,27 +339,6 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
 		return groupManagementAgents.keySet();
 	}
 	 /**
-     * Set the maximum number of retries, if message sending to a particular node fails
-     */
-    private void setMaximumRetries() {
-       //TODO create set max Retries if applicable for ZooKeeper 
-    }
-    /*private void configureMode(byte[] domain) {
-//        if (clusterManagementMode) {
-//            mode = new ClusterManagementMode(domain, groupManagementAgents, primaryMembershipManager);
-//            for (GroupManagementAgent agent : groupManagementAgents.values()) {
-//
-//                if (agent instanceof DefaultGroupManagementAgent) {
-//                    ((DefaultGroupManagementAgent) agent).setSender(channelSender);
-//                }
-//            }
-//        } else {
-//            mode = new ApplicationMode(domain, primaryMembershipManager);
-//        }
-//        mode.init(channel);
-    }*/
-
-	/**
      * A RequestBlockingHandler, which is an implementation of
      * {@link org.apache.axis2.engine.Handler} is added to the InFlow & InFaultFlow. This handler
      * is used for rejecting Web service requests until this node has been initialized. This handler

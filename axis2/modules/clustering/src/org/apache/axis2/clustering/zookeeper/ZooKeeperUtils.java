@@ -27,22 +27,16 @@ import java.util.UUID;
 import java.util.Properties;
 
 import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.exception.ZkMarshallingError;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringConstants;
 import org.apache.axis2.clustering.Member;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 
 public class ZooKeeperUtils {
 
-	public static ZkClient zookeeper;
-
-	public ZooKeeperUtils(ZkClient zk) {
-		this.zookeeper = zk;
-	}
+	private static ZkClient zookeeper;
 
 	/**
 	 * This method allows the user to get the zookeeper client instance
@@ -60,7 +54,7 @@ public class ZooKeeperUtils {
 	 *            the ZooKeeper client
 	 */
 	public static void setZookeeperConnection(ZkClient zkclient) {
-		zookeeper = zkclient;
+		setZookeeper(zkclient);
 	}
 
 	/**
@@ -77,10 +71,10 @@ public class ZooKeeperUtils {
 	
 		
 
-		zookeeper.setZkSerializer(new SerializableSerializer());
+		getZookeeper().setZkSerializer(new SerializableSerializer());
 //		zookeeper.setZkSerializer(new CommandSerializer());
 	
-		zookeeper.create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME,
+		getZookeeper().create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME,
 				command, CreateMode.PERSISTENT_SEQUENTIAL);
 	
 	}
@@ -96,10 +90,10 @@ public class ZooKeeperUtils {
 		String domain = new String(member.getDomain());
 		String id = UUID.randomUUID().toString();
 		ZkSerializer as = new SerializableSerializer();
-		zookeeper.setZkSerializer(as);
+		getZookeeper().setZkSerializer(as);
 
 		// System.out.print(false);
-		zookeeper.createEphemeral("/" + domain + "/members/" + id, member);
+		getZookeeper().createEphemeral("/" + domain + "/members/" + id, member);
 	}
 
 	public static Object getAddedNodes() {
@@ -123,9 +117,9 @@ public class ZooKeeperUtils {
 			String parentPath) {
 		List<ZkMember> members = new ArrayList<ZkMember>();
 		for (String childpath : childlist) {
-			zookeeper.setZkSerializer(new SerializableSerializer());
+			getZookeeper().setZkSerializer(new SerializableSerializer());
 
-			Object m = zookeeper.readData(parentPath + "/" + childpath);
+			Object m = getZookeeper().readData(parentPath + "/" + childpath);
 			members.add((ZkMember) m);
 		}
 
@@ -198,12 +192,12 @@ public class ZooKeeperUtils {
 		// TODO Later members should not execute previous commands
 		// When a new member is initialized it should be assigned a currentId
 
-		String id = id = getNextId(currentid);
+		String id = getNextId(currentid);
 		List<ClusteringCommand> commands = new ArrayList<ClusteringCommand>();
 		String commandpath = path + "/" + ZooKeeperConstants.COMMAND_BASE_NAME;
 		ClusteringCommand command;
 
-		while ((command = (ClusteringCommand) zookeeper.readData(commandpath
+		while ((command = (ClusteringCommand) getZookeeper().readData(commandpath
 				+ id, true)) != null) {
 			commands.add(command);
 			id = getNextId(id);
@@ -233,7 +227,7 @@ public class ZooKeeperUtils {
 	 * @return a list od zookeeper members
 	 */
 	public static List<ZkMember> getZkMembers(String parentPath) {
-		List<String> childlist = zookeeper.getChildren(parentPath);
+		List<String> childlist = getZookeeper().getChildren(parentPath);
 		return getZkMembers(childlist, parentPath);
 
 	}
@@ -326,6 +320,13 @@ public class ZooKeeperUtils {
 			// ???
 		}
 		return properties;
+	}
+
+	/**
+	 * @param zookeeper the zookeeper to set
+	 */
+	public static void setZookeeper(ZkClient zookeeper) {
+		ZooKeeperUtils.zookeeper = zookeeper;
 	}
 
 }
