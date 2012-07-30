@@ -268,10 +268,19 @@ public class ZooKeeperUtils {
 				+ new String(member.getDomain()) + ")";
 	}
 
-	// TODO Implementation of this method
-	// Using String Buffer ?
 	public static String getHost(ZkMember member) {
-		return null;
+		byte[] hostBytes = member.getZkHost();
+        StringBuffer host = new StringBuffer();
+        if (hostBytes != null) {
+            for (int i = 0; i < hostBytes.length; i++) {
+                int hostByte = hostBytes[i] >= 0 ? (int) hostBytes[i] : (int) hostBytes[i] + 256;
+                host.append(hostByte);
+                if (i < hostBytes.length - 1) {
+                    host.append(".");
+                }
+            }
+        }
+        return host.toString();
 	}
 
 	/**

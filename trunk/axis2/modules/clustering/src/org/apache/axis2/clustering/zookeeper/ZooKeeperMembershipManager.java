@@ -106,7 +106,6 @@ public class ZooKeeperMembershipManager {
         if (memberExists || !(belongsToSameDomain)) {
             return false;
         }
-        // TODO What are the other checks to be carried out before adding a member
 
         boolean shouldAddMember = (localMember == null) || ZooKeeperUtils.areInSameDomain(member,
                 localMember.getDomain());
