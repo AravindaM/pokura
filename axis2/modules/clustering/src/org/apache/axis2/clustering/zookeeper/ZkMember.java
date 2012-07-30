@@ -24,7 +24,9 @@ import java.util.UUID;
 
 public interface ZkMember extends Serializable{
 
-    public byte[] getZkHostName();
+    public byte[] getZkHost();
+
+    public String getZkHostName();
 
     public UUID getZkNodeID();
 
@@ -36,7 +38,9 @@ public interface ZkMember extends Serializable{
 
     public byte[] getPayLoad();
 
-    public void setZkHostName(byte[] zkHostName);
+    public void setZkHost(byte[] zkHost);
+
+    public void setZkHostName(String zkHostName);
 
     public void setZkNodeId(UUID zkNodeId);
 
@@ -49,7 +53,5 @@ public interface ZkMember extends Serializable{
     public boolean equals(Object obj);
 
     public int hashCode();
-    
-    public String tString();
 
 }

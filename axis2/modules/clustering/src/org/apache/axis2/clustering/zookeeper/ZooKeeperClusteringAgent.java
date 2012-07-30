@@ -176,13 +176,13 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         axis2CommandReceiver.startRecieve();
         axis2MemberReceiver.startRecieve();
         
-        MembershipScheme mm = new ZooKeeperMembershipScheme(primaryMembershipManager);
-        mm.joinGroup();
-        
+        MembershipScheme memberScheme = new ZooKeeperMembershipScheme(primaryMembershipManager,parameters,domain);
+        setMemberInfo();
+        memberScheme.init();
         //setMaximumRetries();
         //configureMode(domain);
        // configureMembershipScheme(domain, mode.getMembershipManagers());
-        setMemberInfo();
+
         
 		
 	}
