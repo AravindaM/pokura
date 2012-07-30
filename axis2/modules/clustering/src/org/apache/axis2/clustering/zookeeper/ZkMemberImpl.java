@@ -91,8 +91,8 @@ public class ZkMemberImpl implements ZkMember {
         this.payLoad = payLoad;
     }
 
-    public String toString(Object obj) {
-        return obj.getClass().getName();
+    public String toString() {
+        return this.getClass().getName();
     }
 
     public byte[] getZkHost() {

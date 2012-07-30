@@ -88,7 +88,7 @@ public class ZooKeeperUtils {
 	 */
 	public static void setZkMemeber(ZkMember member) {
 		String domain = new String(member.getDomain());
-		String id = UUID.randomUUID().toString();
+		String id = member.getZkNodeID().toString();
 		ZkSerializer as = new SerializableSerializer();
 		getZookeeper().setZkSerializer(as);
 

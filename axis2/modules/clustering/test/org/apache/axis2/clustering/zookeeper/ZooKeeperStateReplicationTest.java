@@ -168,7 +168,7 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 
 	}
 	
-    /*public void testRemovePropertyFromConfigurationContext() throws Exception {
+    public void testRemovePropertyFromConfigurationContext() throws Exception {
 
         String key1 = "configCtxKey";
         String val1 = "configCtxVal1";
@@ -189,7 +189,7 @@ public class ZooKeeperStateReplicationTest extends TestCase {
         String value = (String) configurationContext1.getProperty(key1);
         assertNull(configurationContext2.getProperty(key1));
         assertNull(value);
-    }*/
+    }
 
     protected void tearDown() throws Exception {
         super.tearDown();

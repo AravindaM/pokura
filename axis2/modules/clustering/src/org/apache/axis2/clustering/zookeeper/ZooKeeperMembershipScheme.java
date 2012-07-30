@@ -4,20 +4,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.axis2.clustering.ClusteringFault;
-import org.apache.axis2.clustering.Member;
 import org.apache.axis2.clustering.MembershipScheme;
 import org.apache.axis2.clustering.tribes.TribesConstants;
-import org.apache.axis2.clustering.tribes.TribesUtil;
-import org.apache.axis2.clustering.tribes.WkaMembershipService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.util.Utils;
-//import org.apache.catalina.tribes.membership.StaticMember;
-import org.apache.catalina.tribes.transport.ReceiverBase;
 import org.apache.commons.logging.LogFactory;
 
 public class ZooKeeperMembershipScheme implements MembershipScheme {
@@ -37,7 +32,7 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
     }
 
     public void init() throws ClusteringFault {
-        //configureMembership();
+        configureMembership();
         joinGroup();
     }
 
@@ -62,6 +57,8 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
         ZkMember localMember = new ZkMemberImpl();
 
         // ------------ START: Configure and add the local member ---------------------
+        localMember.setZkNodeId(UUID.randomUUID());
+
         Parameter localHost = getParameter(ZooKeeperConstants.LOCAL_MEMBER_HOST);
         String host;
         if (localHost != null) {
