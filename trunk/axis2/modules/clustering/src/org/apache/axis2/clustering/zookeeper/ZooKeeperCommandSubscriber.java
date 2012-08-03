@@ -69,7 +69,7 @@ public class ZooKeeperCommandSubscriber {
 		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
 				commandPath,
 				new ZooKeeperCommandListener(initialId, stateManager,
-						configurationContext, nodeManager, membershipManager));
+						configurationContext, nodeManager, membershipManager,this));
 		System.out.println(commandPath);
 
 	}
