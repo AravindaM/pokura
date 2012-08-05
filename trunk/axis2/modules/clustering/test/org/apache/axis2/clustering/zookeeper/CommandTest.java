@@ -81,17 +81,17 @@ public class CommandTest extends TestCase {
 			
 //			while(true){}
 				
-//			long startTime = System.nanoTime();
-//			
-//			while (System.nanoTime() - startTime < 500000000) {
-////				System.out.println(Axis2CommandReceiver.startTime);
-//				
+			long startTime = System.nanoTime();
+			
+			while (System.nanoTime() - startTime < 500000000) {
+//				System.out.println(Axis2CommandReceiver.startTime);
+				
 //				if(System.nanoTime() - ZooKeeperCommandSubscriber.startTime > 50000000) {
 //					System.out.println("timeout reached");
 //					zooKeeperCommandSubscriber.timoutCommandProcess();
 //					break;
 //				}
-//			}
+			}
 	}
 	
 
