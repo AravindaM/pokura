@@ -18,8 +18,6 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.io.Serializable;
-
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
@@ -86,11 +84,11 @@ public class CommandTest extends TestCase {
 			while (System.nanoTime() - startTime < 500000000) {
 //				System.out.println(Axis2CommandReceiver.startTime);
 				
-//				if(System.nanoTime() - ZooKeeperCommandSubscriber.startTime > 50000000) {
-//					System.out.println("timeout reached");
-//					zooKeeperCommandSubscriber.timoutCommandProcess();
-//					break;
-//				}
+				if(System.nanoTime() - ZooKeeperCommandSubscriber.startTime > 50000000) {
+					System.out.println("timeout reached");
+					zooKeeperCommandSubscriber.timoutCommandProcess();
+					break;
+				}
 			}
 	}
 	
