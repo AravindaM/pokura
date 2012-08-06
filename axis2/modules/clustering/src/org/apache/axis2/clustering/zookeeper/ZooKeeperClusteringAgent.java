@@ -18,29 +18,10 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.clustering.ClusteringAgent;
-import org.apache.axis2.clustering.ClusteringCommand;
-import org.apache.axis2.clustering.ClusteringConstants;
-import org.apache.axis2.clustering.ClusteringFault;
-import org.apache.axis2.clustering.ClusteringMessage;
-import org.apache.axis2.clustering.Member;
-import org.apache.axis2.clustering.MembershipScheme;
-import org.apache.axis2.clustering.RequestBlockingHandler;
+import org.apache.axis2.clustering.*;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
@@ -57,103 +38,106 @@ import org.apache.axis2.engine.Phase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class ZooKeeperClusteringAgent implements ClusteringAgent{
+import javax.xml.namespace.QName;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
 
-	private static final Log log = LogFactory.getLog(ZooKeeperClusteringAgent.class);
-	
-	private ZooKeeperNodeManager configurationManager;
+public class ZooKeeperClusteringAgent implements ClusteringAgent {
+
+    private static final Log log = LogFactory.getLog(ZooKeeperClusteringAgent.class);
+
+    private ZooKeeperNodeManager configurationManager;
     private ZooKeeperStateManager contextManager;
     private final Map<String, GroupManagementAgent> groupManagementAgents =
-        new HashMap<String, GroupManagementAgent>();
+            new HashMap<String, GroupManagementAgent>();
     private ZooKeeperMembershipManager primaryMembershipManager;
 
     private ZooKeeperCommandListener axis2CommandChildListener;
-    private	ZooKeeperCommandSubscriber axis2CommandReceiver;
+    private ZooKeeperCommandSubscriber axis2CommandReceiver;
     private ZooKeeperMemberListener axis2MemberListener;
     private ZooKeeperMemberSubscriber axis2MemberReceiver;
     private final HashMap<String, Parameter> parameters;
-    
+
     private ConfigurationContext configurationContext;
-    
-    
-    
-    
+
+
     public ZooKeeperCommandListener getAxis2CommandChildListener() {
-		return axis2CommandChildListener;
-	}
+        return axis2CommandChildListener;
+    }
 
-	public void setAxis2CommandChildListener(
-			ZooKeeperCommandListener axis2CommandChildListener) {
-		this.axis2CommandChildListener = axis2CommandChildListener;
-	}
+    public void setAxis2CommandChildListener(
+            ZooKeeperCommandListener axis2CommandChildListener) {
+        this.axis2CommandChildListener = axis2CommandChildListener;
+    }
 
-	public ZooKeeperCommandSubscriber getAxis2CommandReceiver() {
-		return axis2CommandReceiver;
-	}
+    public ZooKeeperCommandSubscriber getAxis2CommandReceiver() {
+        return axis2CommandReceiver;
+    }
 
-	public void setAxis2CommandReceiver(ZooKeeperCommandSubscriber axis2CommandReceiver) {
-		this.axis2CommandReceiver = axis2CommandReceiver;
-	}
+    public void setAxis2CommandReceiver(ZooKeeperCommandSubscriber axis2CommandReceiver) {
+        this.axis2CommandReceiver = axis2CommandReceiver;
+    }
 
-	public ZooKeeperMemberListener getAxis2MemberListener() {
-		return axis2MemberListener;
-	}
+    public ZooKeeperMemberListener getAxis2MemberListener() {
+        return axis2MemberListener;
+    }
 
-	public void setAxis2MemberListener(ZooKeeperMemberListener axis2MemberListener) {
-		this.axis2MemberListener = axis2MemberListener;
-	}
+    public void setAxis2MemberListener(ZooKeeperMemberListener axis2MemberListener) {
+        this.axis2MemberListener = axis2MemberListener;
+    }
 
-	public ZooKeeperMemberSubscriber getAxis2MemberReceiver() {
-		return axis2MemberReceiver;
-	}
+    public ZooKeeperMemberSubscriber getAxis2MemberReceiver() {
+        return axis2MemberReceiver;
+    }
 
-	public void setAxis2MemberReceiver(ZooKeeperMemberSubscriber axis2MemberReceiver) {
-		this.axis2MemberReceiver = axis2MemberReceiver;
-	}
+    public void setAxis2MemberReceiver(ZooKeeperMemberSubscriber axis2MemberReceiver) {
+        this.axis2MemberReceiver = axis2MemberReceiver;
+    }
 
-	
+
     /**
      * Static members
      */
     private List<org.apache.axis2.clustering.Member> members;
-    
-	
-	public ZooKeeperClusteringAgent() {
-		parameters = new HashMap<String, Parameter>();
-	}
 
-	public void addParameter(Parameter param) throws AxisFault {
-		parameters.put(param.getName(), param);
-	}
 
-	public void removeParameter(Parameter param) throws AxisFault {
-		parameters.remove(param.getName());
-	}
+    public ZooKeeperClusteringAgent() {
+        parameters = new HashMap<String, Parameter>();
+    }
 
-	public void deserializeParameters(OMElement parameterElement)
-			throws AxisFault {
-		throw new UnsupportedOperationException();
-	}
+    public void addParameter(Parameter param) throws AxisFault {
+        parameters.put(param.getName(), param);
+    }
 
-	public Parameter getParameter(String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void removeParameter(Parameter param) throws AxisFault {
+        parameters.remove(param.getName());
+    }
 
-	public ArrayList<Parameter> getParameters() {
-		ArrayList<Parameter> list = new ArrayList<Parameter>();
-		for (String msg : parameters.keySet()) {
+    public void deserializeParameters(OMElement parameterElement)
+            throws AxisFault {
+        throw new UnsupportedOperationException();
+    }
+
+    public Parameter getParameter(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public ArrayList<Parameter> getParameters() {
+        ArrayList<Parameter> list = new ArrayList<Parameter>();
+        for (String msg : parameters.keySet()) {
             list.add(parameters.get(msg));
         }
-		return list;
-	}
+        return list;
+    }
 
-	public boolean isParameterLocked(String parameterName) {
-		Parameter parameter = parameters.get(parameterName);
+    public boolean isParameterLocked(String parameterName) {
+        Parameter parameter = parameters.get(parameterName);
         return parameter != null && parameter.isLocked();
-	}
-	
-	public void init() throws ClusteringFault {
+    }
+
+    public void init() throws ClusteringFault {
         log.info("Initializing cluster...");
         addRequestBlockingHandlerToInFlows();
         primaryMembershipManager = new ZooKeeperMembershipManager(configurationContext);
@@ -163,77 +147,76 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         ZkMember zkm = new ZkMemberImpl();
         zkm.setDomain(domain);
         primaryMembershipManager.setLocalMember(zkm);
-  
-    	ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
-    			contextManager,configurationContext,configurationManager,primaryMembershipManager);
-		zooKeeperCommandSubscriber.startRecieve();
-		final ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
-		
-		contextManager.setSender(sender);
+
+        ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
+                contextManager, configurationContext, configurationManager, primaryMembershipManager);
+        zooKeeperCommandSubscriber.startRecieve();
+        final ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
+
+        contextManager.setSender(sender);
         axis2CommandReceiver = new ZooKeeperCommandSubscriber(primaryMembershipManager);
-        axis2MemberReceiver =  new ZooKeeperMemberSubscriber(primaryMembershipManager);
-        
+        axis2MemberReceiver = new ZooKeeperMemberSubscriber(primaryMembershipManager);
+
         axis2CommandReceiver.startRecieve();
         axis2MemberReceiver.startRecieve();
-        
-        MembershipScheme memberScheme = new ZooKeeperMembershipScheme(primaryMembershipManager,parameters,domain);
+
+        MembershipScheme memberScheme = new ZooKeeperMembershipScheme(primaryMembershipManager, parameters, domain);
         setMemberInfo();
         memberScheme.init();
         //setMaximumRetries();
         //configureMode(domain);
-       // configureMembershipScheme(domain, mode.getMembershipManagers());
+        // configureMembershipScheme(domain, mode.getMembershipManagers());
 
-        
-		
-	}
 
-	public StateManager getStateManager() {
-		return contextManager;
-	}
+    }
 
-	public NodeManager getNodeManager() {
-		return configurationManager;
-	}
+    public StateManager getStateManager() {
+        return contextManager;
+    }
 
-	public void setStateManager(StateManager stateManager) {
-		this.contextManager = (ZooKeeperStateManager)stateManager;
-	}
+    public NodeManager getNodeManager() {
+        return configurationManager;
+    }
 
-	public void setNodeManager(NodeManager nodeManager) {
-		this.configurationManager = (ZooKeeperNodeManager)nodeManager;
-	}
+    public void setStateManager(StateManager stateManager) {
+        this.contextManager = (ZooKeeperStateManager) stateManager;
+    }
 
-	public void shutdown() throws ClusteringFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setNodeManager(NodeManager nodeManager) {
+        this.configurationManager = (ZooKeeperNodeManager) nodeManager;
+    }
 
-	public void setConfigurationContext(
-			ConfigurationContext configurationContext) {
-		this.configurationContext = configurationContext;
-	}
+    public void shutdown() throws ClusteringFault {
+        // TODO Auto-generated method stub
 
-	public void setMembers(List<Member> members) {
-		this.members = members;
-	}
+    }
 
-	public List<Member> getMembers() {
-		return this.members;
-	}
+    public void setConfigurationContext(
+            ConfigurationContext configurationContext) {
+        this.configurationContext = configurationContext;
+    }
 
-	public void addGroupManagementAgent(GroupManagementAgent agent,
-			String applicationDomain) {
-		log.info("Managing group application domain " + applicationDomain +
+    public void setMembers(List<Member> members) {
+        this.members = members;
+    }
+
+    public List<Member> getMembers() {
+        return this.members;
+    }
+
+    public void addGroupManagementAgent(GroupManagementAgent agent,
+                                        String applicationDomain) {
+        log.info("Managing group application domain " + applicationDomain +
                 " using agent " + agent.getClass());
-		groupManagementAgents.put(applicationDomain, agent);
-		
-	}
+        groupManagementAgents.put(applicationDomain, agent);
 
-	public GroupManagementAgent getGroupManagementAgent(String applicationDomain) {
-		return groupManagementAgents.get(applicationDomain);
-	}
+    }
 
-	 /**
+    public GroupManagementAgent getGroupManagementAgent(String applicationDomain) {
+        return groupManagementAgents.get(applicationDomain);
+    }
+
+    /**
      * Get the clustering domain to which this node belongs to
      *
      * @return The clustering domain to which this node belongs to
@@ -248,19 +231,20 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         }
         return domain;
     }
+
     private void setMemberInfo() throws ClusteringFault {
         Properties memberInfo = new Properties();
         AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
         TransportInDescription httpTransport = axisConfig.getTransportIn("http");
         int portOffset = 0;
-        if(System.getProperty("portOffset") != null){
+        if (System.getProperty("portOffset") != null) {
             portOffset = Integer.parseInt(System.getProperty("portOffset"));
         }
         if (httpTransport != null) {
             Parameter port = httpTransport.getParameter("port");
             if (port != null) {
                 memberInfo.put("httpPort",
-                               String.valueOf(Integer.valueOf((String)port.getValue()) + portOffset));
+                        String.valueOf(Integer.valueOf((String) port.getValue()) + portOffset));
             }
         }
         TransportInDescription httpsTransport = axisConfig.getTransportIn("https");
@@ -268,25 +252,25 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
             Parameter port = httpsTransport.getParameter("port");
             if (port != null) {
                 memberInfo.put("httpsPort",
-                               String.valueOf(Integer.valueOf((String)port.getValue()) + portOffset));
+                        String.valueOf(Integer.valueOf((String) port.getValue()) + portOffset));
             }
         }
 
         memberInfo.setProperty("hostName",
-                               TribesUtil.getLocalHost(getParameter(TribesConstants.LOCAL_MEMBER_HOST)));
+                TribesUtil.getLocalHost(getParameter(TribesConstants.LOCAL_MEMBER_HOST)));
 
         Parameter propsParam = getParameter("properties");
-        if(propsParam != null){
+        if (propsParam != null) {
             OMElement paramEle = propsParam.getParameterElement();
-            for(Iterator<?> iter = paramEle.getChildrenWithLocalName("property"); iter.hasNext();){
+            for (Iterator<?> iter = paramEle.getChildrenWithLocalName("property"); iter.hasNext(); ) {
                 OMElement propEle = (OMElement) iter.next();
                 OMAttribute nameAttrib = propEle.getAttribute(new QName("name"));
-                if(nameAttrib != null){
+                if (nameAttrib != null) {
                     String attribName = nameAttrib.getAttributeValue();
                     attribName = replaceProperty(attribName, memberInfo);
 
                     OMAttribute valueAttrib = propEle.getAttribute(new QName("value"));
-                    if  (valueAttrib != null) {
+                    if (valueAttrib != null) {
                         String attribVal = valueAttrib.getAttributeValue();
                         attribVal = replaceProperty(attribVal, memberInfo);
                         memberInfo.setProperty(attribName, attribVal);
@@ -308,7 +292,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         ZkMember member = primaryMembershipManager.getLocalMember();
         member.setPayLoad(bout.toByteArray());
         primaryMembershipManager.setLocalMember(member);
-       // channel.getMembershipService().setPayload(bout.toByteArray());
+        // channel.getMembershipService().setPayload(bout.toByteArray());
     }
 
     private static String replaceProperty(String text, Properties props) {
@@ -319,26 +303,27 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
         // Properties are specified as ${system.property},
         // and are assumed to be System properties
         while (indexOfStartingChars < text.indexOf("${") &&
-               (indexOfStartingChars = text.indexOf("${")) != -1 &&
-            (indexOfClosingBrace = text.indexOf("}")) != -1) { // Is a property used?
+                (indexOfStartingChars = text.indexOf("${")) != -1 &&
+                (indexOfClosingBrace = text.indexOf("}")) != -1) { // Is a property used?
             String sysProp = text.substring(indexOfStartingChars + 2,
-                                            indexOfClosingBrace);
+                    indexOfClosingBrace);
             String propValue = props.getProperty(sysProp);
             if (propValue == null) {
                 propValue = System.getProperty(sysProp);
             }
             if (propValue != null) {
                 text = text.substring(0, indexOfStartingChars) + propValue +
-                       text.substring(indexOfClosingBrace + 1);
+                        text.substring(indexOfClosingBrace + 1);
             }
         }
         return text;
     }
-    
-	public Set<String> getDomains() {
-		return groupManagementAgents.keySet();
-	}
-	 /**
+
+    public Set<String> getDomains() {
+        return groupManagementAgents.keySet();
+    }
+
+    /**
      * A RequestBlockingHandler, which is an implementation of
      * {@link org.apache.axis2.engine.Handler} is added to the InFlow & InFaultFlow. This handler
      * is used for rejecting Web service requests until this node has been initialized. This handler
@@ -362,7 +347,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
                     phase.addHandler(requestBlockingHandler);
 
                     log.debug("Added " + ClusteringConstants.REQUEST_BLOCKING_HANDLER +
-                              " between SOAPMessageBodyBasedDispatcher & InstanceDispatcher to InFlow");
+                            " between SOAPMessageBodyBasedDispatcher & InstanceDispatcher to InFlow");
                     break;
                 }
             }
@@ -382,25 +367,25 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent{
                     phase.addHandler(requestBlockingHandler);
 
                     log.debug("Added " + ClusteringConstants.REQUEST_BLOCKING_HANDLER +
-                              " between SOAPMessageBodyBasedDispatcher & InstanceDispatcher to InFaultFlow");
+                            " between SOAPMessageBodyBasedDispatcher & InstanceDispatcher to InFaultFlow");
                     break;
                 }
             }
         }
     }
 
-	public boolean isCoordinator() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    public boolean isCoordinator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	public List<ClusteringCommand> sendMessage(ClusteringMessage msg,
-			boolean isRpcMessage) throws ClusteringFault {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public List<ClusteringCommand> sendMessage(ClusteringMessage msg,
+                                               boolean isRpcMessage) throws ClusteringFault {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	 public void finalize(){
-	      
-	    }
+    public void finalize() {
+
+    }
 }

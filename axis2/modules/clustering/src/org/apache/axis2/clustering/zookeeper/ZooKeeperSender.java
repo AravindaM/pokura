@@ -24,45 +24,42 @@ import org.apache.axis2.clustering.MessageSender;
 
 /**
  * This class is used to send messages to Zookeeper cluster
- * 
- * 
  */
 
 public class ZooKeeperSender implements MessageSender {
 
-	private ZooKeeperMembershipManager membershipManager;
-	private byte[] domain;
+    private ZooKeeperMembershipManager membershipManager;
+    private byte[] domain;
 
-	public ZooKeeperSender(ZooKeeperMembershipManager membershipManager) {
-		this.membershipManager = membershipManager;
-	}
+    public ZooKeeperSender(ZooKeeperMembershipManager membershipManager) {
+        this.membershipManager = membershipManager;
+    }
 
-	/**
-	 * send command objects to the group
-	 * 
-	 * @param msg
-	 *            - command object
-	 */
-	public void sendToGroup(ClusteringCommand msg) throws ClusteringFault {
-		domain = membershipManager.getDomain();
-		String domainName = new String(domain);
+    /**
+     * send command objects to the group
+     *
+     * @param msg - command object
+     */
+    public void sendToGroup(ClusteringCommand msg) throws ClusteringFault {
+        domain = membershipManager.getDomain();
+        String domainName = new String(domain);
 
-		if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
-				+ ZooKeeperConstants.COMMANDS_BASE_NAME)) {
-			
-			ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
-					+ ZooKeeperConstants.COMMANDS_BASE_NAME);
-			
-		}
+        if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
+                + ZooKeeperConstants.COMMANDS_BASE_NAME)) {
 
-		ZooKeeperUtils.createCommandZNode(msg, domainName);
-		
-			
-	}
+            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
+                    + ZooKeeperConstants.COMMANDS_BASE_NAME);
 
-	public void sendToSelf(ClusteringCommand msg) throws ClusteringFault {
-		// TODO Auto-generated method stub
+        }
 
-	}
+        ZooKeeperUtils.createCommandZNode(msg, domainName);
+
+
+    }
+
+    public void sendToSelf(ClusteringCommand msg) throws ClusteringFault {
+        // TODO Auto-generated method stub
+
+    }
 
 }

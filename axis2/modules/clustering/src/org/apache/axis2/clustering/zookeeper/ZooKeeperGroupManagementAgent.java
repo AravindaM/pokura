@@ -29,111 +29,109 @@ import java.util.List;
 /**
  * This class used to initialize Group of different members and send commands
  * initiated members
- * 
  */
 public class ZooKeeperGroupManagementAgent {
 
-	private static final Log log = LogFactory.getLog(ZooKeeperGroupManagementAgent.class);
-	private final List<ZkMember> members = new ArrayList<ZkMember>();
-	private ZooKeeperMembershipManager membershipManager;
-	private ZooKeeperSender zookeeperSender;
-	private String description;
+    private static final Log log = LogFactory.getLog(ZooKeeperGroupManagementAgent.class);
+    private final List<ZkMember> members = new ArrayList<ZkMember>();
+    private ZooKeeperMembershipManager membershipManager;
+    private ZooKeeperSender zookeeperSender;
+    private String description;
 
-	public ZooKeeperGroupManagementAgent(ZooKeeperMembershipManager membershipManager, String description) {
-		this.membershipManager = membershipManager;
-		this.description = description;
-		initZookeeperSender();
-	}
+    public ZooKeeperGroupManagementAgent(ZooKeeperMembershipManager membershipManager, String description) {
+        this.membershipManager = membershipManager;
+        this.description = description;
+        initZookeeperSender();
+    }
 
-	public ZooKeeperMembershipManager getMembershipManager() {
-		return membershipManager;
-	}
+    public ZooKeeperMembershipManager getMembershipManager() {
+        return membershipManager;
+    }
 
-	public void setMembershipManager(ZooKeeperMembershipManager membershipManager) {
-		this.membershipManager = membershipManager;
-	}
+    public void setMembershipManager(ZooKeeperMembershipManager membershipManager) {
+        this.membershipManager = membershipManager;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public List<ZkMember> getMembers() {
-		return members;
-	}
+    public List<ZkMember> getMembers() {
+        return members;
+    }
 
-	public void setZookeeperSender(ZooKeeperSender zookeeperSender) {
-		this.zookeeperSender = zookeeperSender;
-	}
+    public void setZookeeperSender(ZooKeeperSender zookeeperSender) {
+        this.zookeeperSender = zookeeperSender;
+    }
 
-	public void applicationMemberAdded(ZkMember member) {
-		Thread th = new Thread(new MemberAdder(member));
-		th.setPriority(Thread.MAX_PRIORITY);
-		th.start();
-	}
+    public void applicationMemberAdded(ZkMember member) {
+        Thread th = new Thread(new MemberAdder(member));
+        th.setPriority(Thread.MAX_PRIORITY);
+        th.start();
+    }
 
-	public void applicationMemberRemoved(ZkMember member) {
-		log.info("Application member " + member + " left cluster.");
-		members.remove(member);
-	}
+    public void applicationMemberRemoved(ZkMember member) {
+        log.info("Application member " + member + " left cluster.");
+        members.remove(member);
+    }
 
-	public void send(GroupManagementCommand command) throws ClusteringFault {
-		
-		for(int i=0; i< members.size() ; i++){
-			membershipManager.addMember(members.get(i));
-		}
-		zookeeperSender.sendToGroup(command);
-	}
+    public void send(GroupManagementCommand command) throws ClusteringFault {
 
-	private void initZookeeperSender() {
-		if (membershipManager != null) {
-			zookeeperSender = new ZooKeeperSender(membershipManager);
-		}
-	}
+        for (int i = 0; i < members.size(); i++) {
+            membershipManager.addMember(members.get(i));
+        }
+        zookeeperSender.sendToGroup(command);
+    }
 
-	private class MemberAdder implements Runnable {
+    private void initZookeeperSender() {
+        if (membershipManager != null) {
+            zookeeperSender = new ZooKeeperSender(membershipManager);
+        }
+    }
 
-		private final ZkMember member;
+    private class MemberAdder implements Runnable {
 
-		private MemberAdder(ZkMember member) {
-			this.member = member;
-		}
+        private final ZkMember member;
 
-		public void run() {
-			if (members.contains(member)) {
-				return;
-			}
-			if (canConnect(member)) {
-				try {
-					Thread.sleep(10000); // Sleep for sometime to allow complete
-											// initialization of the node
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				if (!members.contains(member)) {
-					members.add(member);
-				}
-				log.info("Application member " + member + " joined application cluster");
-			} else {
-				log.error("Could not add application member " + member);
-			}
-		}
+        private MemberAdder(ZkMember member) {
+            this.member = member;
+        }
 
-		/**
-		 * Before adding a member, we will try to verify whether we can connect
-		 * to it
-		 * 
-		 * @param member
-		 *            The member whose connectvity needs to be verified
-		 * @return true, if the member can be contacted; false, otherwise.
-		 */
-		private boolean canConnect(ZkMember member) {
-			// TODO implement check for connectivity of ZkMember
-			return false;
-		}
-	}
+        public void run() {
+            if (members.contains(member)) {
+                return;
+            }
+            if (canConnect(member)) {
+                try {
+                    Thread.sleep(10000); // Sleep for sometime to allow complete
+                    // initialization of the node
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (!members.contains(member)) {
+                    members.add(member);
+                }
+                log.info("Application member " + member + " joined application cluster");
+            } else {
+                log.error("Could not add application member " + member);
+            }
+        }
+
+        /**
+         * Before adding a member, we will try to verify whether we can connect
+         * to it
+         *
+         * @param member The member whose connectvity needs to be verified
+         * @return true, if the member can be contacted; false, otherwise.
+         */
+        private boolean canConnect(ZkMember member) {
+            // TODO implement check for connectivity of ZkMember
+            return false;
+        }
+    }
 
 }

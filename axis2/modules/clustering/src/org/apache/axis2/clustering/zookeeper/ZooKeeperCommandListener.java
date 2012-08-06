@@ -18,9 +18,6 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.axis2.clustering.ClusteringCommand;
@@ -30,6 +27,9 @@ import org.apache.axis2.clustering.management.NodeManagementCommand;
 import org.apache.axis2.clustering.state.StateClusteringCommand;
 import org.apache.axis2.context.ConfigurationContext;
 
+import java.util.Collections;
+import java.util.List;
+
 public class ZooKeeperCommandListener implements IZkChildListener {
 
     private ZooKeeperStateManager stateManager;
@@ -37,7 +37,8 @@ public class ZooKeeperCommandListener implements IZkChildListener {
     private ZooKeeperNodeManager nodeManager;
     private ZooKeeperCommandSubscriber zooKeeperCommandSubscriber;
     private ZooKeeperMembershipManager zooKeeperMembershipManager;
-    private Integer currentId;
+
+    Integer currentId;
     static long startTimeStatic;
 
     /**
@@ -61,41 +62,92 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
     public void handleChildChange(String parentPath, List<String> currentChilds)
             throws Exception {
-        // call command processing method for each new command
-        long startTime = System.nanoTime();
-        startTimeStatic = startTime;
 
-        Collections.sort(currentChilds);
+        new ZooKeeperCommandHandler(stateManager, configurationContext, nodeManager, zooKeeperMembershipManager,
+                zooKeeperCommandSubscriber, parentPath, currentChilds).start();
+    }
+
+    class ZooKeeperCommandHandler extends Thread {
+
+        private ZooKeeperStateManager stateManager;
+        private ConfigurationContext configurationContext;
+        private ZooKeeperNodeManager nodeManager;
+        private ZooKeeperCommandSubscriber zooKeeperCommandSubscriber;
+        private ZooKeeperMembershipManager zooKeeperMembershipManager;
+        private String parentPath;
+        private List<String> currentChilds;
+
+
+        public ZooKeeperCommandHandler(ZooKeeperStateManager stateManager,
+                                       ConfigurationContext configurationContext,
+                                       ZooKeeperNodeManager nodeManager,
+                                       ZooKeeperMembershipManager membershipManager,
+                                       ZooKeeperCommandSubscriber zooKeeperCommandSubscriber,
+                                       String parentPath, List<String> currentChilds) {
+            this.stateManager = stateManager;
+            this.configurationContext = configurationContext;
+            this.nodeManager = nodeManager;
+            this.zooKeeperCommandSubscriber = zooKeeperCommandSubscriber;
+            this.zooKeeperMembershipManager = membershipManager;
+            this.parentPath = parentPath;
+            this.currentChilds = currentChilds;
+        }
+
+        @Override
+        public void start() {
+            System.out.println(System.currentTimeMillis());
+            System.out.println(this);
+            // call command processing method for each new command
+            long startTime = System.nanoTime();
+            startTimeStatic = startTime;
+
+            Collections.sort(currentChilds);
 
 //        System.out.println(parentPath);
 
-        for (int i = currentId; i < currentChilds.size(); i++) {
-            System.out.println(currentChilds.get(i) + " processing...");
-            // processMessage((ClusteringCommand)
-            // ZooKeeperUtils.getZookeeper().readData(currentChilds.get(i)));
+            System.out.println("start loop");
+            for (int i = currentId; i < currentChilds.size(); i++) {
+                System.out.println(currentChilds.get(i) + " processing...");
+                // processMessage((ClusteringCommand)
+                // ZooKeeperUtils.getZookeeper().readData(currentChilds.get(i)));
 
-            ZkClient zk = ZooKeeperUtils.getZookeeper();
-            String cmName = currentChilds.get(i);
+                ZkClient zk = ZooKeeperUtils.getZookeeper();
+                String cmName = currentChilds.get(i);
 
-            if (zk.exists(parentPath + "/" + cmName)) {
-                ClusteringCommand cm = (ClusteringCommand) zk
-                        .readData(parentPath + "/" + cmName);
-                processMessage(cm);
+                if (zk.exists(parentPath + "/" + cmName)) {
+                    ClusteringCommand cm = (ClusteringCommand) zk
+                            .readData(parentPath + "/" + cmName);
+                    try {
+                        processMessage(cm);
+                    } catch (Exception e) {
+                    }
+
+                }
+
+                currentId++;
+            }
+            System.out.println("end loop");
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+
             }
 
-            currentId++;
-        }
-
-//		 Thread.sleep(200000);
+//            if (startTime == startTimeStatic) {
+//                System.out.println("timeout reached");
+//                try {
+//                    timeoutCommandProcess();
+//                } catch (Exception e) {
 //
-//		if (startTime == startTimeStatic) {
-//			System.out.println("timeout reached");
-//			timoutCommandProcess();
-//		}
+//                }
+//            }
+
+        }
 
     }
 
-    public void timoutCommandProcess() throws Exception {
+    public void timeoutCommandProcess() throws Exception {
         String domainName = new String(zooKeeperMembershipManager.getDomain());
         String commandPath = "/" + domainName
                 + ZooKeeperConstants.COMMANDS_BASE_NAME;
@@ -135,5 +187,4 @@ public class ZooKeeperCommandListener implements IZkChildListener {
         }
         System.out.println("processed");
     }
-
 }
