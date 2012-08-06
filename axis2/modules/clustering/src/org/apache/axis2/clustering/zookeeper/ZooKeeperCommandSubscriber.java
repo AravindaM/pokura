@@ -20,93 +20,84 @@ package org.apache.axis2.clustering.zookeeper;
 
 import java.util.List;
 
+import org.I0Itec.zkclient.ZkClient;
+import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.context.ConfigurationContext;
 
 public class ZooKeeperCommandSubscriber {
-	private ZooKeeperStateManager stateManager;
-	private ConfigurationContext configurationContext;
-	private ZooKeeperNodeManager nodeManager;
-	private ZooKeeperMembershipManager membershipManager;
-	private Integer initialId;
-	public static long startTime;
-	public static long eventCount;
+    private ZooKeeperStateManager stateManager;
+    private ConfigurationContext configurationContext;
+    private ZooKeeperNodeManager nodeManager;
+    private ZooKeeperMembershipManager membershipManager;
+    private Integer initialId;
+    public static long startTime;
+    public static long eventCount;
 
-	/**
-	 * @param stateManager
-	 * @param configurationContext
-	 * @param nodeManager
-	 * @param membershipManager
-	 */
-	public ZooKeeperCommandSubscriber(ZooKeeperStateManager stateManager,
-			ConfigurationContext configurationContext,
-			ZooKeeperNodeManager nodeManager,
-			ZooKeeperMembershipManager membershipManager) {
-		this.stateManager = stateManager;
-		this.configurationContext = configurationContext;
-		this.nodeManager = nodeManager;
-		this.membershipManager = membershipManager;
-	}
+    /**
+     * @param stateManager
+     * @param configurationContext
+     * @param nodeManager
+     * @param membershipManager
+     */
+    public ZooKeeperCommandSubscriber(ZooKeeperStateManager stateManager,
+                                      ConfigurationContext configurationContext,
+                                      ZooKeeperNodeManager nodeManager,
+                                      ZooKeeperMembershipManager membershipManager) {
+        this.stateManager = stateManager;
+        this.configurationContext = configurationContext;
+        this.nodeManager = nodeManager;
+        this.membershipManager = membershipManager;
+    }
 
-	/**
-	 * @param membershipManager
-	 */
-	public ZooKeeperCommandSubscriber(
-			ZooKeeperMembershipManager membershipManager) {
-		super();
-		this.membershipManager = membershipManager;
-	}
+    /**
+     * @param membershipManager
+     */
+    public ZooKeeperCommandSubscriber(
+            ZooKeeperMembershipManager membershipManager) {
+        super();
+        this.membershipManager = membershipManager;
+    }
 
-	/**
-	 * Set Zookeeper command listener
-	 */
-	public void startRecieve() {
+    /**
+     * Set Zookeeper command listener
+     */
+    public void startRecieve() {
 
-		String domainName = new String(membershipManager.getDomain());
-		String commandPath = "/" + domainName
-				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
-		initialId = generateCurrentId(commandPath);
+        String domainName = new String(membershipManager.getDomain());
+        String commandPath = "/" + domainName
+                + ZooKeeperConstants.COMMANDS_BASE_NAME;
+        initialId = generateCurrentId(commandPath);
 
-		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
-				commandPath,
-				new ZooKeeperCommandListener(initialId, stateManager,
-						configurationContext, nodeManager, membershipManager,this));
-		System.out.println(commandPath);
+        ZooKeeperUtils.getZookeeper().subscribeChildChanges(
+                commandPath,
+                new ZooKeeperCommandListener(initialId, stateManager,
+                        configurationContext, nodeManager, membershipManager,this));
+//        System.out.println(commandPath);
 
-	}
+    }
 
-	public void stopRecive() {
-		// TODO this method should be able to remove the chlidlistners from the
-		// given path
-	}
+    public void stopRecive() {
+        // TODO this method should be able to remove the chlidlistners from the
+        // given path
+    }
 
-	/**
-	 * Generated the sequence number of the command
-	 * 
-	 * @param commandPath
-	 *            - pass the path of the command objects to process
-	 * @return return the number of command objects in the given path
-	 */
-	private Integer generateCurrentId(String commandPath) {
-		// TODO size cannot do because later old commands have to delete
-		System.out.println(commandPath);
-		if (ZooKeeperUtils.getZookeeper().exists(commandPath)) {
-			return ZooKeeperUtils.getZookeeper().getChildren(commandPath)
-					.size();
-		} else {
-			return 0;
-		}
-	}
+    /**
+     * Generated the sequence number of the command
+     *
+     * @param commandPath
+     *            - pass the path of the command objects to process
+     * @return return the number of command objects in the given path
+     */
+    private Integer generateCurrentId(String commandPath) {
+        // TODO size cannot do because later old commands have to delete
+        System.out.println(commandPath);
+        if (ZooKeeperUtils.getZookeeper().exists(commandPath)) {
+            return ZooKeeperUtils.getZookeeper().getChildren(commandPath)
+                    .size();
+        } else {
+            return 0;
+        }
+    }
 
-	public void timoutCommandProcess()
-	{
-		String domainName = new String(membershipManager.getDomain());
-		String commandPath = "/" + domainName
-				+ ZooKeeperConstants.COMMANDS_BASE_NAME;
-		
-		 List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(commandPath);
-		
-		for (int i = initialId; i < currentChilds.size(); i++) {
-			System.out.println(currentChilds.get(i) + " after timeout processing...");
-		}
-	}
+
 }
