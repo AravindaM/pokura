@@ -22,7 +22,7 @@ package org.apache.axis2.clustering.zookeeper;
 import java.io.Serializable;
 import java.util.UUID;
 
-public interface ZkMember extends Serializable{
+public interface ZkMember extends Serializable {
 
     public byte[] getZkHost();
 

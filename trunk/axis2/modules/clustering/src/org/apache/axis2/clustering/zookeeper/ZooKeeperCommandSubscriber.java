@@ -18,10 +18,6 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.util.List;
-
-import org.I0Itec.zkclient.ZkClient;
-import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.context.ConfigurationContext;
 
 public class ZooKeeperCommandSubscriber {
@@ -71,7 +67,7 @@ public class ZooKeeperCommandSubscriber {
         ZooKeeperUtils.getZookeeper().subscribeChildChanges(
                 commandPath,
                 new ZooKeeperCommandListener(initialId, stateManager,
-                        configurationContext, nodeManager, membershipManager,this));
+                        configurationContext, nodeManager, membershipManager, this));
 //        System.out.println(commandPath);
 
     }
@@ -84,8 +80,7 @@ public class ZooKeeperCommandSubscriber {
     /**
      * Generated the sequence number of the command
      *
-     * @param commandPath
-     *            - pass the path of the command objects to process
+     * @param commandPath - pass the path of the command objects to process
      * @return return the number of command objects in the given path
      */
     private Integer generateCurrentId(String commandPath) {
@@ -99,5 +94,5 @@ public class ZooKeeperCommandSubscriber {
         }
     }
 
-
 }
+

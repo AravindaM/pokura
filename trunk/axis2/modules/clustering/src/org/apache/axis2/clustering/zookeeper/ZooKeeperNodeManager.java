@@ -18,8 +18,6 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.util.ArrayList;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringFault;
@@ -28,69 +26,71 @@ import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 
+import java.util.ArrayList;
+
 public class ZooKeeperNodeManager implements NodeManager {
 
-	public void addParameter(Parameter param) throws AxisFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public void addParameter(Parameter param) throws AxisFault {
+        // TODO Auto-generated method stub
 
-	public void removeParameter(Parameter param) throws AxisFault {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	public void deserializeParameters(OMElement parameterElement)
-			throws AxisFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public void removeParameter(Parameter param) throws AxisFault {
+        // TODO Auto-generated method stub
 
-	public Parameter getParameter(String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    }
 
-	public ArrayList<Parameter> getParameters() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void deserializeParameters(OMElement parameterElement)
+            throws AxisFault {
+        // TODO Auto-generated method stub
 
-	public boolean isParameterLocked(String parameterName) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    }
 
-	public void prepare() throws ClusteringFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public Parameter getParameter(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public void rollback() throws ClusteringFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public ArrayList<Parameter> getParameters() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public void commit() throws ClusteringFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public boolean isParameterLocked(String parameterName) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	public void exceptionOccurred(Throwable throwable) throws ClusteringFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public void prepare() throws ClusteringFault {
+        // TODO Auto-generated method stub
 
-	public void setConfigurationContext(
-			ConfigurationContext configurationContext) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	public void sendMessage(NodeManagementCommand command)
-			throws ClusteringFault {
-		// TODO Auto-generated method stub
-		
-	}
+    public void rollback() throws ClusteringFault {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void commit() throws ClusteringFault {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void exceptionOccurred(Throwable throwable) throws ClusteringFault {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void setConfigurationContext(
+            ConfigurationContext configurationContext) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void sendMessage(NodeManagementCommand command)
+            throws ClusteringFault {
+        // TODO Auto-generated method stub
+
+    }
 
 }

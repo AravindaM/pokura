@@ -1,5 +1,12 @@
 package org.apache.axis2.clustering.zookeeper;
 
+import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.MembershipScheme;
+import org.apache.axis2.clustering.tribes.TribesConstants;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.util.Utils;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -7,13 +14,6 @@ import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import org.apache.axis2.clustering.ClusteringFault;
-import org.apache.axis2.clustering.MembershipScheme;
-import org.apache.axis2.clustering.tribes.TribesConstants;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.util.Utils;
-import org.apache.commons.logging.LogFactory;
 
 public class ZooKeeperMembershipScheme implements MembershipScheme {
 

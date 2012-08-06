@@ -18,18 +18,19 @@
  */
 
 package org.apache.axis2.clustering.zookeeper;
+
 /**
  * Contains constants that are needed
- * @author pulasthi
  *
+ * @author pulasthi
  */
 public class ZooKeeperConstants {
 
-	public static final String COMMAND_BASE_NAME = "/command/command";
-	public static final String COMMANDS_BASE_NAME = "/command";
-	public static final String MEMEBER_BASE_NAME = "/members";
+    public static final String COMMAND_BASE_NAME = "/command/command";
+    public static final String COMMANDS_BASE_NAME = "/command";
+    public static final String MEMEBER_BASE_NAME = "/members";
 
-    public static String LOCAL_MEMBER_HOST="localMemberHost";
+    public static String LOCAL_MEMBER_HOST = "localMemberHost";
 
 
 }

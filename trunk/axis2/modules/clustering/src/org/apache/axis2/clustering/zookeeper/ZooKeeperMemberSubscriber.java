@@ -19,37 +19,35 @@
 package org.apache.axis2.clustering.zookeeper;
 
 public class ZooKeeperMemberSubscriber {
-	private ZooKeeperMembershipManager membershipManager;
+    private ZooKeeperMembershipManager membershipManager;
 
-	public ZooKeeperMemberSubscriber(ZooKeeperMembershipManager membershipManager) {
-		this.membershipManager = membershipManager;
-	}
+    public ZooKeeperMemberSubscriber(ZooKeeperMembershipManager membershipManager) {
+        this.membershipManager = membershipManager;
+    }
 
-	/**
-	 * Set Zookeeper command listener
-	 */
-	public void startRecieve() {	
-		
-		//TODO handle null pointers and instances where the zookeeper is down 
-		String domainName = new String(membershipManager.getDomain());
-		String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME ;
-		//TODO handle the state when the parent nodes are not created
-		if(!ZooKeeperUtils.getZookeeper().exists("/"+domainName))
-		{
-			ZooKeeperUtils.getZookeeper().createPersistent("/"+domainName);
-		}
-		if(!ZooKeeperUtils.getZookeeper().exists("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME))
-		{
-			ZooKeeperUtils.getZookeeper().createPersistent("/"+domainName+ZooKeeperConstants.MEMEBER_BASE_NAME);
-		}
-		
-		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
-				memberPath,
-				new ZooKeeperMemberListener(membershipManager));
-	}
-	
-	public void stopRecieve(){
-		// TODO this method should be able to remove the chlidlistners from the given path
+    /**
+     * Set Zookeeper command listener
+     */
+    public void startRecieve() {
 
-	}
+        //TODO handle null pointers and instances where the zookeeper is down
+        String domainName = new String(membershipManager.getDomain());
+        String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME;
+        //TODO handle the state when the parent nodes are not created
+        if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName)) {
+            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName);
+        }
+        if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME)) {
+            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME);
+        }
+
+        ZooKeeperUtils.getZookeeper().subscribeChildChanges(
+                memberPath,
+                new ZooKeeperMemberListener(membershipManager));
+    }
+
+    public void stopRecieve() {
+        // TODO this method should be able to remove the chlidlistners from the given path
+
+    }
 }

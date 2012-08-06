@@ -18,36 +18,36 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.util.List;
-
 import org.I0Itec.zkclient.IZkChildListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class ZooKeeperMemberListener implements IZkChildListener {
-	
-	 private static Log log = LogFactory.getLog(ZooKeeperMemberListener.class);
-	 private final ZooKeeperMembershipManager membershipManager;
-	    
-	public ZooKeeperMemberListener(ZooKeeperMembershipManager membershipManager) {
-		this.membershipManager = membershipManager;
-	}
+import java.util.List;
 
-	public void handleChildChange(String parentPath, List<String> currentChilds)
-			throws Exception {
-		//TODO improve performance by making sure unwanted member objects are not retrieved 
-		List<ZkMember> oldmembers = membershipManager.getMembers();
-		List<ZkMember> newmembers = ZooKeeperUtils.getZkMembers(currentChilds,parentPath);
-		
-		List<ZkMember> addedmembers = ZooKeeperUtils.getNewMembers(oldmembers,newmembers);
-		 for (ZkMember zkMember : addedmembers) {
-			 if (membershipManager.addMember(zkMember)) {
-		            log.info("New member " + ZooKeeperUtils.getName(zkMember) + " joined cluster.");
-		            System.out.println("New member " + ZooKeeperUtils.getName(zkMember) + " joined cluster.");
-			  }
-		}
-		 
-		
-	}
+public class ZooKeeperMemberListener implements IZkChildListener {
+
+    private static Log log = LogFactory.getLog(ZooKeeperMemberListener.class);
+    private final ZooKeeperMembershipManager membershipManager;
+
+    public ZooKeeperMemberListener(ZooKeeperMembershipManager membershipManager) {
+        this.membershipManager = membershipManager;
+    }
+
+    public void handleChildChange(String parentPath, List<String> currentChilds)
+            throws Exception {
+        //TODO improve performance by making sure unwanted member objects are not retrieved
+        List<ZkMember> oldmembers = membershipManager.getMembers();
+        List<ZkMember> newmembers = ZooKeeperUtils.getZkMembers(currentChilds, parentPath);
+
+        List<ZkMember> addedmembers = ZooKeeperUtils.getNewMembers(oldmembers, newmembers);
+        for (ZkMember zkMember : addedmembers) {
+            if (membershipManager.addMember(zkMember)) {
+                log.info("New member " + ZooKeeperUtils.getName(zkMember) + " joined cluster.");
+                System.out.println("New member " + ZooKeeperUtils.getName(zkMember) + " joined cluster.");
+            }
+        }
+
+
+    }
 
 }
