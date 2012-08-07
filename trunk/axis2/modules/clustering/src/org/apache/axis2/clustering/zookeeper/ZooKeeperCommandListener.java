@@ -104,7 +104,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
             System.out.println("\nStart loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
             for (int i = currentId; i < currentChilds.size(); i++) {
-                System.out.println(currentChilds.get(i) + " processing... " );
+                System.out.println(currentChilds.get(i) + " processing... ");
 
                 ZkClient zk = ZooKeeperUtils.getZookeeper();
                 String cmName = currentChilds.get(i);
@@ -127,50 +127,51 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                 Thread.sleep(20000);
             } catch (InterruptedException e) {
 
-        }
-
-    }
-
-    public void timeoutCommandProcess() throws Exception {
-        String domainName = new String(zooKeeperMembershipManager.getDomain());
-        String commandPath = "/" + domainName
-                + ZooKeeperConstants.COMMANDS_BASE_NAME;
-
-        List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(
-                commandPath);
-
-        System.out.println("/nTimeout Start Loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
-        for (int i = currentId; i < currentChilds.size(); i++) {
-            System.out.println(currentChilds.get(i)
-                    + " after timeout processing...");
-
-            ZkClient zk = ZooKeeperUtils.getZookeeper();
-            String cmName = currentChilds.get(i);
-
-            if (zk.exists(commandPath + "/" + cmName)) {
-                ClusteringCommand cm = (ClusteringCommand) zk
-                        .readData(commandPath + "/" + cmName);
-                processMessage(cm);
             }
 
-            currentId++;
         }
-        System.out.println("Timeout End Loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
-    }
 
-    private void processMessage(ClusteringCommand command)
-            throws ClusteringFault {
-        // process the command object
+        public void timeoutCommandProcess() throws Exception {
+            String domainName = new String(zooKeeperMembershipManager.getDomain());
+            String commandPath = "/" + domainName
+                    + ZooKeeperConstants.COMMANDS_BASE_NAME;
 
-        if (command instanceof StateClusteringCommand && stateManager != null) {
-            StateClusteringCommand ctxCmd = (StateClusteringCommand) command;
-            ctxCmd.execute(configurationContext);
-        } else if (command instanceof NodeManagementCommand
-                && nodeManager != null) {
-            ((NodeManagementCommand) command).execute(configurationContext);
-        } else if (command instanceof GroupManagementCommand) {
-            ((GroupManagementCommand) command).execute(configurationContext);
+            List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(
+                    commandPath);
+
+            System.out.println("/nTimeout Start Loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
+            for (int i = currentId; i < currentChilds.size(); i++) {
+                System.out.println(currentChilds.get(i)
+                        + " after timeout processing...");
+
+                ZkClient zk = ZooKeeperUtils.getZookeeper();
+                String cmName = currentChilds.get(i);
+
+                if (zk.exists(commandPath + "/" + cmName)) {
+                    ClusteringCommand cm = (ClusteringCommand) zk
+                            .readData(commandPath + "/" + cmName);
+                    processMessage(cm);
+                }
+
+                currentId++;
+            }
+            System.out.println("Timeout End Loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
         }
-        System.out.println("processed");
+
+        private void processMessage(ClusteringCommand command)
+                throws ClusteringFault {
+            // process the command object
+
+            if (command instanceof StateClusteringCommand && stateManager != null) {
+                StateClusteringCommand ctxCmd = (StateClusteringCommand) command;
+                ctxCmd.execute(configurationContext);
+            } else if (command instanceof NodeManagementCommand
+                    && nodeManager != null) {
+                ((NodeManagementCommand) command).execute(configurationContext);
+            } else if (command instanceof GroupManagementCommand) {
+                ((GroupManagementCommand) command).execute(configurationContext);
+            }
+            System.out.println("processed");
+        }
     }
 }
