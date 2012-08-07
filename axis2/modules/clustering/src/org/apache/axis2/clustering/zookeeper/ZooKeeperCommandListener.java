@@ -127,17 +127,6 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                 Thread.sleep(20000);
             } catch (InterruptedException e) {
 
-            }
-
-            if (startTime == startTimeStatic) {
-                System.out.println("timeout reached");
-                try {
-                    timeoutCommandProcess();
-                } catch (Exception e) {
-
-                }
-            }
-
         }
 
     }
