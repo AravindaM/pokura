@@ -130,5 +130,9 @@ public final class ClusteringConstants {
          * Well-Known Address based membership management scheme
          */
         public static final String WKA_BASED = "wka";
+        /**
+         * Apache ZooKeeper based membership discovery/management scheme
+         */
+        public static final String ZooKeeper_BASED = "zookeeper";
     }
 }

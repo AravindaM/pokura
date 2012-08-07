@@ -18,6 +18,7 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -373,6 +374,35 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
                 }
             }
         }
+    }
+
+    public void setZkInstancesInfo() {
+        Parameter paramZkServers = parameters.get("zookeeperServers");
+
+        StringBuilder serveListbuilder = new StringBuilder();
+        if (paramZkServers != null) {
+            OMElement serversElement = paramZkServers.getParameterElement();
+            String serverString = null;
+
+            for (Iterator<?> itr = serversElement.getChildrenWithLocalName("zkServer"); itr.hasNext(); ) {
+                OMElement serverChild = (OMElement) itr.next();
+                OMAttribute serverAttrib = serverChild.getAttribute(new QName("serverString"));
+
+                if (serverAttrib != null) {
+                    serverString = serverAttrib.getAttributeValue();
+                }
+                serveListbuilder.append(serverString);
+                if(itr.hasNext())
+                serveListbuilder.append(",");
+            }
+            serveListbuilder.deleteCharAt(serveListbuilder.length() - 1);
+        }
+        connectToServer(serveListbuilder.toString());
+    }
+
+    public boolean connectToServer(String severList) {
+        ZooKeeperUtils.setZookeeperConnection(new ZkClient(severList));
+        return true;
     }
 
     public boolean isCoordinator() {

@@ -418,6 +418,13 @@
                 </context>
             </replication>
         </stateManager>
+
+        <!--Specify the Initial Zookeeper server configurations-->
+        <parameter name="zookeeperServers">
+            <zkServer serverString="localhost:4590" />
+            <zkServer serverString="localhost:4591" />
+            <zkServer serverString="localhost:4592" />
+        </parameter>
     </clustering>
 
     <!-- ================================================= -->
