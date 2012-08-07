@@ -68,8 +68,6 @@ public class ZooKeeperCommandSubscriber {
                 commandPath,
                 new ZooKeeperCommandListener(initialId, stateManager,
                         configurationContext, nodeManager, membershipManager, this));
-//        System.out.println(commandPath);
-
     }
 
     public void stopRecive() {
@@ -85,7 +83,6 @@ public class ZooKeeperCommandSubscriber {
      */
     private Integer generateCurrentId(String commandPath) {
         // TODO size cannot do because later old commands have to delete
-        System.out.println(commandPath);
         if (ZooKeeperUtils.getZookeeper().exists(commandPath)) {
             return ZooKeeperUtils.getZookeeper().getChildren(commandPath)
                     .size();
