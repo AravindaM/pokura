@@ -24,10 +24,15 @@ import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringConstants;
 import org.apache.axis2.clustering.Member;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.util.Utils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +40,7 @@ import java.util.Properties;
 
 public class ZooKeeperUtils {
 
+    private static final Log log= LogFactory.getLog(ZooKeeperUtils.class);
     private static ZkClient zookeeper;
 
     /**
@@ -319,6 +325,24 @@ public class ZooKeeperUtils {
      */
     public static void setZookeeper(ZkClient zookeeper) {
         ZooKeeperUtils.zookeeper = zookeeper;
+    }
+
+    public static String getLocalHost(Parameter tcpListenHost){
+        String host = null;
+        if (tcpListenHost != null) {
+            host = ((String) tcpListenHost.getValue()).trim();
+        } else {
+            try {
+                host = Utils.getIpAddress();
+            } catch (SocketException e) {
+                String msg = "Could not get local IP address";
+                log.error(msg, e);
+            }
+        }
+        if (System.getProperty(ClusteringConstants.LOCAL_IP_ADDRESS) != null) {
+            host = System.getProperty(ClusteringConstants.LOCAL_IP_ADDRESS);
+        }
+        return host;
     }
 
 }

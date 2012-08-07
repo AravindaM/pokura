@@ -105,10 +105,11 @@
 
     <!--Service deployer , this will alow users to deploy AAR or exploded AAR as axis2 services-->
     <deployer extension=".aar" directory="services" class="org.apache.axis2.deployment.ServiceDeployer">
-        <serviceBuilderExtension name ="jwsbuilderExt" class="org.apache.axis2.jaxws.framework.JAXWSServiceBuilderExtension"/>
-        <serviceBuilderExtension name ="wsdlbuilderExt" class="org.apache.axis2.deployment.WSDLServiceBuilderExtension"/>
+        <serviceBuilderExtension name="jwsbuilderExt"
+                                 class="org.apache.axis2.jaxws.framework.JAXWSServiceBuilderExtension"/>
+        <serviceBuilderExtension name="wsdlbuilderExt" class="org.apache.axis2.deployment.WSDLServiceBuilderExtension"/>
     </deployer>
-    
+
     <!--POJO deployer , this will alow users to drop .class file and make that into a service-->
     <deployer extension=".class" directory="pojo" class="org.apache.axis2.deployment.POJODeployer"/>
     <deployer extension=".jar" directory="servicejars"
@@ -153,7 +154,7 @@
     <!--all the other MEP implement it and add the correct entry to here , so that you can refer from-->
     <!--any operation -->
     <!--Note : You can override this for a particular service by adding the same element with your requirement-->
-    <messageReceivers>        
+    <messageReceivers>
         <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
                          class="org.apache.axis2.receivers.RawXMLINOnlyMessageReceiver"/>
         <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
@@ -394,7 +395,7 @@
            The "enable" attribute indicates whether Node management has been enabled
         -->
         <nodeManager class="org.apache.axis2.clustering.management.DefaultNodeManager"
-                         enable="true"/>
+                     enable="true"/>
 
         <!--
            This interface is responsible for handling state replication. The property changes in
@@ -424,6 +425,13 @@
                 </context>
             </replication>
         </stateManager>
+
+        <!--Specify the Initial Zookeeper server configurations-->
+        <parameter name="zookeeperServers">
+            <zkServer serverString="localhost:4590" />
+            <zkServer serverString="localhost:4591" />
+            <zkServer serverString="localhost:4592" />
+        </parameter>
     </clustering>
 
     <!-- ================================================= -->
