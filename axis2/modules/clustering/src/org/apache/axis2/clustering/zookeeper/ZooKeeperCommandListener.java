@@ -65,6 +65,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
         new ZooKeeperCommandHandler(stateManager, configurationContext, nodeManager, zooKeeperMembershipManager,
                 zooKeeperCommandSubscriber, parentPath, currentChilds).start();
+
     }
 
     class ZooKeeperCommandHandler extends Thread {
@@ -94,22 +95,16 @@ public class ZooKeeperCommandListener implements IZkChildListener {
         }
 
         @Override
-        public void start() {
-            System.out.println(System.currentTimeMillis());
-            System.out.println(this);
+        public void run() {
             // call command processing method for each new command
             long startTime = System.nanoTime();
             startTimeStatic = startTime;
 
             Collections.sort(currentChilds);
 
-//        System.out.println(parentPath);
-
-            System.out.println("start loop");
+            System.out.println("\nStart loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
             for (int i = currentId; i < currentChilds.size(); i++) {
-                System.out.println(currentChilds.get(i) + " processing...");
-                // processMessage((ClusteringCommand)
-                // ZooKeeperUtils.getZookeeper().readData(currentChilds.get(i)));
+                System.out.println(currentChilds.get(i) + " processing... " );
 
                 ZkClient zk = ZooKeeperUtils.getZookeeper();
                 String cmName = currentChilds.get(i);
@@ -126,7 +121,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
                 currentId++;
             }
-            System.out.println("end loop");
+            System.out.println("end loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
 
             try {
                 Thread.sleep(2000);
@@ -134,14 +129,14 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
             }
 
-//            if (startTime == startTimeStatic) {
-//                System.out.println("timeout reached");
-//                try {
-//                    timeoutCommandProcess();
-//                } catch (Exception e) {
-//
-//                }
-//            }
+            if (startTime == startTimeStatic) {
+                System.out.println("timeout reached");
+                try {
+                    timeoutCommandProcess();
+                } catch (Exception e) {
+
+                }
+            }
 
         }
 
@@ -155,6 +150,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
         List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(
                 commandPath);
 
+        System.out.println("/nTimeout Start Loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
         for (int i = currentId; i < currentChilds.size(); i++) {
             System.out.println(currentChilds.get(i)
                     + " after timeout processing...");
@@ -170,6 +166,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
             currentId++;
         }
+        System.out.println("Timeout End Loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
     }
 
     private void processMessage(ClusteringCommand command)
