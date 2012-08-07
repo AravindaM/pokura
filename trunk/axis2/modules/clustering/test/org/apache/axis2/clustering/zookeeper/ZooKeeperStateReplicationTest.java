@@ -22,7 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ZooKeeperStateReplicationTest extends TestCase {
-    private static Log log = LogFactory.getLog(ZooKeeperStateReplicationTest.class);
+	private static Log log = LogFactory
+			.getLog(ZooKeeperStateReplicationTest.class);
 	private static final String TEST_SERVICE_NAME = "testService";
 	ZkServer zks;
 	private static final Parameter domainParam = new Parameter(
@@ -68,10 +69,11 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 				}, 4599);
 		zks.start();
 
-		//System.setProperty(ClusteringConstants.LOCAL_IP_ADDRESS,
-		//		Utils.getIpAddress());
+		// System.setProperty(ClusteringConstants.LOCAL_IP_ADDRESS,
+		// Utils.getIpAddress());
 		ZooKeeperUtils.setZookeeperConnection(new ZkClient("localhost:4599"));
 		// First cluster
+		
 		configurationContext1 = ConfigurationContextFactory
 				.createDefaultConfigurationContext();
 		serviceGroup1 = createAxisServiceGroup(configurationContext1);
@@ -151,8 +153,8 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 			Thread.sleep(2000);
 			String value = (String) configurationContext2.getProperty(key1);
 			assertEquals(val1, value);
-            //System.out.println(val1+value);
-           // log.info("Reached assertEqual-"+val1+":"+value);
+			// System.out.println(val1+value);
+			// log.info("Reached assertEqual-"+val1+":"+value);
 
 		}
 
@@ -167,45 +169,46 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		}
 
 	}
-	
-    public void testRemovePropertyFromConfigurationContext() throws Exception {
 
-        String key1 = "configCtxKey";
-        String val1 = "configCtxVal1";
+	public void testRemovePropertyFromConfigurationContext() throws Exception {
 
-        // First set the property on a cluster 1 and replicate it
-        {
-            configurationContext1.setProperty(key1, val1);
-            ctxMan1.updateContext(configurationContext1);
-            Thread.sleep(2000);
-            String value = (String) configurationContext2.getProperty(key1);
-            assertEquals(val1, value);
-        }
+		String key1 = "configCtxKey";
+		String val1 = "configCtxVal1";
 
-        // Next remove this property from cluster 2, replicate it, and check that it is unavailable in cluster 1
-        configurationContext2.removeProperty(key1);
-        ctxMan2.updateContext(configurationContext2);
-        Thread.sleep(2000);
-        String value = (String) configurationContext1.getProperty(key1);
-        assertNull(configurationContext2.getProperty(key1));
-        assertNull(value);
-    }
+		// First set the property on a cluster 1 and replicate it
+		{
+			configurationContext1.setProperty(key1, val1);
+			ctxMan1.updateContext(configurationContext1);
+			Thread.sleep(2000);
+			String value = (String) configurationContext2.getProperty(key1);
+			assertEquals(val1, value);
+		}
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        ZooKeeperUtils.getZookeeper().close();
-        if (clusterManager1 != null) {
-            clusterManager1.shutdown();
-            System.out.println("------ CLuster-1 shutdown complete ------");
-        }
-        if (clusterManager2 != null) {
-            clusterManager2.shutdown();
-            System.out.println("------ CLuster-2 shutdown complete ------");
-        }
-//        MembershipManager.removeAllMembers();
-        Thread.sleep(500);
-        
-        zks.shutdown();
-    }
+		// Next remove this property from cluster 2, replicate it, and check
+		// that it is unavailable in cluster 1
+		configurationContext2.removeProperty(key1);
+		ctxMan2.updateContext(configurationContext2);
+		Thread.sleep(2000);
+		String value = (String) configurationContext1.getProperty(key1);
+		assertNull(configurationContext2.getProperty(key1));
+		assertNull(value);
+	}
+
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		ZooKeeperUtils.getZookeeper().close();
+		if (clusterManager1 != null) {
+			clusterManager1.shutdown();
+			System.out.println("------ CLuster-1 shutdown complete ------");
+		}
+		if (clusterManager2 != null) {
+			clusterManager2.shutdown();
+			System.out.println("------ CLuster-2 shutdown complete ------");
+		}
+		// MembershipManager.removeAllMembers();
+		Thread.sleep(500);
+
+		zks.shutdown();
+	}
 
 }

@@ -92,7 +92,7 @@ public class ZkMemberImpl implements ZkMember {
     }
 
     public String toString() {
-        return this.getClass().getName();
+        return this.getZkNodeID().toString();
     }
 
     public byte[] getZkHost() {

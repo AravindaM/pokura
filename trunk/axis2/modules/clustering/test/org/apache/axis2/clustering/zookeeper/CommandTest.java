@@ -35,15 +35,15 @@ public class CommandTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
-				new IDefaultNameSpace() {
-
-					public void createDefaultNameSpace(ZkClient zkClient) {
-						// TODO Auto-generated method stub
-
-					}
-				}, 4599);
-		zks.start();
+//		zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
+//				new IDefaultNameSpace() {
+//
+//					public void createDefaultNameSpace(ZkClient zkClient) {
+//						// TODO Auto-generated method stub
+//
+//					}
+//				}, 4599);
+//		zks.start();
 
 	}
 
@@ -79,7 +79,7 @@ public class CommandTest extends TestCase {
 			sender.sendToGroup(command);
 			sender.sendToGroup(command);	
 			
-			while(true){}
+			//while(true){}
 
 
 //			long startTime = System.nanoTime();
@@ -103,7 +103,7 @@ public class CommandTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		zks.shutdown();
+		//zks.shutdown();
 	}
 
 }
