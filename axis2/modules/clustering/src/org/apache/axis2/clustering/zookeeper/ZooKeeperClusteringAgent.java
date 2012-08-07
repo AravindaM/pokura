@@ -139,6 +139,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 
     public void init() throws ClusteringFault {
         log.info("Initializing cluster...");
+        
         addRequestBlockingHandlerToInFlows();
         primaryMembershipManager = new ZooKeeperMembershipManager(configurationContext);
         byte[] domain = getClusterDomain();
@@ -157,7 +158,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         axis2CommandReceiver = new ZooKeeperCommandSubscriber(primaryMembershipManager);
         axis2MemberReceiver = new ZooKeeperMemberSubscriber(primaryMembershipManager);
 
-        axis2CommandReceiver.startRecieve();
+		axis2MemberReceiver =  new ZooKeeperMemberSubscriber(primaryMembershipManager);
         axis2MemberReceiver.startRecieve();
 
         MembershipScheme memberScheme = new ZooKeeperMembershipScheme(primaryMembershipManager, parameters, domain);
@@ -388,4 +389,20 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
     public void finalize() {
 
     }
+
+	public void addGroupManagementAgent(GroupManagementAgent arg0, String arg1,
+			String arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int getAliveMemberCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public GroupManagementAgent getGroupManagementAgent(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

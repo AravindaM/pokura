@@ -124,7 +124,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
             System.out.println("end loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
 
             try {
-                Thread.sleep(2000);
+                Thread.sleep(20000);
             } catch (InterruptedException e) {
 
             }
