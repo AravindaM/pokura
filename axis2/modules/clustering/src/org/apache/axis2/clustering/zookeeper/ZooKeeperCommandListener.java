@@ -26,54 +26,57 @@ import org.apache.axis2.clustering.management.GroupManagementCommand;
 import org.apache.axis2.clustering.management.NodeManagementCommand;
 import org.apache.axis2.clustering.state.StateClusteringCommand;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Collections;
 import java.util.List;
 
 public class ZooKeeperCommandListener implements IZkChildListener {
 
+    private static Log log = LogFactory.getLog(ZooKeeperCommandListener.class);
     private ZooKeeperStateManager stateManager;
     private ConfigurationContext configurationContext;
     private ZooKeeperNodeManager nodeManager;
-    private ZooKeeperCommandSubscriber zooKeeperCommandSubscriber;
     private ZooKeeperMembershipManager zooKeeperMembershipManager;
 
     Integer currentId;
     static long startTimeStatic;
 
     /**
-     * @param stateManager
-     * @param configurationContext
-     * @param nodeManager
+     * @param initialId            Start position of the commands to process by the member
+     * @param stateManager         ZooKeeperStateManager instance of the member
+     * @param configurationContext ConfigurationContext instance of the member
+     * @param nodeManager          ZooKeeperNodeManager instance of the member
+     * @param membershipManager    ZooKeeperMembershipManager instance of the member
      */
     public ZooKeeperCommandListener(Integer initialId,
                                     ZooKeeperStateManager stateManager,
                                     ConfigurationContext configurationContext,
                                     ZooKeeperNodeManager nodeManager,
-                                    ZooKeeperMembershipManager membershipManager,
-                                    ZooKeeperCommandSubscriber zooKeeperCommandSubscriber) {
-        currentId = initialId;
+                                    ZooKeeperMembershipManager membershipManager) {
+        this.currentId = initialId;
         this.stateManager = stateManager;
         this.configurationContext = configurationContext;
         this.nodeManager = nodeManager;
-        this.zooKeeperCommandSubscriber = zooKeeperCommandSubscriber;
         this.zooKeeperMembershipManager = membershipManager;
     }
 
-    public void handleChildChange(String parentPath, List<String> currentChilds)
-            throws Exception {
-
+    public void handleChildChange(String parentPath, List<String> currentChilds) {
+        // each event is handled by separate threads
         new ZooKeeperCommandHandler(stateManager, configurationContext, nodeManager, zooKeeperMembershipManager,
-                zooKeeperCommandSubscriber, parentPath, currentChilds).start();
+                parentPath, currentChilds).start();
 
     }
 
+    /**
+     * Use a new thread to process each command
+     */
     class ZooKeeperCommandHandler extends Thread {
 
         private ZooKeeperStateManager stateManager;
         private ConfigurationContext configurationContext;
         private ZooKeeperNodeManager nodeManager;
-        private ZooKeeperCommandSubscriber zooKeeperCommandSubscriber;
         private ZooKeeperMembershipManager zooKeeperMembershipManager;
         private String parentPath;
         private List<String> currentChilds;
@@ -83,12 +86,10 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                                        ConfigurationContext configurationContext,
                                        ZooKeeperNodeManager nodeManager,
                                        ZooKeeperMembershipManager membershipManager,
-                                       ZooKeeperCommandSubscriber zooKeeperCommandSubscriber,
                                        String parentPath, List<String> currentChilds) {
             this.stateManager = stateManager;
             this.configurationContext = configurationContext;
             this.nodeManager = nodeManager;
-            this.zooKeeperCommandSubscriber = zooKeeperCommandSubscriber;
             this.zooKeeperMembershipManager = membershipManager;
             this.parentPath = parentPath;
             this.currentChilds = currentChilds;
@@ -102,9 +103,9 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
             Collections.sort(currentChilds);
 
-            System.out.println("\nStart loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
+//            System.out.println("\nStart loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
             for (int i = currentId; i < currentChilds.size(); i++) {
-                System.out.println(currentChilds.get(i) + " processing... ");
+//                System.out.println(currentChilds.get(i) + " processing... ");
 
                 ZkClient zk = ZooKeeperUtils.getZookeeper();
                 String cmName = currentChilds.get(i);
@@ -114,35 +115,54 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                             .readData(parentPath + "/" + cmName);
                     try {
                         processMessage(cm);
-                    } catch (Exception e) {
+                        log.info("Command " + cm.toString() + " processed successfully by member : "
+                                + zooKeeperMembershipManager.getLocalMember());
+                    } catch (ClusteringFault e) {
+                        log.error("Command " + cm.toString() + " processing failed : " + e.toString());
+
                     }
 
                 }
 
                 currentId++;
             }
-            System.out.println("end loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
+//            System.out.println("end loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
 
+            // wait specified time and check whether another command executed during that time
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-
+                log.info(e.toString());
             }
 
+            if (startTime == startTimeStatic) {
+//                System.out.println("timeout reached");
+                try {
+                    timeoutCommandProcess();
+                } catch (Exception e) {
+                    log.error("Zkserver offline");
+                }
+            }
         }
 
-        public void timeoutCommandProcess() throws Exception {
+        /**
+         * After the timeout if no other command events triggered executed the remaining commands
+         */
+        public void timeoutCommandProcess() {
             String domainName = new String(zooKeeperMembershipManager.getDomain());
             String commandPath = "/" + domainName
                     + ZooKeeperConstants.COMMANDS_BASE_NAME;
 
             List<String> currentChilds = ZooKeeperUtils.getZookeeper().getChildren(
                     commandPath);
+            Collections.sort(currentChilds);
 
-            System.out.println("/nTimeout Start Loop" + this.toString() + zooKeeperMembershipManager.getLocalMember());
+//            System.out.println("\nTimeout Start Loop" + this.toString()
+//                                      + zooKeeperMembershipManager.getLocalMember());
             for (int i = currentId; i < currentChilds.size(); i++) {
-                System.out.println(currentChilds.get(i)
-                        + " after timeout processing...");
+//                System.out.println("currentid : " + currentId);
+//                System.out.println(currentChilds.get(i)
+//                        + " after timeout processing...");
 
                 ZkClient zk = ZooKeeperUtils.getZookeeper();
                 String cmName = currentChilds.get(i);
@@ -150,28 +170,38 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                 if (zk.exists(commandPath + "/" + cmName)) {
                     ClusteringCommand cm = (ClusteringCommand) zk
                             .readData(commandPath + "/" + cmName);
-                    processMessage(cm);
+                    try {
+                        processMessage(cm);
+                        log.info("Command " + cm.toString() + " processed successfully by member : "
+                                + zooKeeperMembershipManager.getLocalMember());
+                    } catch (ClusteringFault e) {
+                        log.error("Command " + cm.toString() + " processing failed : " + e.toString());
+                    }
                 }
 
                 currentId++;
             }
-            System.out.println("Timeout End Loop\n" + this.toString() + zooKeeperMembershipManager.getLocalMember());
+//            System.out.println("Timeout End Loop " + this.toString()
+//                                      + zooKeeperMembershipManager.getLocalMember());
         }
 
+        /**
+         * process the command object
+         *
+         * @param command pass the command object to process
+         * @throws ClusteringFault throws ClusteringFault if processing failed
+         */
         private void processMessage(ClusteringCommand command)
                 throws ClusteringFault {
-            // process the command object
-
             if (command instanceof StateClusteringCommand && stateManager != null) {
-                StateClusteringCommand ctxCmd = (StateClusteringCommand) command;
-                ctxCmd.execute(configurationContext);
+                command.execute(configurationContext);
             } else if (command instanceof NodeManagementCommand
                     && nodeManager != null) {
-                ((NodeManagementCommand) command).execute(configurationContext);
+                command.execute(configurationContext);
             } else if (command instanceof GroupManagementCommand) {
-                ((GroupManagementCommand) command).execute(configurationContext);
+                command.execute(configurationContext);
             }
-            System.out.println("processed");
+//          System.out.println("processed");
         }
     }
 }
