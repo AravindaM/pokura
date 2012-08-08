@@ -30,7 +30,6 @@ public class ZooKeeperConstants {
     public static final String COMMANDS_BASE_NAME = "/command";
     public static final String MEMEBER_BASE_NAME = "/members";
 
-    public static String LOCAL_MEMBER_HOST = "localMemberHost";
-
-
+    public static final String LOCAL_MEMBER_HOST = "localMemberHost";
+    public static final String LOCAL_MEMBER_PORT = "localMemberPort";
 }
