@@ -26,8 +26,6 @@ import org.apache.axis2.clustering.*;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
-import org.apache.axis2.clustering.tribes.TribesConstants;
-import org.apache.axis2.clustering.tribes.TribesUtil;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
@@ -257,9 +255,8 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
                         String.valueOf(Integer.valueOf((String) port.getValue()) + portOffset));
             }
         }
-
         memberInfo.setProperty("hostName",
-                TribesUtil.getLocalHost(getParameter(TribesConstants.LOCAL_MEMBER_HOST)));
+        		ZooKeeperUtils.getLocalHost(getParameter(ZooKeeperConstants.LOCAL_MEMBER_HOST)));
 
         Parameter propsParam = getParameter("properties");
         if (propsParam != null) {
