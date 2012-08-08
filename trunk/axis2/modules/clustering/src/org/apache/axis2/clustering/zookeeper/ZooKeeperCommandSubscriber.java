@@ -25,15 +25,12 @@ public class ZooKeeperCommandSubscriber {
     private ConfigurationContext configurationContext;
     private ZooKeeperNodeManager nodeManager;
     private ZooKeeperMembershipManager membershipManager;
-    private Integer initialId;
-    public static long startTime;
-    public static long eventCount;
 
     /**
-     * @param stateManager
-     * @param configurationContext
-     * @param nodeManager
-     * @param membershipManager
+     * @param stateManager  ZooKeeperStateManager instance of the member
+     * @param configurationContext  ConfigurationContext instance of the member
+     * @param nodeManager  ZooKeeperNodeManager instance of the member
+     * @param membershipManager ZooKeeperMembershipManager instance of the member
      */
     public ZooKeeperCommandSubscriber(ZooKeeperStateManager stateManager,
                                       ConfigurationContext configurationContext,
@@ -58,7 +55,7 @@ public class ZooKeeperCommandSubscriber {
      * Set Zookeeper command listener
      */
     public void startRecieve() {
-
+        Integer initialId;
         String domainName = new String(membershipManager.getDomain());
         String commandPath = "/" + domainName
                 + ZooKeeperConstants.COMMANDS_BASE_NAME;
@@ -67,12 +64,7 @@ public class ZooKeeperCommandSubscriber {
         ZooKeeperUtils.getZookeeper().subscribeChildChanges(
                 commandPath,
                 new ZooKeeperCommandListener(initialId, stateManager,
-                        configurationContext, nodeManager, membershipManager, this));
-    }
-
-    public void stopRecive() {
-        // TODO this method should be able to remove the chlidlistners from the
-        // given path
+                        configurationContext, nodeManager, membershipManager));
     }
 
     /**
@@ -82,7 +74,6 @@ public class ZooKeeperCommandSubscriber {
      * @return return the number of command objects in the given path
      */
     private Integer generateCurrentId(String commandPath) {
-        // TODO size cannot do because later old commands have to delete
         if (ZooKeeperUtils.getZookeeper().exists(commandPath)) {
             return ZooKeeperUtils.getZookeeper().getChildren(commandPath)
                     .size();
