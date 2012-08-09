@@ -140,6 +140,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         log.info("Initializing cluster...");
         
         addRequestBlockingHandlerToInFlows();
+        setZkInstancesInfo();
         primaryMembershipManager = new ZooKeeperMembershipManager(configurationContext);
         byte[] domain = getClusterDomain();
         log.info("Cluster domain: " + new String(domain));
@@ -147,7 +148,6 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         ZkMember zkm = new ZkMemberImpl();
         zkm.setDomain(domain);
         primaryMembershipManager.setLocalMember(zkm);
-
         ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
                 contextManager, configurationContext, configurationManager, primaryMembershipManager);
         zooKeeperCommandSubscriber.startRecieve();
@@ -392,7 +392,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
                 if(itr.hasNext())
                 serveListbuilder.append(",");
             }
-            serveListbuilder.deleteCharAt(serveListbuilder.length() - 1);
+            //serveListbuilder.deleteCharAt(serveListbuilder.length() - 1);
         }
         connectToServer(serveListbuilder.toString());
     }
