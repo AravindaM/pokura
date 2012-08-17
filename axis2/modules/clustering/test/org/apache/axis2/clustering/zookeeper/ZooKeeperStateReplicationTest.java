@@ -152,9 +152,11 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 			ctxMan1.updateContext(configurationContext1);
 			Thread.sleep(2000);
 			String value = (String) configurationContext2.getProperty(key1);
+
 			assertEquals(val1, value);
-			// System.out.println(val1+value);
-			// log.info("Reached assertEqual-"+val1+":"+value);
+
+//			System.out.println(val1+value);
+//			log.info("Reached assertEqual-"+val1+":"+value);
 
 		}
 

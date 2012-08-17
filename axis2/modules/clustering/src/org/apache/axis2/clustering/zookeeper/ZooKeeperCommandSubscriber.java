@@ -20,6 +20,9 @@ package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.axis2.context.ConfigurationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class ZooKeeperCommandSubscriber {
     private ZooKeeperStateManager stateManager;
     private ConfigurationContext configurationContext;
@@ -55,16 +58,23 @@ public class ZooKeeperCommandSubscriber {
      * Set Zookeeper command listener
      */
     public void startRecieve() {
-        Integer initialId;
         String domainName = new String(membershipManager.getDomain());
         String commandPath = "/" + domainName
                 + ZooKeeperConstants.COMMANDS_BASE_NAME;
-        initialId = generateCurrentId(commandPath);
 
+        String lastCommandName = getLastCommandName(commandPath);
         ZooKeeperUtils.getZookeeper().subscribeChildChanges(
                 commandPath,
-                new ZooKeeperCommandListener(initialId, stateManager,
+                new ZooKeeperCommandListener(lastCommandName, stateManager,
                         configurationContext, nodeManager, membershipManager));
+
+        if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
+                + ZooKeeperConstants.LAST_COMMAND_BASE_NAME)) {
+
+            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
+                    + ZooKeeperConstants.LAST_COMMAND_BASE_NAME);
+
+        }
     }
 
     /**
@@ -80,6 +90,26 @@ public class ZooKeeperCommandSubscriber {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Return the last executed command
+     * @param commandPath    command path
+     * @return   last command name as a String
+     */
+    private String getLastCommandName(String commandPath)
+    {
+        ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+        Collections.sort(commandList);
+        try
+        {
+            return commandList.get(commandList.size()-1);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+
     }
 
 }

@@ -50,6 +50,13 @@ public class ZooKeeperMembershipManager {
         return domain;
     }
 
+    /*
+        return domain name as a String
+     */
+    public String getDomainName(){
+        return new String(domain);
+    }
+
     public void setDomain(byte[] domain) {
         this.domain = domain;
     }

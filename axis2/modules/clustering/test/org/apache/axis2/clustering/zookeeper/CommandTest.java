@@ -18,92 +18,87 @@
  */
 package org.apache.axis2.clustering.zookeeper;
 
-import java.io.Serializable;
-
+import junit.framework.TestCase;
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.commands.DeleteServiceStateCommand;
-import junit.framework.TestCase;
 
 public class CommandTest extends TestCase {
 
-	ZkServer zks;
+    ZkServer zks;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
 
-//		zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
-//				new IDefaultNameSpace() {
+        zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
+                new IDefaultNameSpace() {
+
+                    public void createDefaultNameSpace(ZkClient zkClient) {
+                        // TODO Auto-generated method stub
+
+                    }
+                }, 4599);
+
+        zks.start();
+
+    }
+
+    public void testSendCommand() throws ClusteringFault, InterruptedException {
+
+        ZkClient zkcli = new ZkClient("localhost:4599");
+
+        if (!zkcli.exists("/TestDomain/command")) {
+            zkcli.createPersistent("/TestDomain");
+            zkcli.createPersistent("/TestDomain/command");
+        }
+
+        ZooKeeperUtils.setZookeeperConnection(zkcli);
+
+        ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
+        membershipManager.setDomain(new String("TestDomain").getBytes());
+
+        ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
+                membershipManager);
+
+        zooKeeperCommandSubscriber.startRecieve();
+        final ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
+
+        final DeleteServiceStateCommand command = new DeleteServiceStateCommand();
+
+
+        for (int i = 0; i < 10  ; i++) {
+            sender.sendToGroup(command);
+        }
+
+//        while (true)
+//        {
 //
-//					public void createDefaultNameSpace(ZkClient zkClient) {
-//						// TODO Auto-generated method stub
-//
-//					}
-//				}, 4599);
-//		zks.start();
-
-	}
-
-	public void testSendCommand() throws ClusteringFault {
-		ZkClient zkcli = new ZkClient("localhost:4599");
-
-		if (!zkcli.exists("/TestDomain/command")) {
-			zkcli.createPersistent("/TestDomain");
-			zkcli.createPersistent("/TestDomain/command");
-		}
-
-		ZooKeeperUtils.setZookeeperConnection(zkcli);
-
-		ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
-		membershipManager.setDomain(new String("TestDomain").getBytes());
-
-		ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
-				membershipManager);
-		zooKeeperCommandSubscriber.startRecieve();
-		final ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
-
-		final DeleteServiceStateCommand command = new DeleteServiceStateCommand();
-
-
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);
-			sender.sendToGroup(command);	
-			
-			//while(true){}
-
+//        }
 
 //			long startTime = System.nanoTime();
 //
 //			while (System.nanoTime() - startTime < 500000000) {
-////				System.out.println(Axis2CommandReceiver.startTime);
+//				System.out.println(Axis2CommandReceiver.startTime);
 //
-////				if(System.nanoTime() - ZooKeeperCommandSubscriber.startTime > 50000000) {
-////					System.out.println("timeout reached");
-////					zooKeeperCommandSubscriber.timeoutCommandProcess();
-////					break;
-////				}
+//				if(System.nanoTime() - ZooKeeperCommandSubscriber.startTime > 50000000) {
+//					System.out.println("timeout reached");
+//					zooKeeperCommandSubscriber.timeoutCommandProcess();
+//					break;
+//				}
 //			}
-	}
-	
+    }
 
 
-	/**
-	 * Ends initialized data
-	 */
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		//zks.shutdown();
-	}
+    /**
+     * Ends initialized data
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        //zks.shutdown();
+    }
 
 }
