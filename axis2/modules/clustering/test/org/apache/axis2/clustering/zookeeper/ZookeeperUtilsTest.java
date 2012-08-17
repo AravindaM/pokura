@@ -19,9 +19,17 @@
 package org.apache.axis2.clustering.zookeeper;
 
 
+import java.util.Date;
+
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
+import org.apache.axis2.clustering.ClusteringCommand;
+import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.state.StateClusteringCommand;
+import org.apache.axis2.clustering.state.commands.DeleteServiceStateCommand;
+import org.apache.axis2.context.ConfigurationContext;
+
 import junit.framework.TestCase;
 
 public class ZookeeperUtilsTest extends TestCase{
@@ -29,29 +37,51 @@ public class ZookeeperUtilsTest extends TestCase{
 	
  @Override
 	protected void setUp() throws Exception {
-	 zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",new IDefaultNameSpace() {
-			
-			public void createDefaultNameSpace(ZkClient zkClient) {
-				// TODO Auto-generated method stub
-				
-			}
-		},4599);
-		 zks.start();
-		super.setUp();
+//	 zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",new IDefaultNameSpace() {
+//			
+//			public void createDefaultNameSpace(ZkClient zkClient) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		},4599);
+//		 zks.start();
+//		super.setUp();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		zks.shutdown();
-		super.tearDown();
+//		zks.shutdown();
+//		super.tearDown();
 	}
 
 
  public void testGetNewMembers(){
-	ZkClient zkcli = new ZkClient("localhost:4599");
+	ZkClient zkcli = new ZkClient("localhost:2181");
 	ZooKeeperUtils.setZookeeperConnection(zkcli);
-	ZkMemberImpl member =  new  ZkMemberImpl();
-	ZooKeeperUtils.setZkMemeber(member);
-	zks.shutdown();
+	
+    System.out.println(new Date().getTime());
+    
+	for (int i = 0; i < 1000; i++) {
+		 
+		Thread t = new Thread(){
+			@Override
+			public void run() {
+				DeleteServiceStateCommand command = new DeleteServiceStateCommand();
+			    String domainName = "apache.axis2.domain1";
+				ZooKeeperUtils.createCommandZNode(command, domainName);
+			}
+		};
+	    t.start();
+	//	byte[] domain = new byte
+
+        //[84, 101, 115, 116, 68, 111, 109, 97, 105, 110]
+		
+		
+	}
+    System.out.println(new Date().getTime());
+
+//	ZkMemberImpl member =  new  ZkMemberImpl();
+//	ZooKeeperUtils.setZkMemeber(member);
+//	zks.shutdown();
  }
 }
