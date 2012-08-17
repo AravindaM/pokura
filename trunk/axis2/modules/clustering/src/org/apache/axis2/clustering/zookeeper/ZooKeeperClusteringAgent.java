@@ -119,8 +119,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
     }
 
     public Parameter getParameter(String name) {
-        // TODO Auto-generated method stub
-        return null;
+    	return parameters.get(name);
     }
 
     public ArrayList<Parameter> getParameters() {
@@ -147,6 +146,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         primaryMembershipManager.setDomain(domain);
         ZkMember zkm = new ZkMemberImpl();
         zkm.setDomain(domain);
+        InitializeZooKeeperNodes(new String(domain));
         primaryMembershipManager.setLocalMember(zkm);
         ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
                 contextManager, configurationContext, configurationManager, primaryMembershipManager);
@@ -373,7 +373,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         }
     }
 
-    public void setZkInstancesInfo() {
+    private void setZkInstancesInfo() {
         Parameter paramZkServers = parameters.get("zookeeperServers");
 
         StringBuilder serveListbuilder = new StringBuilder();
@@ -395,6 +395,23 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
             //serveListbuilder.deleteCharAt(serveListbuilder.length() - 1);
         }
         connectToServer(serveListbuilder.toString());
+    }
+    
+    private void InitializeZooKeeperNodes(String domainName){
+    	if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName)) {
+
+            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName);
+
+        }
+        if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
+                + ZooKeeperConstants.COMMANDS_BASE_NAME)) {
+
+            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
+                    + ZooKeeperConstants.COMMANDS_BASE_NAME);
+
+        }
+        
+        
     }
 
     public boolean connectToServer(String severList) {

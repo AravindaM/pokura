@@ -836,4 +836,20 @@ public class TribesClusteringAgent implements ClusteringAgent {
         Parameter syncAllParam = getParameter(ClusteringConstants.Parameters.SYNCHRONIZE_ALL_MEMBERS);
         return syncAllParam == null || Boolean.parseBoolean((String) syncAllParam.getValue());
     }
+
+	public void addGroupManagementAgent(GroupManagementAgent arg0, String arg1,
+			String arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int getAliveMemberCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public GroupManagementAgent getGroupManagementAgent(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

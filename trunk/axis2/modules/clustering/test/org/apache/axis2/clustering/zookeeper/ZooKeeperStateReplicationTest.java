@@ -3,6 +3,8 @@ package org.apache.axis2.clustering.zookeeper;
 import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
@@ -29,6 +31,8 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 	private static final Parameter domainParam = new Parameter(
 			ClusteringConstants.Parameters.DOMAIN, "axis2.domain."
 					+ UIDGenerator.generateUID());
+	
+	private static Parameter serverString;
 	// --------------- Cluster-1
 	// ------------------------------------------------------
 	private ClusteringAgent clusterManager1;
@@ -58,7 +62,7 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		// System.out.println("[WARNING] Aborting clustering tests");
 		// return;
 		// }
-
+		try{
 		zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
 				new IDefaultNameSpace() {
 
@@ -68,12 +72,21 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 					}
 				}, 4599);
 		zks.start();
+		}catch(IllegalStateException e){
+			
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
 
-		// System.setProperty(ClusteringConstants.LOCAL_IP_ADDRESS,
-		// Utils.getIpAddress());
-		ZooKeeperUtils.setZookeeperConnection(new ZkClient("localhost:4599"));
-		// First cluster
 		
+		OMElement serversElement = AXIOMUtil.stringToOM("<parameter name='zookeeperServers'><zkServer serverString='localhost:2181'/></parameter>");
+		serverString = new Parameter(
+					"zookeeperServers", "<parameter name='zookeeperServers'><zkServer serverString='localhost:2181'/></parameter>");
+		serverString.setParameterElement(serversElement);
+		
+		
+		// First cluster
+	
 		configurationContext1 = ConfigurationContextFactory
 				.createDefaultConfigurationContext();
 		serviceGroup1 = createAxisServiceGroup(configurationContext1);
@@ -83,6 +96,8 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		clusterManager1 = getClusterManager(configurationContext1, ctxMan1,
 				configMan1);
 		clusterManager1.addParameter(domainParam);
+		clusterManager1.addParameter(serverString);
+		
 		clusterManager1.init();
 		System.out
 				.println("---------- ClusteringAgent-1 successfully initialized -----------");
@@ -97,6 +112,8 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		clusterManager2 = getClusterManager(configurationContext2, ctxMan2,
 				configMan2);
 		clusterManager2.addParameter(domainParam);
+		clusterManager2.addParameter(serverString);
+
 		clusterManager2.init();
 		System.out
 				.println("---------- ClusteringAgent-2 successfully initialized -----------");
