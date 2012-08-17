@@ -33,14 +33,11 @@ import org.apache.zookeeper.CreateMode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class ZooKeeperUtils {
 
-    private static final Log log= LogFactory.getLog(ZooKeeperUtils.class);
+    private static final Log log = LogFactory.getLog(ZooKeeperUtils.class);
     private static ZkClient zookeeper;
 
     /**
@@ -78,6 +75,19 @@ public class ZooKeeperUtils {
         getZookeeper().create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME,
                 command, CreateMode.PERSISTENT_SEQUENTIAL);
 
+    }
+
+    public static void createLastCommandEntry(String lastCommand, String domain) {
+        String path = "/" + domain + ZooKeeperConstants.LAST_COMMAND_BASE_NAME
+                + "/" + lastCommand;
+
+        ZkClient zkClient = getZookeeper();
+
+        synchronized (zkClient) {
+            if (!zkClient.exists(path)){
+                zkClient.create(path, null, CreateMode.PERSISTENT);
+            }
+        }
     }
 
     /**
@@ -200,6 +210,29 @@ public class ZooKeeperUtils {
     }
 
     /**
+     * Return the last executed command with the minimum sequence number
+     * @param domain  domain name
+     * @return       last executed command name as a string
+     */
+    public static String getLastCommand(String domain) {
+        List<String> lastCommandList;
+        String path = "/" + domain + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
+        lastCommandList = getZookeeper().getChildren(path);
+        Collections.sort(lastCommandList);
+        if (lastCommandList.size() > 0) {
+            return lastCommandList.get(0);
+        } else {
+            return null;
+        }
+
+    }
+
+    public static int getCommandID(String commandName) {
+        return Integer.parseInt(String.valueOf(commandName.toCharArray(), 7, 10));
+    }
+
+
+    /**
      * Generates the next id of the command node sequence.
      *
      * @param id the current id
@@ -210,6 +243,12 @@ public class ZooKeeperUtils {
         count++;
         return String.format("%010d", count);
     }
+
+    public static String commandNameofIndex(int index)
+    {
+        return "command"+ String.format("%010d", index);
+    }
+
 
     /**
      * This method gets the zookeeper members under the given parent path
@@ -327,7 +366,7 @@ public class ZooKeeperUtils {
         ZooKeeperUtils.zookeeper = zookeeper;
     }
 
-    public static String getLocalHost(Parameter tcpListenHost){
+    public static String getLocalHost(Parameter tcpListenHost) {
         String host = null;
         if (tcpListenHost != null) {
             host = ((String) tcpListenHost.getValue()).trim();
@@ -344,7 +383,6 @@ public class ZooKeeperUtils {
         }
         return host;
     }
-    
-    
+
 
 }

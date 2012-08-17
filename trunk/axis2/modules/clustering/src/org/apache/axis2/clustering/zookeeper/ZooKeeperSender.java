@@ -51,10 +51,7 @@ public class ZooKeeperSender implements MessageSender {
                     + ZooKeeperConstants.COMMANDS_BASE_NAME);
 
         }
-
         ZooKeeperUtils.createCommandZNode(msg, domainName);
-
-
     }
 
     public void sendToSelf(ClusteringCommand msg) throws ClusteringFault {
