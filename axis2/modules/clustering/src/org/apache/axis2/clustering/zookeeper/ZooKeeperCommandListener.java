@@ -124,11 +124,13 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                             Collections.sort(commandList);
 
                             for (int i = 0; i <= commandList.indexOf(deleteUpto); i++) {
-                                ZooKeeperUtils.getZookeeper().delete(commandPath + "/" + commandList.get(i));
+                                ZooKeeperUtils.getDirectZookeeper().delete(commandPath + "/" + commandList.get(i), -1, null, null);
+                                
                             }
 
                             for (int i = 0; i < lastCommandList.size(); i++) {
-                                ZooKeeperUtils.getZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(i));
+                                ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(i), -1, null, null);
+                        
                             }
                             log.info("Commands deleted upto : " + deleteUpto);
                         }

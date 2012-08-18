@@ -415,7 +415,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
     }
 
     public boolean connectToServer(String severList) {
-        ZooKeeperUtils.setZookeeperConnection(new ZkClient(severList));
+        ZooKeeperUtils.setZookeeperConnection(new ZkClient(severList),severList);
         return true;
     }
 

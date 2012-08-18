@@ -29,6 +29,8 @@ import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.ZooDefs.Ids;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,6 +41,7 @@ public class ZooKeeperUtils {
 
     private static final Log log = LogFactory.getLog(ZooKeeperUtils.class);
     private static ZkClient zookeeper;
+    private static ZooKeeper directZookeeper;
 
     /**
      * This method allows the user to get the zookeeper client instance
@@ -54,8 +57,8 @@ public class ZooKeeperUtils {
      *
      * @param zkclient the ZooKeeper client
      */
-    public static void setZookeeperConnection(ZkClient zkclient) {
-        setZookeeper(zkclient);
+    public static void setZookeeperConnection(ZkClient zkclient,String serverList) {
+        setZookeeper(zkclient,serverList);
     }
 
     /**
@@ -70,14 +73,22 @@ public class ZooKeeperUtils {
 
 
         getZookeeper().setZkSerializer(new SerializableSerializer());
-//		zookeeper.setZkSerializer(new CommandSerializer());
-
-        getZookeeper().create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME,
-                command, CreateMode.PERSISTENT_SEQUENTIAL);
+        byte data[] = new SerializableSerializer().serialize(command);
+        directZookeeper.create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME, data, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL, null, null);
+        /*getZookeeper().create("/" + domain + ZooKeeperConstants.COMMAND_BASE_NAME,
+               command, CreateMode.PERSISTENT_SEQUENTIAL);*/
 
     }
 
-    public static void createLastCommandEntry(String lastCommand, String domain) {
+    public static ZooKeeper getDirectZookeeper() {
+		return directZookeeper;
+	}
+
+	public static void setDirectZookeeper(ZooKeeper directZookeeper) {
+		ZooKeeperUtils.directZookeeper = directZookeeper;
+	}
+
+	public static void createLastCommandEntry(String lastCommand, String domain) {
         String path = "/" + domain + ZooKeeperConstants.LAST_COMMAND_BASE_NAME
                 + "/" + lastCommand;
 
@@ -362,8 +373,14 @@ public class ZooKeeperUtils {
     /**
      * @param zookeeper the zookeeper to set
      */
-    public static void setZookeeper(ZkClient zookeeper) {
+    public static void setZookeeper(ZkClient zookeeper,String serverList) {
         ZooKeeperUtils.zookeeper = zookeeper;
+        try {
+			directZookeeper = new ZooKeeper(serverList, 5000, zookeeper);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     public static String getLocalHost(Parameter tcpListenHost) {

@@ -57,7 +57,7 @@ public class ZookeeperUtilsTest extends TestCase{
 
  public void testGetNewMembers(){
 	ZkClient zkcli = new ZkClient("localhost:2181");
-	ZooKeeperUtils.setZookeeperConnection(zkcli);
+	ZooKeeperUtils.setZookeeperConnection(zkcli,"localhost:2181");
 	
     System.out.println(new Date().getTime());
     
