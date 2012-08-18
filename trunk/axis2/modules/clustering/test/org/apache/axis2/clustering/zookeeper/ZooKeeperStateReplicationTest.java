@@ -79,9 +79,9 @@ public class ZooKeeperStateReplicationTest extends TestCase {
 		}
 
 		
-		OMElement serversElement = AXIOMUtil.stringToOM("<parameter name='zookeeperServers'><zkServer serverString='localhost:2181'/></parameter>");
+		OMElement serversElement = AXIOMUtil.stringToOM("<parameter name='zookeeperServers'><zkServer serverString='localhost:4599'/></parameter>");
 		serverString = new Parameter(
-					"zookeeperServers", "<parameter name='zookeeperServers'><zkServer serverString='localhost:2181'/></parameter>");
+					"zookeeperServers", "<parameter name='zookeeperServers'><zkServer serverString='localhost:4599'/></parameter>");
 		serverString.setParameterElement(serversElement);
 		
 		

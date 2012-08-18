@@ -55,7 +55,7 @@ public class CommandTest extends TestCase {
             zkcli.createPersistent("/TestDomain/command");
         }
 
-        ZooKeeperUtils.setZookeeperConnection(zkcli);
+        ZooKeeperUtils.setZookeeperConnection(zkcli,"localhost:4599");
 
         ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
         membershipManager.setDomain(new String("TestDomain").getBytes());
@@ -72,12 +72,12 @@ public class CommandTest extends TestCase {
         for (int i = 0; i < 10  ; i++) {
             sender.sendToGroup(command);
         }
-
-//        while (true)
-//        {
-//
-//        }
-
+        try{
+        Thread.sleep(7000);
+        }catch (Exception e) {
+			// TODO: handle exception
+		}
+        
 //			long startTime = System.nanoTime();
 //
 //			while (System.nanoTime() - startTime < 500000000) {
