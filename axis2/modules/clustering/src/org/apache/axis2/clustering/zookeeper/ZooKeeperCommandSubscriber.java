@@ -57,7 +57,7 @@ public class ZooKeeperCommandSubscriber {
     /**
      * Set Zookeeper command listener
      */
-    public void startRecieve() {
+    public void startRecieve(int cmdDelThreshold,int cmdUpdateThreshold) {
         String domainName = new String(membershipManager.getDomain());
         String commandPath = "/" + domainName
                 + ZooKeeperConstants.COMMANDS_BASE_NAME;
@@ -66,7 +66,7 @@ public class ZooKeeperCommandSubscriber {
         ZooKeeperUtils.getZookeeper().subscribeChildChanges(
                 commandPath,
                 new ZooKeeperCommandListener(lastCommandName, stateManager,
-                        configurationContext, nodeManager, membershipManager));
+                        configurationContext, nodeManager, membershipManager,cmdDelThreshold,cmdUpdateThreshold));
 
         if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
                 + ZooKeeperConstants.LAST_COMMAND_BASE_NAME)) {

@@ -292,6 +292,7 @@
                     nodes will notify the others in the group. When a member leaves the cluster or
                     is deemed to have left the cluster, it will be detected by the Group Membership
                     Service (GMS) using a TCP ping mechanism.
+           3. zookeeper - membership is discovered using zookeeper queruom
         -->
         <parameter name="membershipScheme">multicast</parameter>
 
@@ -383,19 +384,25 @@
         Enable the groupManagement entry if you need to run this node as a cluster manager.
         Multiple application domains with different GroupManagementAgent implementations
         can be defined in this section.
+        =====================================================
+        To use zookeeper clustering scheme change agent value to
+        "org.apache.axis2.clustering.zookeeper.ZooKeeperGroupManagementAgent"
         -->
         <groupManagement enable="false">
             <applicationDomain name="apache.axis2.application.domain"
                                description="Axis2 group"
-                               agent="org.apache.axis2.clustering.management.DefaultGroupManagementAgent"/>
+                               agent="org.apache.axis2.clustering.zookeeper.ZooKeeperGroupManagementAgent"/>
         </groupManagement>
 
         <!--
            This interface is responsible for handling management of a specific node in the cluster
            The "enable" attribute indicates whether Node management has been enabled
+           =====================================================
+        To use zookeeper clustering scheme change agent value to
+        "org.apache.axis2.clustering.zookeeper.ZooKeeperNodeManager"
         -->
-        <nodeManager class="org.apache.axis2.clustering.management.DefaultNodeManager"
-                     enable="true"/>
+        <nodeManager class="org.apache.axis2.clustering.zookeeper.ZooKeeperNodeManager"
+                         enable="true"/>
 
         <!--
            This interface is responsible for handling state replication. The property changes in
@@ -406,8 +413,10 @@
            "*" indicates that all properties in a particular context should not be replicated.
 
             The "enable" attribute indicates whether context replication has been enabled
+        To use zookeeper clustering scheme change agent value to
+        "org.apache.axis2.clustering.zookeeper.ZooKeeperStateManager"
         -->
-        <stateManager class="org.apache.axis2.clustering.state.DefaultStateManager"
+        <stateManager class="org.apache.axis2.clustering.zookeeper.ZooKeeperStateManager"
                       enable="true">
             <replication>
                 <defaults>
@@ -432,6 +441,11 @@
             <zkServer serverString="localhost:4591" />
             <zkServer serverString="localhost:4592" />
         </parameter>
+
+        <!--Specify the no of zookeeper nodes to be deleted when the command node threshold is reached -->
+        <parameter name="commandDeleteThreshold">250</parameter>
+        <parameter name="commandUpdateThreshold">200</parameter>
+
     </clustering>
 
     <!-- ================================================= -->

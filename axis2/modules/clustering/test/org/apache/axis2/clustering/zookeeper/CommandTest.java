@@ -48,7 +48,7 @@ public class CommandTest extends TestCase {
 
     public void testSendCommand() throws ClusteringFault, InterruptedException {
 
-        ZkClient zkcli = new ZkClient("localhost:4599");
+        ZkClient zkcli = new ZkClient("localhost:2181");
 
         if (!zkcli.exists("/TestDomain/command")) {
             zkcli.createPersistent("/TestDomain");
@@ -63,13 +63,13 @@ public class CommandTest extends TestCase {
         ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
                 membershipManager);
 
-        zooKeeperCommandSubscriber.startRecieve();
+        zooKeeperCommandSubscriber.startRecieve(200,200);
         final ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
 
         final DeleteServiceStateCommand command = new DeleteServiceStateCommand();
 
 
-        for (int i = 0; i < 10  ; i++) {
+        for (int i = 0; i < 100  ; i++) {
             sender.sendToGroup(command);
         }
         try{
