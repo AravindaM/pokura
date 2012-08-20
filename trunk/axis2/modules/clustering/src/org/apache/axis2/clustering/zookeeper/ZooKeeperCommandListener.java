@@ -41,6 +41,8 @@ public class ZooKeeperCommandListener implements IZkChildListener {
     private ZooKeeperNodeManager nodeManager;
     private ZooKeeperMembershipManager zooKeeperMembershipManager;
     private Object syncObject = new Object();
+    private int commandDeleteThreshold;
+    private int commandUpdateThreshold;
 
     String lastCommandName;
 
@@ -57,19 +59,23 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                                     ZooKeeperStateManager stateManager,
                                     ConfigurationContext configurationContext,
                                     ZooKeeperNodeManager nodeManager,
-                                    ZooKeeperMembershipManager membershipManager) {
+                                    ZooKeeperMembershipManager membershipManager,
+                                    int commandDeleteThreshold,
+                                    int commandUpdateThreshold) {
         this.lastCommandName = lastCommandName;
         this.stateManager = stateManager;
         this.configurationContext = configurationContext;
         this.nodeManager = nodeManager;
         this.zooKeeperMembershipManager = membershipManager;
+        this.commandDeleteThreshold = commandDeleteThreshold;
+        this.commandUpdateThreshold = commandUpdateThreshold;
 
     }
 
     public void handleChildChange(String parentPath, List<String> currentChilds) {
         // each event is handled by separate threads
         new ZooKeeperCommandHandler(stateManager, configurationContext, nodeManager, zooKeeperMembershipManager,
-                parentPath, currentChilds).start();
+                parentPath, currentChilds, commandDeleteThreshold, commandUpdateThreshold).start();
     }
 
     /**
@@ -83,18 +89,24 @@ public class ZooKeeperCommandListener implements IZkChildListener {
         private ZooKeeperMembershipManager zooKeeperMembershipManager;
         private String parentPath;
         private List<String> currentChilds;
+        private int commandDeleteThreshold;
+        private int commandUpdateThreshold;
 
         public ZooKeeperCommandHandler(ZooKeeperStateManager stateManager,
                                        ConfigurationContext configurationContext,
                                        ZooKeeperNodeManager nodeManager,
                                        ZooKeeperMembershipManager membershipManager,
-                                       String parentPath, List<String> currentChilds) {
+                                       String parentPath, List<String> currentChilds,
+                                       int commandDeleteThreshold,
+                                       int commandUpdateThreshold) {
             this.stateManager = stateManager;
             this.configurationContext = configurationContext;
             this.nodeManager = nodeManager;
             this.zooKeeperMembershipManager = membershipManager;
             this.parentPath = parentPath;
             this.currentChilds = currentChilds;
+            this.commandDeleteThreshold = commandDeleteThreshold;
+            this.commandUpdateThreshold = commandUpdateThreshold;
         }
 
         @Override
@@ -107,7 +119,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
             synchronized (syncObject) {
 
                 //delete processed commands to reduce the size of the command list
-                if ((int) (Math.random() * 1000) % 10 == 1) {
+                if (currentChilds.size() > commandDeleteThreshold) {
 
                     String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
                     String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
@@ -125,12 +137,12 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
                             for (int i = 0; i <= commandList.indexOf(deleteUpto); i++) {
                                 ZooKeeperUtils.getDirectZookeeper().delete(commandPath + "/" + commandList.get(i), -1, null, null);
-                                
+
                             }
 
                             for (int i = 0; i < lastCommandList.size(); i++) {
                                 ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(i), -1, null, null);
-                        
+
                             }
                             log.info("Commands deleted upto : " + deleteUpto);
                         }
@@ -167,12 +179,6 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                             try {
                                 processMessage(cm);
                                 lastCommandName = cmName;
-                                //update the lastCommand entry
-                                if ((int) (Math.random() * 1000) % 10 == 1) {
-                                    ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
-                                    log.info("lastcommand entry updated with " + lastCommandName);
-                                }
-
                                 log.info(cmName + " " + cm.toString() + " processed successfully by member : "
                                         + zooKeeperMembershipManager.getLocalMember());
                             } catch (ClusteringFault e) {
@@ -181,6 +187,12 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                             }
 
                         }
+
+                    }
+                    //update the lastCommand entry
+                    if (currentChilds.size() > commandUpdateThreshold) {
+                        ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
+                        log.info("lastcommand entry updated with " + lastCommandName);
                     }
                 }
             }
@@ -194,8 +206,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
             }
 
 
-            synchronized (syncObject)
-            {
+            synchronized (syncObject) {
                 if (startTime == startTimeStatic) {
                     try {
                         timeoutCommandProcess();

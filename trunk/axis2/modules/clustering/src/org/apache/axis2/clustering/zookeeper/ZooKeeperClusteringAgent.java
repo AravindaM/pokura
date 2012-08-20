@@ -57,6 +57,8 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
     private ZooKeeperMemberListener axis2MemberListener;
     private ZooKeeperMemberSubscriber axis2MemberReceiver;
     private final HashMap<String, Parameter> parameters;
+    private int commandDeleteThreshold;
+    private int commandUpdateThreshold;
 
     private ConfigurationContext configurationContext;
 
@@ -150,7 +152,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         primaryMembershipManager.setLocalMember(zkm);
         ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
                 contextManager, configurationContext, configurationManager, primaryMembershipManager);
-        zooKeeperCommandSubscriber.startRecieve();
+        zooKeeperCommandSubscriber.startRecieve(commandDeleteThreshold,commandUpdateThreshold);
         final ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
 
         contextManager.setSender(sender);
@@ -395,6 +397,23 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
             //serveListbuilder.deleteCharAt(serveListbuilder.length() - 1);
         }
         connectToServer(serveListbuilder.toString());
+
+        Parameter commandDelThreshold = parameters.get("commandDeleteThreshold");
+
+        if(commandDelThreshold!=null){
+            OMElement delThresholdElement = commandDelThreshold.getParameterElement();
+            String cmdDelThresholdVal= delThresholdElement.getText();
+            commandDeleteThreshold = Integer.parseInt(cmdDelThresholdVal);
+        }
+
+
+        Parameter commandUpThreshold = parameters.get("commandUpdateThreshold");
+        if(commandDelThreshold!=null){
+            OMElement upThresholdElement = commandDelThreshold.getParameterElement();
+            String cmdUpThresholdVal= upThresholdElement.getText();
+            commandUpdateThreshold = Integer.parseInt(cmdUpThresholdVal);
+        }
+
     }
     
     private void InitializeZooKeeperNodes(String domainName){
@@ -449,4 +468,12 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    public int getCommandDeleteThreshold() {
+        return commandDeleteThreshold;
+    }
+
+    public int getCommandUpdateThreshold() {
+        return commandUpdateThreshold;
+    }
 }
