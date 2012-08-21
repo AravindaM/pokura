@@ -118,39 +118,6 @@ public class ZooKeeperCommandListener implements IZkChildListener {
 
             synchronized (syncObject) {
 
-                //delete processed commands to reduce the size of the command list
-                if (currentChilds.size() > commandDeleteThreshold) {
-
-                    String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
-                    String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
-                    if (ZooKeeperUtils.getZookeeper().exists(lastCommandPath)) {
-
-                        String deleteUpto = ZooKeeperUtils.getLastCommand(zooKeeperMembershipManager.getDomainName());
-
-                        if (deleteUpto != null) {
-
-                            ArrayList<String> lastCommandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(lastCommandPath);
-                            ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
-
-                            Collections.sort(lastCommandList);
-                            Collections.sort(commandList);
-
-                            for (int i = 0; i <= commandList.indexOf(deleteUpto); i++) {
-                                ZooKeeperUtils.getDirectZookeeper().delete(commandPath + "/" + commandList.get(i), -1, null, null);
-
-                            }
-
-                            for (int i = 0; i < lastCommandList.size(); i++) {
-                                ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(i), -1, null, null);
-
-                            }
-                            log.info("Commands deleted upto : " + deleteUpto);
-                        }
-
-                    }
-
-                }
-
                 Collections.sort(currentChilds);
 
                 int id;
@@ -194,6 +161,39 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                         ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
                         log.info("lastcommand entry updated with " + lastCommandName);
                     }
+                }
+
+                //delete processed commands to reduce the size of the command list
+                if (currentChilds.size() > commandDeleteThreshold) {
+
+                    String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
+                    String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
+                    if (ZooKeeperUtils.getZookeeper().exists(lastCommandPath)) {
+
+                        String deleteUpto = ZooKeeperUtils.getLastCommand(zooKeeperMembershipManager.getDomainName());
+
+                        if (deleteUpto != null) {
+
+                            ArrayList<String> lastCommandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(lastCommandPath);
+                            ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+
+                            Collections.sort(lastCommandList);
+                            Collections.sort(commandList);
+
+                            for (int i = 0; i <= commandList.indexOf(deleteUpto); i++) {
+                                ZooKeeperUtils.getDirectZookeeper().delete(commandPath + "/" + commandList.get(i), -1, null, null);
+
+                            }
+
+                            for (int i = 0; i < lastCommandList.size(); i++) {
+                                ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(i), -1, null, null);
+
+                            }
+                            log.info("Commands deleted upto : " + deleteUpto);
+                        }
+
+                    }
+
                 }
             }
 
