@@ -148,75 +148,74 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                                 try {
                                     processMessage(cm);
                                     lastCommandName = cmName;
-                                    System.out.println(cmName + " " + cm.toString() + " processed successfully by member : "
-                                            + zooKeeperMembershipManager.getLocalMember());
+//                                    log.info(cmName + " " + cm.toString() + " processed successfully by member : "
+//                                            + zooKeeperMembershipManager.getLocalMember());
                                 } catch (ClusteringFault e) {
-                                    System.out.println(cmName + " " + cm.toString() + " processing failed : " + e.toString());
+                                    log.error(cmName + " " + cm.toString() + " processing failed : " + e.toString());
 
                                 }
                             } catch (Exception e) {
-                                System.out.println(e.getMessage());
+                                log.error(e.getMessage());
                             }
 
                         }
 
                     }
                     //update the lastCommand entry
-                    
+
                     if (currentChilds.size() > commandUpdateThreshold) {
-                    	synchronized (deleteUpdateSync) {
-                    		 String parentPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
-                             
-                             if(ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + lastCommandName)){
-                             	ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
-                             	System.out.println("lastcommand entry updated with " + lastCommandName);
-                             }	
-						}                      
-                        
+                        synchronized (deleteUpdateSync) {
+                            String parentPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
+
+                            if (ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + lastCommandName)) {
+                                ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
+                                log.info("lastcommand entry updated with " + lastCommandName);
+                            }
+                        }
+
                     }
                 }
 
                 //delete processed commands to reduce the size of the command list
                 if (currentChilds.size() > commandDeleteThreshold) {
-                	synchronized (deleteUpdateSync) {
-						
-					
+                    synchronized (deleteUpdateSync) {
 
-                    String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
-                    String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
-                    if (ZooKeeperUtils.getZookeeper().exists(lastCommandPath)) {
-                    	
-                        String deleteUpto = ZooKeeperUtils.getLastCommand(zooKeeperMembershipManager.getDomainName());
 
-                        if (deleteUpto != null) {
-                        	if(ZooKeeperUtils.getZookeeper().exists(commandPath+ "/" + deleteUpto)){
-                            ArrayList<String> lastCommandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(lastCommandPath);
-                            ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+                        String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
+                        String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
+                        if (ZooKeeperUtils.getZookeeper().exists(lastCommandPath)) {
 
-                            Collections.sort(lastCommandList);
-                            Collections.sort(commandList);
+                            String deleteUpto = ZooKeeperUtils.getLastCommand(zooKeeperMembershipManager.getDomainName());
 
-                            for (int i = 0; i <= commandList.indexOf(deleteUpto); i++) {
-                                try {
-                                    ZooKeeperUtils.getDirectZookeeper().delete(commandPath + "/" + commandList.get(i), -1, null, null);
-                                } catch (Exception e) {
-                                    System.out.println(e.getMessage());
+                            if (deleteUpto != null) {
+                                if (ZooKeeperUtils.getZookeeper().exists(commandPath + "/" + deleteUpto)) {
+                                    ArrayList<String> lastCommandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(lastCommandPath);
+                                    ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+
+                                    Collections.sort(lastCommandList);
+                                    Collections.sort(commandList);
+
+                                    for (int i = 0; i <= commandList.indexOf(deleteUpto); i++) {
+                                        try {
+                                            ZooKeeperUtils.getDirectZookeeper().delete(commandPath + "/" + commandList.get(i), -1, null, null);
+                                        } catch (Exception e) {
+                                            log.error(e.getMessage());
+                                        }
+                                    }
+
+//                            for (int i = 0; i < lastCommandList.size(); i++) {
+                                    try {
+                                        ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(0), -1, null, null);
+                                    } catch (Exception e) {
+                                        log.error(e.getMessage());
+                                    }
+                                    //                            }
+                                    log.info("Commands deleted upto : " + deleteUpto);
                                 }
                             }
 
-//                            for (int i = 0; i < lastCommandList.size(); i++) {
-                            try {
-                                ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(0), -1, null, null);
-                            } catch (Exception e) {
-                                System.out.println(e.getMessage());
-                            }
-                            //                            }
-                            System.out.println("Commands deleted upto : " + deleteUpto);
-                        	}
                         }
-
                     }
-                	}
 
                 }
             }
@@ -226,7 +225,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                System.out.println(e.toString());
+                log.error(e.toString());
             }
 
 
@@ -235,7 +234,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                     try {
                         timeoutCommandProcess();
                     } catch (Exception e) {
-                        System.out.println("Zkserver offline");
+                        log.error("Zkserver offline");
                     }
                 }
             }
@@ -283,13 +282,13 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                             try {
                                 processMessage(cm);
                                 lastCommandName = cmName;
-                                System.out.println(cmName + " " + cm.toString() + " processed successfully by member : "
+                                log.info(cmName + " " + cm.toString() + " processed successfully by member : "
                                         + zooKeeperMembershipManager.getLocalMember());
                             } catch (ClusteringFault e) {
-                                System.out.println(cmName + " " + cm.toString() + " processing failed : " + e.toString());
+                                log.error(cmName + " " + cm.toString() + " processing failed : " + e.toString());
                             }
                         } catch (Exception e) {
-                            System.out.println(e.getMessage());
+                            log.error(e.getMessage());
                         }
                     }
 

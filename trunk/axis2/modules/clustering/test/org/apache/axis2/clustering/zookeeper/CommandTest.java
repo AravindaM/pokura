@@ -19,7 +19,6 @@
 package org.apache.axis2.clustering.zookeeper;
 
 import junit.framework.TestCase;
-import org.I0Itec.zkclient.IDefaultNameSpace;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkServer;
 import org.apache.axis2.clustering.ClusteringFault;
@@ -33,16 +32,16 @@ public class CommandTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
-                new IDefaultNameSpace() {
-
-                    public void createDefaultNameSpace(ZkClient zkClient) {
-                        // TODO Auto-generated method stub
-
-                    }
-                }, 4599);
-
-        zks.start();
+//        zks = new ZkServer("/tmp/zookeepertest/data", "/tmp/zookeepertest/log",
+//                new IDefaultNameSpace() {
+//
+//                    public void createDefaultNameSpace(ZkClient zkClient) {
+//                        // TODO Auto-generated method stub
+//
+//                    }
+//                }, 4599);
+//
+//        zks.start();
 
     }
 
@@ -55,7 +54,7 @@ public class CommandTest extends TestCase {
             zkcli.createPersistent("/TestDomain/command");
         }
 
-        ZooKeeperUtils.setZookeeperConnection(zkcli,"localhost:4599");
+        ZooKeeperUtils.setZookeeperConnection(zkcli, "localhost:2181");
 
         ZooKeeperMembershipManager membershipManager = new ZooKeeperMembershipManager();
         membershipManager.setDomain(new String("TestDomain").getBytes());
@@ -63,21 +62,108 @@ public class CommandTest extends TestCase {
         ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
                 membershipManager);
 
-        zooKeeperCommandSubscriber.startRecieve(200,200);
+        zooKeeperCommandSubscriber.startRecieve(20, 20);
         final ZooKeeperSender sender = new ZooKeeperSender(membershipManager);
 
         final DeleteServiceStateCommand command = new DeleteServiceStateCommand();
 
 
-        for (int i = 0; i < 100  ; i++) {
+        for (int i = 0; i < 100; i++) {
             sender.sendToGroup(command);
         }
-        try{
-        Thread.sleep(7000);
-        }catch (Exception e) {
-			// TODO: handle exception
-		}
-        
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 100; i++) {
+            sender.sendToGroup(command);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        for (int i = 0; i < 10000; i++) {
+            sender.sendToGroup(command);
+        }
+        while (true) {
+
+        }
+
+
 //			long startTime = System.nanoTime();
 //
 //			while (System.nanoTime() - startTime < 500000000) {
@@ -102,3 +188,4 @@ public class CommandTest extends TestCase {
     }
 
 }
+ 
