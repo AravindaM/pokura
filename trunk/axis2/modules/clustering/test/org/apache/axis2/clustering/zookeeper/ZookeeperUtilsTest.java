@@ -56,32 +56,32 @@ public class ZookeeperUtilsTest extends TestCase{
 
 
  public void testGetNewMembers(){
-	ZkClient zkcli = new ZkClient("localhost:2181");
-	ZooKeeperUtils.setZookeeperConnection(zkcli,"localhost:2181");
-	
-    System.out.println(new Date().getTime());
-    
-	for (int i = 0; i < 1000; i++) {
-		 
-		Thread t = new Thread(){
-			@Override
-			public void run() {
-				DeleteServiceStateCommand command = new DeleteServiceStateCommand();
-			    String domainName = "apache.axis2.domain1";
-				ZooKeeperUtils.createCommandZNode(command, domainName);
-			}
-		};
-	    t.start();
-	//	byte[] domain = new byte
-
-        //[84, 101, 115, 116, 68, 111, 109, 97, 105, 110]
-		
-		
-	}
-    System.out.println(new Date().getTime());
-
-//	ZkMemberImpl member =  new  ZkMemberImpl();
-//	ZooKeeperUtils.setZkMemeber(member);
-//	zks.shutdown();
+//	ZkClient zkcli = new ZkClient("localhost:2181");
+//	ZooKeeperUtils.setZookeeperConnection(zkcli,"localhost:2181");
+//	
+//    System.out.println(new Date().getTime());
+//    
+//	for (int i = 0; i < 1000; i++) {
+//		 
+//		Thread t = new Thread(){
+//			@Override
+//			public void run() {
+//				DeleteServiceStateCommand command = new DeleteServiceStateCommand();
+//			    String domainName = "apache.axis2.domain1";
+//				ZooKeeperUtils.createCommandZNode(command, domainName);
+//			}
+//		};
+//	    t.start();
+//	//	byte[] domain = new byte
+//
+//        //[84, 101, 115, 116, 68, 111, 109, 97, 105, 110]
+//		
+//		
+//	}
+//    System.out.println(new Date().getTime());
+//
+////	ZkMemberImpl member =  new  ZkMemberImpl();
+////	ZooKeeperUtils.setZkMemeber(member);
+////	zks.shutdown();
  }
 }

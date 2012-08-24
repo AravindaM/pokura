@@ -409,7 +409,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 
         Parameter commandUpThreshold = parameters.get("commandUpdateThreshold");
         if(commandDelThreshold!=null){
-            OMElement upThresholdElement = commandDelThreshold.getParameterElement();
+            OMElement upThresholdElement = commandUpThreshold.getParameterElement();
             String cmdUpThresholdVal= upThresholdElement.getText();
             commandUpdateThreshold = Integer.parseInt(cmdUpThresholdVal);
         }

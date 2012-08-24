@@ -118,7 +118,6 @@ public class ZooKeeperCommandListener implements IZkChildListener {
             startTimeStatic = startTime;
 
             synchronized (syncObject) {
-
                 Collections.sort(currentChilds);
 
                 int id;
@@ -135,61 +134,22 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                     }
                 }
 
-                if (id < currentChilds.size() && id > -1) {
-                    for (int i = id; i < currentChilds.size(); i++) {
-
-                        String cmName = currentChilds.get(i);
-
-                        if (ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + cmName)) {
-                            try {
-                                ClusteringCommand cm = (ClusteringCommand) ZooKeeperUtils.getZookeeper()
-                                        .readData(parentPath + "/" + cmName);
-
-                                try {
-                                    processMessage(cm);
-                                    lastCommandName = cmName;
-//                                    log.info(cmName + " " + cm.toString() + " processed successfully by member : "
-//                                            + zooKeeperMembershipManager.getLocalMember());
-                                } catch (ClusteringFault e) {
-                                    log.error(cmName + " " + cm.toString() + " processing failed : " + e.toString());
-
-                                }
-                            } catch (Exception e) {
-                                log.error(e.getMessage());
-                            }
-
-                        }
-
-                    }
-                    //update the lastCommand entry
-
-                    if (currentChilds.size() > commandUpdateThreshold) {
-                        synchronized (deleteUpdateSync) {
-                            String parentPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
-
-                            if (ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + lastCommandName)) {
-                                ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
-                                log.info("lastcommand entry updated with " + lastCommandName);
-                            }
-                        }
-
-                    }
-                }
-
-                //delete processed commands to reduce the size of the command list
-                if (currentChilds.size() > commandDeleteThreshold) {
-                    synchronized (deleteUpdateSync) {
+              //delete processed commands to reduce the size of the command list
+                if (currentChilds.size() > commandDeleteThreshold && id > -1) {
 
 
                         String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
                         String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
                         if (ZooKeeperUtils.getZookeeper().exists(lastCommandPath)) {
 
+                            ArrayList<String> lastCommandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(lastCommandPath);
+                           if(lastCommandList.size()>zooKeeperMembershipManager.getMembers().size()){
+                            	
+                           
                             String deleteUpto = ZooKeeperUtils.getLastCommand(zooKeeperMembershipManager.getDomainName());
 
                             if (deleteUpto != null) {
                                 if (ZooKeeperUtils.getZookeeper().exists(commandPath + "/" + deleteUpto)) {
-                                    ArrayList<String> lastCommandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(lastCommandPath);
                                     ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
 
                                     Collections.sort(lastCommandList);
@@ -213,12 +173,56 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                                     log.info("Commands deleted upto : " + deleteUpto);
                                 }
                             }
-
+                        }
                         }
                     }
+                
+                if (id < currentChilds.size() && id > -1) {
+                	
+                    for (int i = id; i < currentChilds.size(); i++) {
+
+                        String cmName = currentChilds.get(i);
+
+                        if (ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + cmName)) {
+                            try {
+                                ClusteringCommand cm = (ClusteringCommand) ZooKeeperUtils.getZookeeper()
+                                        .readData(parentPath + "/" + cmName);
+
+                                try {
+                                    processMessage(cm);
+                                    lastCommandName = cmName;
+                                    log.info(cmName + " " + cm.toString() + " processed successfully by member : "
+                                            + zooKeeperMembershipManager.getLocalMember());
+                                } catch (ClusteringFault e) {
+                                    log.error(cmName + " " + cm.toString() + " processing failed : " + e.toString());
+
+                                }
+                            } catch (Exception e) {
+                                log.error(e.getMessage());
+                            }
+
+                        }
+
+                    }
+                    //update the lastCommand entry
+
+                    if (currentChilds.size() > commandUpdateThreshold) {
+                            String parentPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
+                            String lastCommandParentPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
+
+                            if (ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + lastCommandName) && !(ZooKeeperUtils.getZookeeper().exists(lastCommandParentPath+ "/" + lastCommandName))) {
+                                ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
+                                log.info("lastcommand entry updated with " + lastCommandName);
+                            }
+                        
+
+                    }
+                }
+
+                
 
                 }
-            }
+            
 
 
             // wait specified time and check whether another command executed during that time

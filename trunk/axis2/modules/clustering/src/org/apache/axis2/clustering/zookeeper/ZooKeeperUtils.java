@@ -157,8 +157,8 @@ public class ZooKeeperUtils {
      */
     public static List<ZkMember> getNewMembers(List<ZkMember> existingMembers,
                                                List<ZkMember> currentMembers) {
-        Collection<ZkMember> oldList = existingMembers;
-        Collection<ZkMember> newList = currentMembers;
+        Collection<ZkMember> oldList = new ArrayList<ZkMember>(existingMembers);
+        Collection<ZkMember> newList = new ArrayList<ZkMember>(currentMembers);
 
         newList.removeAll(oldList);
 

@@ -140,15 +140,16 @@ public class ZooKeeperMembershipManager {
      *
      * @param member The member that left the cluster
      */
-    public void memberRemoved(ZkMember member) {
+    public boolean memberRemoved(ZkMember member) {
         if (log.isDebugEnabled()) {
             log.debug("Member disappeared" + ZooKeeperUtils.getName(member) + "from domain" + new String(member.getDomain()));
-            members.remove(member);
+           
         }
         // If this an application domain member
         if (groupManagementAgent != null) {
             groupManagementAgent.applicationMemberRemoved(ZooKeeperUtils.toAxis2Member(member));
         }
+        return members.remove(member);
     }
 
     public ZkMember getLocalMember() {
