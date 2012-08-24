@@ -137,7 +137,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
               //delete processed commands to reduce the size of the command list
                 if (currentChilds.size() > commandDeleteThreshold && id > -1) {
 
-
+                		
                         String lastCommandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
                         String commandPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.COMMANDS_BASE_NAME;
                         if (ZooKeeperUtils.getZookeeper().exists(lastCommandPath)) {
@@ -163,13 +163,11 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                                         }
                                     }
 
-//                            for (int i = 0; i < lastCommandList.size(); i++) {
                                     try {
-                                        ZooKeeperUtils.getDirectZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(0), -1, null, null);
+                                        ZooKeeperUtils.getZookeeper().delete(lastCommandPath + "/" + lastCommandList.get(0));
                                     } catch (Exception e) {
                                         log.error(e.getMessage());
                                     }
-                                    //                            }
                                     log.info("Commands deleted upto : " + deleteUpto);
                                 }
                             }
@@ -211,8 +209,12 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                             String lastCommandParentPath = "/" + zooKeeperMembershipManager.getDomainName() + ZooKeeperConstants.LAST_COMMAND_BASE_NAME;
 
                             if (ZooKeeperUtils.getZookeeper().exists(parentPath + "/" + lastCommandName) && !(ZooKeeperUtils.getZookeeper().exists(lastCommandParentPath+ "/" + lastCommandName))) {
-                                ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
+                                try{
+                            	ZooKeeperUtils.createLastCommandEntry(lastCommandName, zooKeeperMembershipManager.getDomainName());
                                 log.info("lastcommand entry updated with " + lastCommandName);
+                                }catch(Exception e){
+                                	log.info("lastcommand entry enrty " + lastCommandName +" exists");
+                                }
                             }
                         
 
