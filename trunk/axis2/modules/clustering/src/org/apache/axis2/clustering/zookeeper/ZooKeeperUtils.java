@@ -79,15 +79,25 @@ public class ZooKeeperUtils {
                command, CreateMode.PERSISTENT_SEQUENTIAL);*/
 
     }
-
+    /**
+     * Returns the ZooKeeper client object for asynchronous communications
+     * @return ZooKeeper client object
+     */
     public static ZooKeeper getDirectZookeeper() {
 		return directZookeeper;
 	}
-
+    /**
+     * Sets the ZooKeeper client object for asynchronous communications
+     * @param directZookeeper ZooKeeper client object
+     */
 	public static void setDirectZookeeper(ZooKeeper directZookeeper) {
 		ZooKeeperUtils.directZookeeper = directZookeeper;
 	}
-
+	/**
+	 * Creates the Last command entry in the ZooKeeper Quorum
+	 * @param lastCommand the lastcommand name
+	 * @param domain the domain related to the command
+	 */
 	public static void createLastCommandEntry(String lastCommand, String domain) {
         String path = "/" + domain + ZooKeeperConstants.LAST_COMMAND_BASE_NAME
                 + "/" + lastCommand;
@@ -308,6 +318,11 @@ public class ZooKeeperUtils {
                 + new String(member.getDomain()) + ")";
     }
 
+    /**
+     * Returns the host name of the given member
+     * @param member the member who's host needs to be retrieved 
+     * @return the host name of the member
+     */
     public static String getHost(ZkMember member) {
         byte[] hostBytes = member.getZkHost();
         StringBuffer host = new StringBuffer();
@@ -365,7 +380,7 @@ public class ZooKeeperUtils {
             properties = new Properties();
             properties.load(inputStream);
         } catch (IOException e) {
-            // ???
+            log.error(e.getMessage());
         }
         return properties;
     }
@@ -378,8 +393,7 @@ public class ZooKeeperUtils {
         try {
 			directZookeeper = new ZooKeeper(serverList, 5000, zookeeper);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
     }
 
