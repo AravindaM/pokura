@@ -22,85 +22,85 @@ import java.util.UUID;
 
 public class ZkMemberImpl implements ZkMember {
 
-    private static final long serialVersionUID = 3453754554654424234L;
-    private byte[] zkHost;
-    private String zkHostName;
-    private UUID zkNodeId;
-    private int port;
-    private byte[] domain;
-    private byte[] payLoad;
+	private static final long serialVersionUID = 3453754554654424234L;
+	private byte[] zkHost;
+	private String zkHostName;
+	private UUID zkNodeId;
+	private int port;
+	private byte[] domain;
+	private byte[] payLoad;
 
-    public String getZkHostName() {
-        return zkHostName;
-    }
+	public String getZkHostName() {
+		return zkHostName;
+	}
 
-    public UUID getZkNodeID() {
-        return zkNodeId;
-    }
+	public UUID getZkNodeID() {
+		return zkNodeId;
+	}
 
-    public int getPort() {
-        return port;
-    }
+	public int getPort() {
+		return port;
+	}
 
-    public byte[] getDomain() {
-        return domain;
-    }
+	public byte[] getDomain() {
+		return domain;
+	}
 
-    public byte[] getPayLoad() {
-        return payLoad;
-    }
+	public byte[] getPayLoad() {
+		return payLoad;
+	}
 
-    public boolean isAlive() {
-        return false;
-    }
+	public boolean isAlive() {
+		return false;
+	}
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof ZkMember)) {
-            return false;
-        }
-        return this.zkNodeId.equals(((ZkMember) obj).getZkNodeID());
-    }
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ZkMember)) {
+			return false;
+		}
+		return this.zkNodeId.equals(((ZkMember) obj).getZkNodeID());
+	}
 
-    public int hashCode() {
-        int hash = 7;
-        hash = hash * 31 + zkNodeId.hashCode();
-        hash = hash * 31 + (zkHostName == null ? 0 : zkHostName.hashCode());
-        return hash;
-    }
+	public int hashCode() {
+		int hash = 7;
+		hash = hash * 31 + zkNodeId.hashCode();
+		hash = hash * 31 + (zkHostName == null ? 0 : zkHostName.hashCode());
+		return hash;
+	}
 
-    public void setZkHostName(String zkHostName) {
-        this.zkHostName = zkHostName;
-    }
+	public void setZkHostName(String zkHostName) {
+		this.zkHostName = zkHostName;
+	}
 
-    public void setZkNodeId(UUID zkNodeId) {
-        this.zkNodeId = zkNodeId;
-    }
+	public void setZkNodeId(UUID zkNodeId) {
+		this.zkNodeId = zkNodeId;
+	}
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+	public void setPort(int port) {
+		this.port = port;
+	}
 
-    public void setDomain(byte[] domain) {
-        this.domain = domain;
-    }
+	public void setDomain(byte[] domain) {
+		this.domain = domain;
+	}
 
-    public void setPayLoad(byte[] payLoad) {
-        this.payLoad = payLoad;
-    }
+	public void setPayLoad(byte[] payLoad) {
+		this.payLoad = payLoad;
+	}
 
-    public String toString() {
-        return this.getClass().getName();
-    }
+	public String toString() {
+		return this.getClass().getName();
+	}
 
-    public byte[] getZkHost() {
-        return zkHost;
-    }
+	public byte[] getZkHost() {
+		return zkHost;
+	}
 
-    public void setZkHost(byte[] zkHost) {
-        this.zkHost = zkHost;
-    }
+	public void setZkHost(byte[] zkHost) {
+		this.zkHost = zkHost;
+	}
 }
 

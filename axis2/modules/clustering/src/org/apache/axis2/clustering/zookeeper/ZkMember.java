@@ -24,30 +24,83 @@ import java.util.UUID;
 
 public interface ZkMember extends Serializable {
 
+	/**
+	 * Returns the Host associated with the member
+	 * @return the byte array that represents the host
+	 */
     public byte[] getZkHost();
 
+    /**
+     * Returns the host name of the member
+     * @return host name as String 
+     */
     public String getZkHostName();
 
+    /**
+     * Returns the Unique id used to identify this member in the 
+     * ZooKeeper Quorum
+     * @return The UUID value of the identifier 
+     */
     public UUID getZkNodeID();
 
+    /**
+     * Returns the port number of this member
+     * @return the int value of the port
+     */
     public int getPort();
 
+    /**
+     * Returns the domain that the member is associated to 
+     * @return the byte array value of the domain
+     */
     public byte[] getDomain();
 
+    /**
+     * Returns whether the member is alive
+     * @return true if the member is active and alive return false if not
+     */
     public boolean isAlive();
-
+    /**
+     * Returns the payload of the member, the payload contains the Axis2 Member
+     * @return the byte array of the payload
+     */
     public byte[] getPayLoad();
 
+    /**
+     * Sets  the Host associated with the member
+     * @param zkHost - the byte array that represents the host
+     */
     public void setZkHost(byte[] zkHost);
 
+    /**
+     * Sets  the host name of the member
+     * @param zkHostName - the name of the host in string
+     */
     public void setZkHostName(String zkHostName);
 
+    /**
+     * Sets the Unique id used to identify this member in the 
+     * ZooKeeper Quorum
+     * @param zkNodeId - UUID value that represents the node id
+     */
     public void setZkNodeId(UUID zkNodeId);
 
+    /**
+     * Sets the port number of this member
+     * @param port - the port number of the member
+     */
     public void setPort(int port);
 
+    /**
+     * Sets the domain of the member
+     * @param domain -  the byte array value of the domain
+     */
     public void setDomain(byte[] domain);
 
+    /**
+     * Sets the payload of the member
+     * @param payLoad the byte array of the payload
+     */
     public void setPayLoad(byte[] payLoad);
 
     public boolean equals(Object obj);
