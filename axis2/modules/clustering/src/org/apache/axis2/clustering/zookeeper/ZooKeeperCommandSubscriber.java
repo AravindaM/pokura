@@ -24,93 +24,96 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class ZooKeeperCommandSubscriber {
-    private ZooKeeperStateManager stateManager;
-    private ConfigurationContext configurationContext;
-    private ZooKeeperNodeManager nodeManager;
-    private ZooKeeperMembershipManager membershipManager;
+	private ZooKeeperStateManager stateManager;
+	private ConfigurationContext configurationContext;
+	private ZooKeeperNodeManager nodeManager;
+	private ZooKeeperMembershipManager membershipManager;
 
-    /**
-     * @param stateManager  ZooKeeperStateManager instance of the member
-     * @param configurationContext  ConfigurationContext instance of the member
-     * @param nodeManager  ZooKeeperNodeManager instance of the member
-     * @param membershipManager ZooKeeperMembershipManager instance of the member
-     */
-    public ZooKeeperCommandSubscriber(ZooKeeperStateManager stateManager,
-                                      ConfigurationContext configurationContext,
-                                      ZooKeeperNodeManager nodeManager,
-                                      ZooKeeperMembershipManager membershipManager) {
-        this.stateManager = stateManager;
-        this.configurationContext = configurationContext;
-        this.nodeManager = nodeManager;
-        this.membershipManager = membershipManager;
-    }
+	/**
+	 * Initializes the ZooKeeperCommandSubscriber
+	 * @param stateManager  ZooKeeperStateManager instance of the member
+	 * @param configurationContext  ConfigurationContext instance of the member
+	 * @param nodeManager  ZooKeeperNodeManager instance of the member
+	 * @param membershipManager ZooKeeperMembershipManager instance of the member
+	 */
+	public ZooKeeperCommandSubscriber(ZooKeeperStateManager stateManager,
+			ConfigurationContext configurationContext,
+			ZooKeeperNodeManager nodeManager,
+			ZooKeeperMembershipManager membershipManager) {
+		this.stateManager = stateManager;
+		this.configurationContext = configurationContext;
+		this.nodeManager = nodeManager;
+		this.membershipManager = membershipManager;
+	}
 
-    /**
-     * @param membershipManager
-     */
-    public ZooKeeperCommandSubscriber(
-            ZooKeeperMembershipManager membershipManager) {
-        super();
-        this.membershipManager = membershipManager;
-    }
+	/**
+	 * @param membershipManager
+	 */
+	public ZooKeeperCommandSubscriber(
+			ZooKeeperMembershipManager membershipManager) {
+		super();
+		this.membershipManager = membershipManager;
+	}
 
-    /**
-     * Set Zookeeper command listener
-     */
-    public void startRecieve(int cmdDelThreshold,int cmdUpdateThreshold) {
-        String domainName = new String(membershipManager.getDomain());
-        String commandPath = "/" + domainName
-                + ZooKeeperConstants.COMMANDS_BASE_NAME;
+	/**
+	 * Sets the Command listeners
+	 * @param cmdDelThreshold the command delete threshold
+	 * @param cmdUpdateThreshold the command update threshold
+	 */
+	public void startRecieve(int cmdDelThreshold,int cmdUpdateThreshold) {
+		String domainName = new String(membershipManager.getDomain());
+		String commandPath = "/" + domainName
+		+ ZooKeeperConstants.COMMANDS_BASE_NAME;
 
-        String lastCommandName = getLastCommandName(commandPath);
-        ZooKeeperUtils.getZookeeper().subscribeChildChanges(
-                commandPath,
-                new ZooKeeperCommandListener(lastCommandName, stateManager,
-                        configurationContext, nodeManager, membershipManager,cmdDelThreshold,cmdUpdateThreshold));
+		String lastCommandName = getLastCommandName(commandPath);
+		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
+				commandPath,
+				new ZooKeeperCommandListener(lastCommandName, stateManager,
+						configurationContext, nodeManager, membershipManager,cmdDelThreshold,cmdUpdateThreshold));
 
-        if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
-                + ZooKeeperConstants.LAST_COMMAND_BASE_NAME)) {
+		if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
+				+ ZooKeeperConstants.LAST_COMMAND_BASE_NAME)) {
 
-            ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
-                    + ZooKeeperConstants.LAST_COMMAND_BASE_NAME);
+			ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName
+					+ ZooKeeperConstants.LAST_COMMAND_BASE_NAME);
 
-        }
-    }
+		}
+	}
 
-    /**
-     * Generated the sequence number of the command
-     *
-     * @param commandPath - pass the path of the command objects to process
-     * @return return the number of command objects in the given path
-     */
-    private Integer generateCurrentId(String commandPath) {
-        if (ZooKeeperUtils.getZookeeper().exists(commandPath)) {
-            return ZooKeeperUtils.getZookeeper().getChildren(commandPath)
-                    .size();
-        } else {
-            return 0;
-        }
-    }
+	/**
+	 * Generated the sequence number of the command
+	 *
+	 * @param commandPath - pass the path of the command objects to process
+	 * @return return the number of command objects in the given path
+	 */
+	private Integer generateCurrentId(String commandPath) {
+		if (ZooKeeperUtils.getZookeeper().exists(commandPath)) {
+			return ZooKeeperUtils.getZookeeper().getChildren(commandPath)
+			.size();
+		} else {
+			return 0;
+		}
+	}
 
-    /**
-     * Return the last executed command
-     * @param commandPath    command path
-     * @return   last command name as a String
-     */
-    private String getLastCommandName(String commandPath)
-    {
-        ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
-        Collections.sort(commandList);
-        try
-        {
-            return commandList.get(commandList.size()-1);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+	/**
+	 * Return the last executed command
+	 * @param commandPath    command path
+	 * @return   last command name as a String
+	 */
+	private String getLastCommandName(String commandPath)
+	{
+		ArrayList<String> commandList = (ArrayList) ZooKeeperUtils.getZookeeper().getChildren(commandPath);
+		Collections.sort(commandList);
+		try
+		{
+			return commandList.get(commandList.size()-1);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
 
-    }
+	}
 
 }
 

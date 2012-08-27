@@ -48,7 +48,7 @@ public class ZooKeeperSender implements MessageSender {
     }
 
     public void sendToSelf(ClusteringCommand msg) throws ClusteringFault {
-        // TODO Auto-generated method stub
+        // Not used in the ZooKeeper based implementation 
 
     }
 
