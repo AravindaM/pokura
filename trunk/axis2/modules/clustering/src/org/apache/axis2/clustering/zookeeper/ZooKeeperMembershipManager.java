@@ -46,48 +46,74 @@ public class ZooKeeperMembershipManager {
         this.configContext = configCtxt;
     }
 
+    /**
+     * Returns the domain as a byte array
+     * @return domain as a byte array
+     */
     public byte[] getDomain() {
         return domain;
     }
 
-    /*
-        return domain name as a String
+    /**
+     * Returns the domain as a String
+     * @return domain as String
      */
     public String getDomainName(){
         return new String(domain);
     }
 
+    /**
+     * Sets the domain for this membership manager
+     * @param domain the byte array value of the domain
+     */
     public void setDomain(byte[] domain) {
         this.domain = domain;
     }
 
+    /**
+     * Returns the Configuration Context for this manager
+     * @return the configuration context
+     */
     public ConfigurationContext getConfigContext() {
         return configContext;
     }
-
+    
+    /**
+     * Sets the Configuration context of the manager
+     * @param configContext the configuration context 
+     */
     public void setConfigContext(ConfigurationContext configContext) {
         this.configContext = configContext;
     }
 
+    /**
+     * Gets the Group management agent related to this manager
+     * @return the Group management agent
+     */
     public GroupManagementAgent getGroupManagementAgent() {
         return groupManagementAgent;
     }
-
+    
+    /**
+     * Sets the Group management agent
+     * @param groupManagementAgent Group management agent
+     */
     public void setGroupManagementAgent(GroupManagementAgent groupManagementAgent) {
         this.groupManagementAgent = groupManagementAgent;
     }
-
-/*
-    public ZkMember[] getMembers() {
-        return members.toArray(new ZkMember[members.size()]);
-
-    }
-*/
-
+    
+    /**
+     * Returns the list of current members in this manager
+     * @return list of members
+     */
     public List<ZkMember> getMembers() {
         return members;
     }
 
+    /** 
+     * Sets a collection of member to the manager
+     * @param members the list of members to be added
+     */
     public void setMembers(List<ZkMember> members) {
         members.addAll(members);
     }
@@ -151,11 +177,19 @@ public class ZooKeeperMembershipManager {
         }
         return members.remove(member);
     }
-
+    
+    /**
+     * Returns the local member of the manager
+     * @return local member
+     */
     public ZkMember getLocalMember() {
         return localMember;
     }
-
+    
+    /**
+     * Sets the local member of the manager
+     * @param localMember local member
+     */
     public void setLocalMember(ZkMember localMember) {
         this.localMember = localMember;
     }

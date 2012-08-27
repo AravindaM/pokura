@@ -50,6 +50,7 @@ public class ZooKeeperCommandListener implements IZkChildListener {
     static long startTimeStatic;
 
     /**
+     * Initializes the Command listener 
      * @param lastCommandName      Last command in the command list
      * @param stateManager         ZooKeeperStateManager instance of the member
      * @param configurationContext ConfigurationContext instance of the member
@@ -72,7 +73,9 @@ public class ZooKeeperCommandListener implements IZkChildListener {
         this.commandUpdateThreshold = commandUpdateThreshold;
 
     }
-
+    /**
+     * This method is called when a event id fired from the ZooKeeper Quorum
+     */
     public void handleChildChange(String parentPath, List<String> currentChilds) {
         // each event is handled by separate threads
         new ZooKeeperCommandHandler(stateManager, configurationContext, nodeManager, zooKeeperMembershipManager,

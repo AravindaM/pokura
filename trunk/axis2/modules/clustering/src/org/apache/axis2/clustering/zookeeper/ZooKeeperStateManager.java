@@ -82,9 +82,7 @@ public class ZooKeeperStateManager implements StateManager {
     public boolean isParameterLocked(String parameterName) {
         return getParameter(parameterName).isLocked();
     }
-    /**
-     * {@inheritDoc}
-     */
+    
     public void updateContext(AbstractContext context) throws ClusteringFault {
         StateClusteringCommand cmd = StateClusteringCommandFactory
                 .getUpdateCommand(context, excludedReplicationPatterns, false);
@@ -93,9 +91,7 @@ public class ZooKeeperStateManager implements StateManager {
         }
 
     }
-    /**
-     * {@inheritDoc}
-     */
+    
     public void updateContext(AbstractContext context, String[] propertyNames)
             throws ClusteringFault {
         StateClusteringCommand cmd =
@@ -104,9 +100,7 @@ public class ZooKeeperStateManager implements StateManager {
             sender.sendToGroup(cmd);
         }
     }
-    /**
-     * {@inheritDoc}
-     */
+    
     public void updateContexts(AbstractContext[] contexts)
             throws ClusteringFault {
         StateClusteringCommandCollection cmd =
@@ -154,7 +148,7 @@ public class ZooKeeperStateManager implements StateManager {
       */
     @SuppressWarnings("rawtypes")
     public void setReplicationExcludePatterns(String contextType, List patterns) {
-        // TODO Auto-generated method stub
+    	 excludedReplicationPatterns.put(contextType, patterns);
     }
 
 }
