@@ -68,9 +68,9 @@
     <version>2.4.2</version>
 </dependency>
         <dependency>
-        	<groupId>com.github.sgroschupf</groupId>
-        	<artifactId>zkclient</artifactId>
-        	<version>0.1</version>
+        <groupId>com.github.sgroschupf</groupId>
+        <artifactId>zkclient</artifactId>
+        <version>0.1</version>
         </dependency>
     </dependencies>
     <url>http://axis.apache.org/axis2/java/core/</url>

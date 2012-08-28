@@ -141,15 +141,20 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         log.info("Initializing cluster...");
         
         addRequestBlockingHandlerToInFlows();
-        setZkInstancesInfo();
+        setZkConnection();
         primaryMembershipManager = new ZooKeeperMembershipManager(configurationContext);
         byte[] domain = getClusterDomain();
-        log.info("Cluster domain: " + new String(domain));
+        log.info("Cluster domain : " + new String(domain));
         primaryMembershipManager.setDomain(domain);
+
+        setCommandThresholdParams();
+        log.info("command Delete Threshold : "+commandDeleteThreshold);
+        log.info("command Update Threshold : "+commandUpdateThreshold);
         ZkMember zkm = new ZkMemberImpl();
         zkm.setDomain(domain);
         InitializeZooKeeperNodes(new String(domain));
         primaryMembershipManager.setLocalMember(zkm);
+
         ZooKeeperCommandSubscriber zooKeeperCommandSubscriber = new ZooKeeperCommandSubscriber(
                 contextManager, configurationContext, configurationManager, primaryMembershipManager);
         zooKeeperCommandSubscriber.startRecieve(commandDeleteThreshold,commandUpdateThreshold);
@@ -165,11 +170,6 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         MembershipScheme memberScheme = new ZooKeeperMembershipScheme(primaryMembershipManager, parameters, domain);
         setMemberInfo();
         memberScheme.init();
-        //setMaximumRetries();
-        //configureMode(domain);
-        // configureMembershipScheme(domain, mode.getMembershipManagers());
-
-
     }
 
     public StateManager getStateManager() {
@@ -375,7 +375,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
         }
     }
 
-    private void setZkInstancesInfo() {
+    private void setZkConnection() {
         Parameter paramZkServers = parameters.get("zookeeperServers");
 
         StringBuilder serveListbuilder = new StringBuilder();
@@ -392,28 +392,10 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
                 }
                 serveListbuilder.append(serverString);
                 if(itr.hasNext())
-                serveListbuilder.append(",");
+                    serveListbuilder.append(",");
             }
-            //serveListbuilder.deleteCharAt(serveListbuilder.length() - 1);
         }
         connectToServer(serveListbuilder.toString());
-
-        Parameter commandDelThreshold = parameters.get("commandDeleteThreshold");
-
-        if(commandDelThreshold!=null){
-            OMElement delThresholdElement = commandDelThreshold.getParameterElement();
-            String cmdDelThresholdVal= delThresholdElement.getText();
-            commandDeleteThreshold = Integer.parseInt(cmdDelThresholdVal);
-        }
-
-
-        Parameter commandUpThreshold = parameters.get("commandUpdateThreshold");
-        if(commandDelThreshold!=null){
-            OMElement upThresholdElement = commandUpThreshold.getParameterElement();
-            String cmdUpThresholdVal= upThresholdElement.getText();
-            commandUpdateThreshold = Integer.parseInt(cmdUpThresholdVal);
-        }
-
     }
     
     private void InitializeZooKeeperNodes(String domainName){
@@ -475,5 +457,21 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 
     public int getCommandUpdateThreshold() {
         return commandUpdateThreshold;
+    }
+
+    private void setCommandThresholdParams(){
+        Parameter commandDelThreshold = parameters.get("commandDeleteThreshold");
+
+        if(commandDelThreshold!=null){
+            OMElement delThresholdElement = commandDelThreshold.getParameterElement();
+            commandDeleteThreshold = Integer.parseInt(delThresholdElement.getText());
+        }
+
+
+        Parameter commandUpThreshold = parameters.get("commandUpdateThreshold");
+        if(commandDelThreshold!=null){
+            OMElement upThresholdElement = commandUpThreshold.getParameterElement();
+            commandUpdateThreshold = Integer.parseInt(upThresholdElement.getText());
+        }
     }
 }
