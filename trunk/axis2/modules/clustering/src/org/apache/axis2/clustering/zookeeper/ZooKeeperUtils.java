@@ -134,7 +134,7 @@ public class ZooKeeperUtils {
 	 *
 	 * @param member the member object to be saved
 	 */
-	public static void setZkMemeber(ZkMember member) {
+	public static void setZkMember(ZkMember member) {
 		String domain = new String(member.getDomain());
 		String id = member.getZkNodeID().toString();
 		ZkSerializer serializer = new SerializableSerializer();
@@ -156,16 +156,16 @@ public class ZooKeeperUtils {
 	/**
 	 * Retrieves the member objects according to the given path list
 	 *
-	 * @param childlist the list of paths to the members
+	 * @param childList the list of paths to the members
 	 * @return a list ZooKeeper members
 	 */
-	public static List<ZkMember> getZkMembers(List<String> childlist,
+	public static List<ZkMember> getZkMembers(List<String> childList,
 			String parentPath) {
 		List<ZkMember> members = new ArrayList<ZkMember>();
-		for (String childpath : childlist) {
+		for (String childPath : childList) {
 			getZookeeper().setZkSerializer(new SerializableSerializer());
 
-			Object m = getZookeeper().readData(parentPath + "/" + childpath);
+			Object m = getZookeeper().readData(parentPath + "/" + childPath);
 			members.add((ZkMember) m);
 		}
 

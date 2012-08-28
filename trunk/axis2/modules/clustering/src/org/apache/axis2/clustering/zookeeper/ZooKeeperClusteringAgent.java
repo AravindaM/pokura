@@ -172,12 +172,12 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 		
 		// start member listening
 		axis2MemberReceiver = new ZooKeeperMemberSubscriber(primaryMembershipManager);
-		axis2MemberReceiver.startRecieve();
+		axis2MemberReceiver.startReceive();
 
 		// initialize membership scheme from domain and other parameters
-		MembershipScheme memberScheme = new ZooKeeperMembershipScheme(primaryMembershipManager, parameters, domain);
+		MembershipScheme membershipScheme = new ZooKeeperMembershipScheme(primaryMembershipManager, parameters, domain);
 		setMemberInfo();
-		memberScheme.init();
+		membershipScheme.init();
 	}
 
 	public StateManager getStateManager() {
@@ -444,7 +444,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 	 * Connect to a ZooKeeper server from the list
 	 * 
 	 * @param severList List of zookeeper servers
-	 * @return successfulness of connection
+	 * @return true if connection established successfully
 	 */
 	public boolean connectToServer(String severList) {
 		ZooKeeperUtils.setZookeeperConnection(new ZkClient(severList), severList);
