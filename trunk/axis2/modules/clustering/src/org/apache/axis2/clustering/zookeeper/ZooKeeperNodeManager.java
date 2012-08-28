@@ -21,53 +21,79 @@ package org.apache.axis2.clustering.zookeeper;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.MessageSender;
+import org.apache.axis2.clustering.management.DefaultNodeManager;
 import org.apache.axis2.clustering.management.NodeManagementCommand;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ZooKeeperNodeManager implements NodeManager {
 
+	
+
+	private static final Log log = LogFactory.getLog(ZooKeeperNodeManager.class);
+	
+	private MessageSender sender;
+    private ConfigurationContext configurationContext;
+    private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
+	
     public void addParameter(Parameter param) throws AxisFault {
-        // TODO Auto-generated method stub
+    	parameters.put(param.getName(), param);
 
     }
 
     public void removeParameter(Parameter param) throws AxisFault {
-        // TODO Auto-generated method stub
+    	parameters.remove(param.getName());
 
     }
 
     public void deserializeParameters(OMElement parameterElement)
             throws AxisFault {
-        // TODO Auto-generated method stub
-
+    	throw new UnsupportedOperationException();
     }
 
     public Parameter getParameter(String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    	return parameters.get(name);    }
 
-    public ArrayList<Parameter> getParameters() {
-        // TODO Auto-generated method stub
-        return null;
+    public ArrayList getParameters() {
+        ArrayList<Parameter> list = new ArrayList<Parameter>();
+        for (Iterator iter = parameters.keySet().iterator(); iter.hasNext();) {
+            list.add(parameters.get(iter.next()));
+        }
+        return list;
     }
 
     public boolean isParameterLocked(String parameterName) {
-        // TODO Auto-generated method stub
-        return false;
+    	return getParameter(parameterName).isLocked();
     }
 
     public void prepare() throws ClusteringFault {
-        // TODO Auto-generated method stub
+    	 if (log.isDebugEnabled()) {
+             log.debug("Enter: DefaultNodeManager::prepare");
+         }
+
+         if (log.isDebugEnabled()) {
+             log.debug("Exit: DefaultNodeManager::prepare");
+         }
 
     }
 
     public void rollback() throws ClusteringFault {
-        // TODO Auto-generated method stub
+    	 if (log.isDebugEnabled()) {
+             log.debug("Enter: DefaultNodeManager::rollback");
+         }
+
+         if (log.isDebugEnabled()) {
+             log.debug("Exit: DefaultNodeManager::rollback");
+         }
 
     }
 
@@ -83,14 +109,20 @@ public class ZooKeeperNodeManager implements NodeManager {
 
     public void setConfigurationContext(
             ConfigurationContext configurationContext) {
-        // TODO Auto-generated method stub
+    	this.configurationContext = configurationContext;
 
     }
+    
+    public void setSender(MessageSender sender) {
+		this.sender = sender;
+	}
 
     public void sendMessage(NodeManagementCommand command)
             throws ClusteringFault {
-        // TODO Auto-generated method stub
+    	 sender.sendToGroup(command);
 
     }
+    
+    
 
 }
