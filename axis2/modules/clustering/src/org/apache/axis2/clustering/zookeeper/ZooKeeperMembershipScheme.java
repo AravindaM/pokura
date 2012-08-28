@@ -2,7 +2,6 @@ package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.MembershipScheme;
-import org.apache.axis2.clustering.tribes.TribesConstants;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.LogFactory;
@@ -36,10 +35,18 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
 		joinGroup();
 	}
 
+    /**
+     * This is the point where new Axis2 member joins with the relevant group/domain.
+     * New {@link ZkMember} node is creates in the zookeeper server under the path
+     * "/domainName/members" which represents the actual Axis2 member.
+     *
+     * @throws ClusteringFault
+     */
 	public void joinGroup() throws ClusteringFault {
 		String domainName = new String(membershipManager.getDomain());
-		String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME;
+		String memberPath = "/" + domainName + ZooKeeperConstants.MEMBER_BASE_NAME;
 
+        //Retrieve the existing members in the domain
 		List<ZkMember> members = ZooKeeperUtils.getZkMembers(memberPath);
 
 		if (!members.isEmpty()) {
@@ -47,10 +54,16 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
 		} else {
 			log.info("No members found. Local member is the 1st member ");
 		}
-		//create a node for this member
-		ZooKeeperUtils.setZkMemeber(membershipManager.getLocalMember());
+		//create a new node for this member
+		ZooKeeperUtils.setZkMember(membershipManager.getLocalMember());
 	}
 
+    /**
+     * Set the properties "host and port" corresponds to local member. These properties may be retrieved
+     * from the configuration file  axi2.xml or from the System properties.
+     *
+     * @throws ClusteringFault
+     */
 	private void configureMembership() throws ClusteringFault {
 
 		ZkMember localMember = new ZkMemberImpl();
@@ -80,7 +93,7 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
 		localMember.setZkHostName(host);
 
 
-		Parameter localPort = getParameter(TribesConstants.LOCAL_MEMBER_PORT);
+		Parameter localPort = getParameter(ZooKeeperConstants.LOCAL_MEMBER_PORT);
 
 		int port;
 		try {
@@ -110,8 +123,20 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
 		// ------------ END: Configure and add the local member ---------------------
 	}
 
+    /**
+     * Check whether specified host and port is resolvable.
+     * An attempt will be made to resolve the hostname into an InetSocketAddress.
+     *
+     * @param socket socket
+     * @param hostname   The Host Name
+     * @param preferredPort  Preferred local port specified in configuration file
+     * @param portStart      Starting port number
+     * @param retries        number of retires to resolve
+     * @return               local port
+     * @throws IOException   if host and port is unresolvable
+     */
 	protected int getLocalPort(ServerSocket socket, String hostname,
-			int preferredPort, int portstart, int retries) throws IOException {
+			int preferredPort, int portStart, int retries) throws IOException {
 		if (preferredPort != -1) {
 			try {
 				return getLocalPort(socket, hostname, preferredPort);
@@ -122,25 +147,35 @@ public class ZooKeeperMembershipScheme implements MembershipScheme {
 		InetSocketAddress addr = null;
 		if (retries > 0) {
 			try {
-				return getLocalPort(socket, hostname, portstart);
+				return getLocalPort(socket, hostname, portStart);
 			} catch (IOException x) {
 				retries--;
 				if (retries <= 0) {
 					log.error("Unable to bind server socket to:" + addr + " throwing error.");
 					throw x;
 				}
-				portstart++;
+				portStart++;
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException ignored) {
 					ignored.printStackTrace();
 				}
-				portstart = getLocalPort(socket, hostname, portstart, retries, -1);
+				portStart = getLocalPort(socket, hostname, portStart, retries, -1);
 			}
 		}
-		return portstart;
+		return portStart;
 	}
 
+    /**
+     *
+     * Creates a socket address from a hostname and a port number and try to bind server socket to address.
+     *
+     * @param socket    socket
+     * @param hostname  The Host Name
+     * @param port      Port Number
+     * @return the local port
+     * @throws IOException if unable to bind socket to address
+     */
 	private int getLocalPort(ServerSocket socket, String hostname, int port) throws IOException {
 		InetSocketAddress addr;
 		addr = new InetSocketAddress(hostname, port);

@@ -33,12 +33,12 @@ public class ZooKeeperMemberSubscriber {
 	}
 
 	/**
-	 * Set Zookeeper command listener
+	 * Subscribe for the changes in child nodes of "/domain/members" node in ZooKeeper server.
 	 */
-	public void startRecieve() {
+	public void startReceive() {
 
 		String domainName = new String(membershipManager.getDomain());
-		String memberPath = "/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME;
+		String memberPath = "/" + domainName + ZooKeeperConstants.MEMBER_BASE_NAME;
 
 		try{
 			if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName)) {
@@ -46,8 +46,8 @@ public class ZooKeeperMemberSubscriber {
 				ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName);
 
 			}
-			if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME)) {
-				ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName + ZooKeeperConstants.MEMEBER_BASE_NAME);
+			if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName + ZooKeeperConstants.MEMBER_BASE_NAME)) {
+				ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName + ZooKeeperConstants.MEMBER_BASE_NAME);
 			}
 		}catch (ZkInterruptedException e) {
 			log.error(e.getMessage());
@@ -64,8 +64,8 @@ public class ZooKeeperMemberSubscriber {
 				new ZooKeeperMemberListener(membershipManager));
 	}
 
-	public void stopRecieve() {
-		// TODO this method should be able to remove the chlidlistners from the given path
+	public void stopReceive() {
+		// TODO this method should be able to remove the childListeners from the given path
 
 	}
 }
