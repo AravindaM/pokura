@@ -19,10 +19,17 @@
 package org.apache.axis2.clustering.zookeeper;
 
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.Member;
+import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.GroupManagementCommand;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +37,10 @@ import java.util.List;
  * This class used to initialize Group of different members and send commands
  * initiated members
  */
-public class ZooKeeperGroupManagementAgent {
+public class ZooKeeperGroupManagementAgent implements GroupManagementAgent{
 
     private static final Log log = LogFactory.getLog(ZooKeeperGroupManagementAgent.class);
-    private final List<ZkMember> members = new ArrayList<ZkMember>();
+    private final List<Member> members = new ArrayList<Member>();
     private ZooKeeperMembershipManager membershipManager;
     private ZooKeeperSender zookeeperSender;
     private String description;
@@ -60,7 +67,7 @@ public class ZooKeeperGroupManagementAgent {
         this.description = description;
     }
 
-    public List<ZkMember> getMembers() {
+    public List<Member> getMembers() {
         return members;
     }
 
@@ -68,22 +75,18 @@ public class ZooKeeperGroupManagementAgent {
         this.zookeeperSender = zookeeperSender;
     }
 
-    public void applicationMemberAdded(ZkMember member) {
+    public void applicationMemberAdded(Member member) {
         Thread th = new Thread(new MemberAdder(member));
         th.setPriority(Thread.MAX_PRIORITY);
         th.start();
     }
 
-    public void applicationMemberRemoved(ZkMember member) {
+    public void applicationMemberRemoved(Member member) {
         log.info("Application member " + member + " left cluster.");
         members.remove(member);
     }
 
     public void send(GroupManagementCommand command) throws ClusteringFault {
-
-        for (int i = 0; i < members.size(); i++) {
-            membershipManager.addMember(members.get(i));
-        }
         zookeeperSender.sendToGroup(command);
     }
 
@@ -95,9 +98,9 @@ public class ZooKeeperGroupManagementAgent {
 
     private class MemberAdder implements Runnable {
 
-        private final ZkMember member;
+        private final Member member;
 
-        private MemberAdder(ZkMember member) {
+        private MemberAdder(Member member) {
             this.member = member;
         }
 
@@ -128,10 +131,45 @@ public class ZooKeeperGroupManagementAgent {
          * @param member The member whose connectvity needs to be verified
          * @return true, if the member can be contacted; false, otherwise.
          */
-        private boolean canConnect(ZkMember member) {
-            // TODO implement check for connectivity of ZkMember
+        private boolean canConnect(Member member) {
+            if (log.isDebugEnabled()) {
+                log.debug("Trying to connect to member " + member + "...");
+            }
+            for (int retries = 30; retries > 0; retries--) {
+                try {
+                    InetAddress addr = InetAddress.getByName(member.getHostName());
+                    int httpPort = member.getHttpPort();
+                    if (log.isDebugEnabled()) {
+                        log.debug("HTTP Port=" + httpPort);
+                    }
+                    if (httpPort != -1) {
+                        SocketAddress httpSockaddr = new InetSocketAddress(addr, httpPort);
+                        new Socket().connect(httpSockaddr, 10000);
+                    }
+                    int httpsPort = member.getHttpsPort();
+                    if (log.isDebugEnabled()) {
+                        log.debug("HTTPS Port=" + httpsPort);
+                    }
+                    if (httpsPort != -1) {
+                        SocketAddress httpsSockaddr = new InetSocketAddress(addr, httpsPort);
+                        new Socket().connect(httpsSockaddr, 10000);
+                    }
+                    return true;
+                } catch (IOException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("", e);
+                    }
+                    String msg = e.getMessage();
+                    if (msg.indexOf("Connection refused") == -1 && msg.indexOf("connect timed out") == -1) {
+                        log.error("Cannot connect to member " + member, e);
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }
             return false;
         }
     }
-
 }
