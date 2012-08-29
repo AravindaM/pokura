@@ -65,12 +65,13 @@ public class ZooKeeperCommandSubscriber {
 		String commandPath = "/" + domainName
 		+ ZooKeeperConstants.COMMANDS_BASE_NAME;
 
+        //get tha last executed command
 		String lastCommandName = getLastCommandName(commandPath);
 		ZooKeeperUtils.getZookeeper().subscribeChildChanges(
 				commandPath,
 				new ZooKeeperCommandListener(lastCommandName, stateManager,
 						configurationContext, nodeManager, membershipManager,cmdDelThreshold,cmdUpdateThreshold));
-
+        //create a command node under the domain name if node not exist
 		if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName
 				+ ZooKeeperConstants.LAST_COMMAND_BASE_NAME)) {
 
@@ -106,6 +107,7 @@ public class ZooKeeperCommandSubscriber {
 		Collections.sort(commandList);
 		try
 		{
+            //return the last entry in the command list
 			return commandList.get(commandList.size()-1);
 		}
 		catch (Exception e)
