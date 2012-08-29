@@ -23,6 +23,9 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.*;
+import org.apache.axis2.clustering.control.ControlCommand;
+import org.apache.axis2.clustering.control.GetConfigurationCommand;
+import org.apache.axis2.clustering.control.GetStateCommand;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.clustering.management.NodeManager;
 import org.apache.axis2.clustering.state.StateManager;
@@ -142,18 +145,18 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 		// blocks until initialization completes
 		addRequestBlockingHandlerToInFlows();
 		setZkConnection();
-		
+
 		// get context and domain name
 		primaryMembershipManager = new ZooKeeperMembershipManager(configurationContext);
 		byte[] domain = getClusterDomain();
-		
+
 		log.info("Cluster domain : " + new String(domain));
 		primaryMembershipManager.setDomain(domain);
-		
+
 		setCommandThresholdParams();
 		log.info("command Delete Threshold : " + commandDeleteThreshold);
 		log.info("command Update Threshold : " + commandUpdateThreshold);
-		
+
 		// Initialize ZooKeeper nodes
 		ZkMember zkm = new ZkMemberImpl();
 		zkm.setDomain(domain);
@@ -166,10 +169,10 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 		zooKeeperCommandSubscriber.startRecieve(commandDeleteThreshold, commandUpdateThreshold);
 		final ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
 		contextManager.setSender(sender);
-		
+
 		// initialize command receiver
 		axis2CommandReceiver = new ZooKeeperCommandSubscriber(primaryMembershipManager);
-		
+
 		// start member listening
 		axis2MemberReceiver = new ZooKeeperMemberSubscriber(primaryMembershipManager);
 		axis2MemberReceiver.startReceive();
@@ -178,6 +181,29 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 		MembershipScheme membershipScheme = new ZooKeeperMembershipScheme(primaryMembershipManager, parameters, domain);
 		setMemberInfo();
 		membershipScheme.init();
+
+		// If configuration management is enabled, get the latest config from a
+		// neighbor
+
+		if (configurationManager != null) {
+			try {
+				initializeSystem(new GetConfigurationCommand());
+			} catch (ClusteringFault e) {
+				log.error(e.getMessage());
+			}
+
+		}
+
+		// If context replication is enabled, get the latest state from a
+		// neighbour
+
+		if (contextManager != null) {
+			try {
+				initializeSystem(new GetStateCommand());
+			} catch (ClusteringFault e) {
+				log.error(e.getMessage());
+			}
+		}
 	}
 
 	public StateManager getStateManager() {
@@ -309,8 +335,10 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 	/**
 	 * Modify property
 	 * 
-	 * @param text new text of the property
-	 * @param props property to be changed
+	 * @param text
+	 *            new text of the property
+	 * @param props
+	 *            property to be changed
 	 * @return modified value
 	 */
 	private static String replaceProperty(String text, Properties props) {
@@ -421,7 +449,8 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 	/**
 	 * Creates ZooKeeper nodes for command handling
 	 * 
-	 * @param domainName Domain name of the Axis2 server
+	 * @param domainName
+	 *            Domain name of the Axis2 server
 	 */
 	private void InitializeZooKeeperNodes(String domainName) {
 		// create node with domain name if not exists
@@ -430,7 +459,7 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 			ZooKeeperUtils.getZookeeper().createPersistent("/" + domainName);
 
 		}
-		
+
 		// create node for commands if not exists in specified domain
 		if (!ZooKeeperUtils.getZookeeper().exists("/" + domainName + ZooKeeperConstants.COMMANDS_BASE_NAME)) {
 
@@ -443,7 +472,8 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 	/**
 	 * Connect to a ZooKeeper server from the list
 	 * 
-	 * @param severList List of zookeeper servers
+	 * @param severList
+	 *            List of zookeeper servers
 	 * @return true if connection established successfully
 	 */
 	public boolean connectToServer(String severList) {
@@ -503,5 +533,15 @@ public class ZooKeeperClusteringAgent implements ClusteringAgent {
 			OMElement upThresholdElement = commandUpThreshold.getParameterElement();
 			commandUpdateThreshold = Integer.parseInt(upThresholdElement.getText());
 		}
+	}
+	
+	/**
+	 * initializes the system by getting the current state of the existing members of the cluster
+	 * @param command the command to be executed
+	 * @throws ClusteringFault
+	 */
+	private void initializeSystem(ControlCommand command) throws ClusteringFault {
+		ZooKeeperSender sender = new ZooKeeperSender(primaryMembershipManager);
+		sender.sendToGroup(command);
 	}
 }
