@@ -22,6 +22,8 @@ import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.clustering.control.ControlCommand;
+import org.apache.axis2.clustering.control.GetStateCommand;
 import org.apache.axis2.clustering.management.GroupManagementCommand;
 import org.apache.axis2.clustering.management.NodeManagementCommand;
 import org.apache.axis2.clustering.state.StateClusteringCommand;
@@ -329,6 +331,15 @@ public class ZooKeeperCommandListener implements IZkChildListener {
                 command.execute(configurationContext);
             } else if (command instanceof GroupManagementCommand) {
                 command.execute(configurationContext);
+            }else if (command instanceof ControlCommand){
+                command.execute(configurationContext);
+                if(command instanceof GetStateCommand){
+                	for (StateClusteringCommand cmd : ((GetStateCommand) command).getCommands()) {
+						ZooKeeperSender sender= new ZooKeeperSender(zooKeeperMembershipManager);
+						sender.sendToGroup(cmd);
+					}
+                }
+
             }
         }
 
