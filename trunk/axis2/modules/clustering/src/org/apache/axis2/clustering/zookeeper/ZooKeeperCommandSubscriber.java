@@ -112,6 +112,7 @@ public class ZooKeeperCommandSubscriber {
 		}
 		catch (Exception e)
 		{
+			
 			return null;
 		}
 
